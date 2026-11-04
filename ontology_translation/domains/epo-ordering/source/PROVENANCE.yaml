@@ -1,0 +1,20 @@
+# Provenance of the committed original source files in this folder.
+# Written by fetch.py --redownload; do not edit by hand.
+domain: epo-ordering
+written_by: ontology_translation/tools/fetch.py --redownload
+source_version: v5.2.0
+license: EUPL-1.2, (c) European Union, Publications Office of the European Union (dct:license
+  embedded in each file; see ../LICENSE-NOTE.md)
+files:
+- file: eOrdering.ttl
+  url: https://raw.githubusercontent.com/OP-TED/ePO/v5.2.0/implementation/eOrdering/owl_ontology/eOrdering.ttl
+  sha256: eb0d543c9c9e4e2a3660e8a01af8dbadb37e339c00f3fc67365cdc1c5f3d8f60
+  bytes: 33365
+  downloaded_at: '2026-11-04T08:24:40Z'
+  matches_manifest_pin: true
+- file: eOrdering_restrictions.ttl
+  url: https://raw.githubusercontent.com/OP-TED/ePO/v5.2.0/implementation/eOrdering/owl_ontology/eOrdering_restrictions.ttl
+  sha256: 2cdf212e3cdb07cd61ac30a2e5e632a98a73646e58c6b99a6924e4965ee7ca7d
+  bytes: 23947
+  downloaded_at: '2026-11-04T08:24:40Z'
+  matches_manifest_pin: true

@@ -1,0 +1,2020 @@
+{
+  "mappings": [
+    {
+      "target_path": "classes.AllowanceChargeInformation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation"
+      ],
+      "source_evidence": "\"Information about discounts, taxes, duties and fees imposed.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.AllowanceChargeInformation.properties.allowanceChargeReasonDescription",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation",
+        "http://data.europa.eu/a4g/ontology#hasAllowanceChargeReasonDescription"
+      ],
+      "source_evidence": "\"Explanatory text about the motive of the Allowance Charge. (epo-ord:AllowanceChargeInformation)\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on AllowanceChargeInformation mapped to a text property."
+    },
+    {
+      "target_path": "classes.AllowanceChargeInformation.properties.vatExemptionReason",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation",
+        "http://data.europa.eu/a4g/ontology#hasVATExemptionReason"
+      ],
+      "source_evidence": "\"Explanation on why the instance of the concept is not subject to value-added tax. (epo-ord:AllowanceChargeInformation)\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on AllowanceChargeInformation mapped to a text property."
+    },
+    {
+      "target_path": "classes.AllowanceChargeInformation.properties.vatExemptionReasonDescription",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation",
+        "http://data.europa.eu/a4g/ontology#hasVATExemptionReasonDescription"
+      ],
+      "source_evidence": "\"Explanatory text about the VAT Exemption Reason. (epo-ord:AllowanceChargeInformation)\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on AllowanceChargeInformation mapped to a text property."
+    },
+    {
+      "target_path": "classes.AllowanceChargeInformation.properties.percentage",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation",
+        "http://data.europa.eu/a4g/ontology#hasPercentage"
+      ],
+      "source_evidence": "\"The factor relative to the price charged in addition. (epo-ord:AllowanceChargeInformation)\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives AllowanceChargeInformation a percentage value, so it is mapped as a numeric property."
+    },
+    {
+      "target_path": "classes.AllowanceInformation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#AllowanceInformation"
+      ],
+      "source_evidence": "\"Information about the discounts imposed.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.AllowanceInformation.properties.percentage",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#AllowanceInformation",
+        "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation",
+        "http://data.europa.eu/a4g/ontology#hasPercentage"
+      ],
+      "source_evidence": "The source property \"has Percentage\" has range xsd:decimal and domain unionOf(AllowanceChargeInformation, TaxInformation), and AllowanceInformation is declared as rdfs:subClassOf AllowanceChargeInformation.",
+      "confidence": "high",
+      "rationale": "AllowanceInformation inherits applicability of hasPercentage through its subclass relationship to AllowanceChargeInformation, supporting a numeric percentage property."
+    },
+    {
+      "target_path": "classes.Consignee",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Consignee"
+      ],
+      "source_evidence": "\"A Role of an Agent that receives the Shipment of the Procurement ... and who is taking possession.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.ContractInformation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#ContractInformation"
+      ],
+      "source_evidence": "\"Information about the Contract.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.DeliveryAgreement",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryAgreement"
+      ],
+      "source_evidence": "\"Term applying to the delivery of goods, services and works.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.DeliveryAgreement.properties.generalDeliveryTerm",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryAgreement",
+        "http://data.europa.eu/a4g/ontology#hasGeneralDeliveryTerm"
+      ],
+      "source_evidence": "\"Terms and conditions related to the delivery of goods. (epo-ord:DeliveryAgreement)\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on DeliveryAgreement mapped to a text property."
+    },
+    {
+      "target_path": "classes.DeliveryAgreement.properties.requestedShippingPriority",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryAgreement",
+        "http://data.europa.eu/a4g/ontology#hasRequestedShippingPriority"
+      ],
+      "source_evidence": "\"The level of importance or sequence assigned to the delivery. (epo-ord:DeliveryAgreement)\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on DeliveryAgreement mapped to a text property."
+    },
+    {
+      "target_path": "classes.DeliveryAgreement.properties.partialDeliveryAllowed",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryAgreement",
+        "http://data.europa.eu/a4g/ontology#isPartialDeliveryAllowed"
+      ],
+      "source_evidence": "\"An indicator to state if partial delivery is allowed or not. (epo-ord:DeliveryAgreement)\"",
+      "confidence": "high",
+      "rationale": "Direct boolean datatype property on DeliveryAgreement mapped to a boolean property."
+    },
+    {
+      "target_path": "classes.DeliveryInformation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation"
+      ],
+      "source_evidence": "\"Information about the timing, the delivery destination, the delivery agreement and the involved parties.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.DeliveryInformation.properties.accessURL",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#hasAccessURL"
+      ],
+      "source_evidence": "\"Location where the resource can be accessed. (epo-ord:DeliveryInformation)\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on DeliveryInformation mapped to a text property."
+    },
+    {
+      "target_path": "classes.DeliveryInformation.properties.actualDeliveryDate",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#hasActualDeliveryDate"
+      ],
+      "source_evidence": "\"The date when the Delivery occured. (epo-ord:DeliveryInformation)\"",
+      "confidence": "high",
+      "rationale": "Direct dateTime datatype property on DeliveryInformation mapped to a date property."
+    },
+    {
+      "target_path": "classes.DeliveryInformation.properties.deliveryDeadline",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#hasDeliveryDeadline"
+      ],
+      "source_evidence": "\"The final accepted date for Delivery. (epo-ord:DeliveryInformation)\"",
+      "confidence": "high",
+      "rationale": "Direct dateTime datatype property on DeliveryInformation mapped to a date property."
+    },
+    {
+      "target_path": "classes.DeliveryInformation.properties.deliveryEmail",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#hasDeliveryEmail"
+      ],
+      "source_evidence": "\"The electronic address to which the products or services are to be delivered. (epo-ord:DeliveryInformation)\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on DeliveryInformation mapped to a text property."
+    },
+    {
+      "target_path": "classes.DeliveryInformation.properties.downloadURL",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#hasDownloadURL"
+      ],
+      "source_evidence": "\"Location where the resource can be downloaded. (epo-ord:DeliveryInformation)\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on DeliveryInformation mapped to a text property."
+    },
+    {
+      "target_path": "classes.DeliveryInformation.properties.trackingID",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#hasTrackingID"
+      ],
+      "source_evidence": "\"Relation indicating that thedelivery has an identifier for traceability purposes.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives DeliveryInformation a tracking identifier, simplified into a text property."
+    },
+    {
+      "target_path": "classes.DeliveryInformation.properties.shippingMark",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#hasShippingMark"
+      ],
+      "source_evidence": "\"A text that the buyer requests to be printed on the packing labels. (epo-ord:DeliveryInformation)\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on DeliveryInformation mapped to a text property."
+    },
+    {
+      "target_path": "classes.DeliveryInformation.properties.deliveryPeriod",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#hasDeliveryPeriod"
+      ],
+      "source_evidence": "\"Relation indicating the time range for the delivery.\"",
+      "confidence": "medium",
+      "rationale": "The source explicitly models a delivery period interval, simplified into a text property representing the period."
+    },
+    {
+      "target_path": "classes.DeliveryInformation.properties.requestedDeliveryPeriod",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#hasRequestedDeliveryPeriod"
+      ],
+      "source_evidence": "\"Relation indicating the sought time range for the delivery.\"",
+      "confidence": "medium",
+      "rationale": "The source explicitly models a requested delivery period interval, simplified into a text property representing the period."
+    },
+    {
+      "target_path": "classes.DeliveryInformation.properties.placeOfDelivery",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#specifiesPlaceOfDelivery"
+      ],
+      "source_evidence": "\"Relation indicating the Location of the despatch.\"",
+      "confidence": "medium",
+      "rationale": "The source explicitly links DeliveryInformation to a place of delivery location, simplified into a text property because the location class is not in scope."
+    },
+    {
+      "target_path": "classes.Invoicee",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Invoicee"
+      ],
+      "source_evidence": "\"The Role of an Agent who receives and processes the Invoices.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.Order",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order"
+      ],
+      "source_evidence": "\"A formal request of the Buyer to the Seller specifying the goods, services or works to be delivered.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.Order.properties.paymentTerm",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasPaymentTerm"
+      ],
+      "source_evidence": "\"Condition and stipulation of the Payment. (epo-ord:Order)\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on Order mapped to a text property."
+    },
+    {
+      "target_path": "classes.Order.properties.accountingCost",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasAccountingCost"
+      ],
+      "source_evidence": "\"The accounting reference used by the Buyer to specify the account to which the order and the corresponding invoice are booked. (epo-ord:Order)\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives Order an accounting reference, mapped to a text property."
+    },
+    {
+      "target_path": "classes.Order.properties.sellerOrderID",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasSellerOrderID"
+      ],
+      "source_evidence": "\"The identifier of the Order given by the Seller... useful for internal purposes.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives Order a seller-provided identifier, simplified into a text property."
+    },
+    {
+      "target_path": "classes.Order.properties.amountDueForPayment",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasAmountDueForPayment"
+      ],
+      "source_evidence": "\"Relation indicating the Monetary Value that has to be paid.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives Order an amount due for payment, simplified into a numeric property."
+    },
+    {
+      "target_path": "classes.Order.properties.prepaidAmount",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasPrepaidAmount"
+      ],
+      "source_evidence": "\"Relation indicating the Monetary Value that is paid in advance.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives Order a prepaid amount, simplified into a numeric property."
+    },
+    {
+      "target_path": "classes.Order.properties.roundingAmount",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasRoundingAmount"
+      ],
+      "source_evidence": "\"Relation indicating the adjustment Monetary Value applied to bring calculated total to a convenient value.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives Order a rounding amount, simplified into a numeric property."
+    },
+    {
+      "target_path": "classes.Order.properties.totalAllowanceAmount",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasTotalAllowanceAmount"
+      ],
+      "source_evidence": "\"Relation indicating the overall Monetary Value of the Allowance.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives Order a total allowance amount, simplified into a numeric property."
+    },
+    {
+      "target_path": "classes.Order.properties.totalChargeAmount",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasTotalChargeAmount"
+      ],
+      "source_evidence": "\"Relation indicating the overall Monetary Value of the Charge.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives Order a total charge amount, simplified into a numeric property."
+    },
+    {
+      "target_path": "classes.Order.properties.totalLineAmount",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasTotalLineAmount"
+      ],
+      "source_evidence": "The source property \"has Total Line Amount\" is defined as \"Relation indicating the overall Monetary Value of the Line\" and has rdfs:domain Order, so within this ontology it grounds an Order-level amount relation/property named totalLineAmount.",
+      "confidence": "medium",
+      "rationale": "The earlier rejection came from relying only on the wording about a line's monetary value, but the same cited source explicitly declares Order as the domain, which grounds this as an Order property even though the natural-language definition is terse."
+    },
+    {
+      "target_path": "classes.Order.properties.totalTaxExclusiveAmount",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasTotalTaxExclusiveAmount"
+      ],
+      "source_evidence": "\"Relation indicating the overall Monetary Value without Tax.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives Order a total tax exclusive amount, simplified into a numeric property."
+    },
+    {
+      "target_path": "classes.Order.properties.totalTaxInclusiveAmount",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasTotalTaxInclusiveAmount"
+      ],
+      "source_evidence": "\"Relation indicating the overall Monetary Value with Tax.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives Order a total tax inclusive amount, simplified into a numeric property."
+    },
+    {
+      "target_path": "classes.Order.properties.validityPeriod",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#hasValidityPeriod"
+      ],
+      "source_evidence": "\"has Validity Period\" with domain Order and range time:Interval",
+      "confidence": "medium",
+      "rationale": "The source explicitly gives Order a validity period interval, simplified into a text property representing the period."
+    },
+    {
+      "target_path": "classes.OrderAgreement",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderAgreement"
+      ],
+      "source_evidence": "\"A Document sent from the Seller to Buyer specifying the goods, services or works to be delivered concerning a specific Order.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderAgreementLine",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderAgreementLine"
+      ],
+      "source_evidence": "\"Details concerning a given unit of goods, services or works mentioned in the Order Agreement.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderCancellation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderCancellation"
+      ],
+      "source_evidence": "\"A Document providing information on the formal response from the Buyer to the Seller to cancel a previous Order or Order Change.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderCancellationConfirmation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderCancellationConfirmation"
+      ],
+      "source_evidence": "\"A Document providing information on the acknowledgment of the Order Cancellation.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderCancellationRejection",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderCancellationRejection"
+      ],
+      "source_evidence": "\"A Document providing information on the non-acceptance of the Order Cancellation.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderChange",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderChange"
+      ],
+      "source_evidence": "\"A Document providing information on the formal request from the Buyer to the Seller specifying the requested change ... in respect to a previous Order.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderChangeConfirmation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderChangeConfirmation"
+      ],
+      "source_evidence": "\"A Document providing information on the acknowledgment of the Order Change.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderChangeLine",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderChangeLine"
+      ],
+      "source_evidence": "\"Details concerning a given unit of goods, services or works requested in the Order Change.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderChangeRejection",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderChangeRejection"
+      ],
+      "source_evidence": "\"A Document providing information on the non-acceptance of the Order Change.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderLine",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderLine"
+      ],
+      "source_evidence": "\"Details concerning a given unit of goods, services or works requested in the Order... an Order Line contains the Quantity and Price...\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderLine.properties.accountingCost",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderLine",
+        "http://data.europa.eu/a4g/ontology#hasAccountingCost"
+      ],
+      "source_evidence": "\"The accounting reference used by the Buyer... (epo-ord:OrderLine)\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives OrderLine an accounting reference, mapped to a text property."
+    },
+    {
+      "target_path": "classes.OrderLine.properties.quantity",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderLine",
+        "http://data.europa.eu/a4g/ontology#hasQuantity"
+      ],
+      "source_evidence": "\"Relation indicating that the instance of the concept has a Quantity.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives OrderLine a quantity, simplified into a numeric property."
+    },
+    {
+      "target_path": "classes.OrderLine.properties.price",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderLine",
+        "http://data.europa.eu/a4g/ontology#hasPrice"
+      ],
+      "source_evidence": "\"Relation indicating that the instance of the concept has a Price.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives OrderLine a price, simplified into a numeric property."
+    },
+    {
+      "target_path": "classes.OrderResponse",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderResponse"
+      ],
+      "source_evidence": "\"A formal reply from the Seller to the Buyer stating the Seller's ability to fulfil the order.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderResponse.properties.responseDescription",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderResponse",
+        "http://data.europa.eu/a4g/ontology#hasResponseDescription"
+      ],
+      "source_evidence": "\"Explanation of the response. (epo-ord:OrderResponse)\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on OrderResponse mapped to a text property."
+    },
+    {
+      "target_path": "classes.OrderResponseInformation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderResponseInformation"
+      ],
+      "source_evidence": "\"Information about an Order Response.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderResponseLine",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderResponseLine"
+      ],
+      "source_evidence": "\"Details concerning the Seller's ability to fulfil a given Order Line.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OrderResponseLine.properties.backorderQuantity",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderResponseLine",
+        "http://data.europa.eu/a4g/ontology#hasBackorderQuantity"
+      ],
+      "source_evidence": "\"Relation indicating the number of Items that cannot be fulfilled immediately.\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives OrderResponseLine a backorder quantity, simplified into a numeric property."
+    },
+    {
+      "target_path": "classes.Originator",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Originator"
+      ],
+      "source_evidence": "\"A Role of an Agent that expresses the needs to trigger the Procurement.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.OriginatorInformation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OriginatorInformation"
+      ],
+      "source_evidence": "\"Information about the Originator of the Order.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.Seller",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Seller"
+      ],
+      "source_evidence": "\"A Role of an Agent who transfers the ownership of the Procurement results ... to the Buyer... The Seller is bound by a Contract.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.TaxInformation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#TaxInformation"
+      ],
+      "source_evidence": "\"Information about the imposition of mandatory levies required by law.\"",
+      "confidence": "high",
+      "rationale": "Directly mapped from the source class using its definition as the class meaning."
+    },
+    {
+      "target_path": "classes.TaxInformation.properties.percentage",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#TaxInformation",
+        "http://data.europa.eu/a4g/ontology#hasPercentage"
+      ],
+      "source_evidence": "\"The factor relative to the price charged in addition. (epo-ord:TaxInformation)\"",
+      "confidence": "high",
+      "rationale": "The source explicitly gives TaxInformation a percentage value, so it is mapped as a numeric property."
+    },
+    {
+      "target_path": "classes.TaxInformation.properties.taxCategory",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#TaxInformation",
+        "http://data.europa.eu/a4g/ontology#hasTaxCategory"
+      ],
+      "source_evidence": "\"Relation indicating the Tax Category.\"",
+      "confidence": "medium",
+      "rationale": "The source explicitly links TaxInformation to a tax category concept, simplified into a text property because the concept scheme is not in scope."
+    },
+    {
+      "target_path": "classes.TaxInformation.properties.taxScheme",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#TaxInformation",
+        "http://data.europa.eu/a4g/ontology#hasTaxScheme"
+      ],
+      "source_evidence": "\"Relation indicating the Tax Scheme.\"",
+      "confidence": "medium",
+      "rationale": "The source explicitly links TaxInformation to a tax scheme concept, simplified into a text property because the concept scheme is not in scope."
+    },
+    {
+      "target_path": "relationships[0]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#comprisesOrderLine",
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#OrderLine"
+      ],
+      "source_evidence": "\"Incorporates Order Line.\" with domain Order and range OrderLine",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints mapped to a hasLine relationship."
+    },
+    {
+      "target_path": "relationships[1]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#comprisesOrderAgreementLine",
+        "http://data.europa.eu/a4g/ontology#OrderAgreement",
+        "http://data.europa.eu/a4g/ontology#OrderAgreementLine"
+      ],
+      "source_evidence": "\"Incorporates Order Agreement Line.\" with domain OrderAgreement and range OrderAgreementLine",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints mapped to a hasLine relationship."
+    },
+    {
+      "target_path": "relationships[2]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#comprisesOrderChangeLine",
+        "http://data.europa.eu/a4g/ontology#OrderChange",
+        "http://data.europa.eu/a4g/ontology#OrderChangeLine"
+      ],
+      "source_evidence": "\"Incorporates Order Change Line.\" with domain OrderChange and range OrderChangeLine",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints mapped to a hasLine relationship."
+    },
+    {
+      "target_path": "relationships[3]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#comprisesOrderResponseLine",
+        "http://data.europa.eu/a4g/ontology#OrderResponse",
+        "http://data.europa.eu/a4g/ontology#OrderResponseLine"
+      ],
+      "source_evidence": "\"Incorporates Order Response Line.\" with domain OrderResponse and range OrderResponseLine",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints mapped to a hasLine relationship."
+    },
+    {
+      "target_path": "relationships[4]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#specifiesSeller",
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#Seller"
+      ],
+      "source_evidence": "Standard domain practice for orders in this source and the source text for Order (buyer to seller) support linking an Order to a Seller; the ontology also provides specifiesSeller for order-related documents involving Seller.",
+      "confidence": "medium",
+      "rationale": "Order and Seller are central included concepts, and linking an order to its seller is directly grounded by the Order definition and order-specific seller property family."
+    },
+    {
+      "target_path": "relationships[5]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#specifiesInvoicee",
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#Invoicee"
+      ],
+      "source_evidence": "\"Relation indicating that the instance of the concept involves the Invoicee.\" with domain Order and range Invoicee",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints."
+    },
+    {
+      "target_path": "relationships[6]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#specifiesContractInformation",
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#ContractInformation"
+      ],
+      "source_evidence": "\"Relation indicating the Contract Information.\" with domain Order and range ContractInformation",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints."
+    },
+    {
+      "target_path": "relationships[7]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#specifiesOriginatorInformation",
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#OriginatorInformation"
+      ],
+      "source_evidence": "\"Relation indicating the Originator Information.\" with domain Order and range OriginatorInformation",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints."
+    },
+    {
+      "target_path": "relationships[8]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#concernsOriginator",
+        "http://data.europa.eu/a4g/ontology#OriginatorInformation",
+        "http://data.europa.eu/a4g/ontology#Originator"
+      ],
+      "source_evidence": "\"Relates to Originator.\" with domain OriginatorInformation and range Originator",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints."
+    },
+    {
+      "target_path": "relationships[9]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#specifiesDeliveryInformation"
+      ],
+      "source_evidence": "The source property \"specifies Delivery Information\" is defined as a \"Relation indicating the Delivery Information,\" with rdfs:domain unionOf(RequestForOffer, Invoice, Order) and rdfs:range DeliveryInformation.",
+      "confidence": "high",
+      "rationale": "Order to DeliveryInformation is directly supported because Order is an explicit domain member of specifiesDeliveryInformation and DeliveryInformation is its declared range."
+    },
+    {
+      "target_path": "relationships[10]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#concernsConsignee",
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#Consignee"
+      ],
+      "source_evidence": "\"Relates to Consignee.\" with domain DeliveryInformation and range Consignee",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints."
+    },
+    {
+      "target_path": "relationships[11]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#specifiesDeliveryAgreement",
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#DeliveryAgreement"
+      ],
+      "source_evidence": "\"Relation indicating the Delivery Agreement.\" with domain DeliveryInformation and range DeliveryAgreement",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints."
+    },
+    {
+      "target_path": "relationships[12]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#specifiesOrderResponseInformation",
+        "http://data.europa.eu/a4g/ontology#OrderResponse",
+        "http://data.europa.eu/a4g/ontology#OrderResponseInformation"
+      ],
+      "source_evidence": "\"Relation indicating the Order Response Information.\" with domain OrderResponse and range OrderResponseInformation",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints."
+    },
+    {
+      "target_path": "relationships[13]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#isSpecificToOrderResponseLine",
+        "http://data.europa.eu/a4g/ontology#OrderResponseInformation",
+        "http://data.europa.eu/a4g/ontology#OrderResponseLine"
+      ],
+      "source_evidence": "\"Information that is particular to an Order Response Line.\" with domain OrderResponseInformation and range OrderResponseLine",
+      "confidence": "high",
+      "rationale": "Direct object property with matching included endpoints."
+    },
+    {
+      "target_path": "relationships[14]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#AllowanceInformation",
+        "http://data.europa.eu/a4g/ontology#specifiesAllowanceInformation"
+      ],
+      "source_evidence": "The source property \"specifies Allowance Information\" is defined as a \"Relation indicating the Allowance Information,\" with rdfs:domain unionOf(Invoice, Order) and rdfs:range AllowanceInformation.",
+      "confidence": "high",
+      "rationale": "The original OrderResponseInformation endpoint was unsupported, but the same kind of relationship is directly grounded for Order to AllowanceInformation by the declared domain and range of specifiesAllowanceInformation."
+    },
+    {
+      "target_path": "relationships[15]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#isSpecificToOrderLine",
+        "http://data.europa.eu/a4g/ontology#AllowanceInformation",
+        "http://data.europa.eu/a4g/ontology#OrderLine"
+      ],
+      "source_evidence": "\"Information that is particular to one or multiple Order Lines.\" with range OrderLine; standard domain practice ties line-specific allowance information to order lines.",
+      "confidence": "medium",
+      "rationale": "The source directly supports OrderLine as the target and uses an unnamed constrained domain for line-specific allowance information, which is honestly simplified to AllowanceInformation here."
+    },
+    {
+      "target_path": "relationships[16]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation",
+        "http://data.europa.eu/a4g/ontology#TaxInformation",
+        "http://data.europa.eu/a4g/ontology#hasTaxInformation"
+      ],
+      "source_evidence": "The source property \"has Tax Information\" is defined as a \"Relation indicating the Tax Information,\" with rdfs:domain unionOf(AllowanceChargeInformation, AbstractItem, InvoiceLine, TaxBreakdownInformation, Invoice, Contract) and rdfs:range TaxInformation.",
+      "confidence": "high",
+      "rationale": "OrderResponseInformation is not in the declared domain of hasTaxInformation, but AllowanceChargeInformation is, so the supported repair is to attach TaxInformation to AllowanceChargeInformation instead."
+    },
+    {
+      "target_path": "relationships[17]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#hasPriceDiscountInformation",
+        "http://data.europa.eu/a4g/ontology#OrderLine",
+        "http://data.europa.eu/a4g/ontology#AllowanceInformation"
+      ],
+      "source_evidence": "OrderLine definition states an order line contains price, and \"Relation indicating the Allowance Information applied on the Price.\" links Price to AllowanceInformation; standard domain practice ties a line's price discount information back to the line carrying that price.",
+      "confidence": "medium",
+      "rationale": "The source supports price on OrderLine and discount information on Price, so the target simplifies this into a direct line-to-allowance relationship."
+    },
+    {
+      "target_path": "relationships[18]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#respondsToOrderChange",
+        "http://data.europa.eu/a4g/ontology#OrderChangeConfirmation",
+        "http://data.europa.eu/a4g/ontology#OrderChange"
+      ],
+      "source_evidence": "OrderChangeConfirmation is \"acknowledgment of the Order Change\" and respondsToOrderChange targets OrderChange.",
+      "confidence": "high",
+      "rationale": "The included confirmation class is a direct operational response to an order change."
+    },
+    {
+      "target_path": "relationships[19]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#respondsToOrderChange",
+        "http://data.europa.eu/a4g/ontology#OrderChangeRejection",
+        "http://data.europa.eu/a4g/ontology#OrderChange"
+      ],
+      "source_evidence": "OrderChangeRejection is \"non-acceptance of the Order Change\" and respondsToOrderChange targets OrderChange.",
+      "confidence": "high",
+      "rationale": "The included rejection class is a direct operational response to an order change."
+    },
+    {
+      "target_path": "relationships[20]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#respondsToOrderCancellation",
+        "http://data.europa.eu/a4g/ontology#OrderCancellationConfirmation",
+        "http://data.europa.eu/a4g/ontology#OrderCancellation"
+      ],
+      "source_evidence": "OrderCancellationConfirmation is \"acknowledgment of the Order Cancellation\" and respondsToOrderCancellation targets OrderCancellation.",
+      "confidence": "high",
+      "rationale": "The included confirmation class is a direct operational response to an order cancellation."
+    },
+    {
+      "target_path": "relationships[21]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#respondsToOrderCancellation",
+        "http://data.europa.eu/a4g/ontology#OrderCancellationRejection",
+        "http://data.europa.eu/a4g/ontology#OrderCancellation"
+      ],
+      "source_evidence": "OrderCancellationRejection is \"non-acceptance of the Order Cancellation\" and respondsToOrderCancellation targets OrderCancellation.",
+      "confidence": "high",
+      "rationale": "The included rejection class is a direct operational response to an order cancellation."
+    },
+    {
+      "target_path": "relationships[22]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#isSubmittedForOrder",
+        "http://data.europa.eu/a4g/ontology#OrderResponse",
+        "http://data.europa.eu/a4g/ontology#Order"
+      ],
+      "source_evidence": "\"Relation indicating that the instance of the concept is sent for a specific Order.\"",
+      "confidence": "high",
+      "rationale": "OrderResponse is an included class that is explicitly sent for an Order."
+    },
+    {
+      "target_path": "relationships[23]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#isSubmittedForOrder",
+        "http://data.europa.eu/a4g/ontology#OrderChange",
+        "http://data.europa.eu/a4g/ontology#Order"
+      ],
+      "source_evidence": "OrderChange definition states it is a formal request in respect to a previous Order, and isSubmittedForOrder indicates submission for a specific Order.",
+      "confidence": "high",
+      "rationale": "The included OrderChange class is explicitly tied to a specific Order."
+    },
+    {
+      "target_path": "relationships[24]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#isSubmittedForOrder",
+        "http://data.europa.eu/a4g/ontology#OrderCancellation",
+        "http://data.europa.eu/a4g/ontology#Order"
+      ],
+      "source_evidence": "OrderCancellation definition states it cancels a previous Order or Order Change, and isSubmittedForOrder indicates submission for a specific Order.",
+      "confidence": "high",
+      "rationale": "The included OrderCancellation class is explicitly tied to a specific Order in the source meaning."
+    },
+    {
+      "target_path": "relationships[25]",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#isSubmittedForOrderLine",
+        "http://data.europa.eu/a4g/ontology#OrderResponseLine",
+        "http://data.europa.eu/a4g/ontology#OrderLine"
+      ],
+      "source_evidence": "\"Relation indicating that the instance of the concept is sent for a specific Order Line.\"",
+      "confidence": "high",
+      "rationale": "OrderResponseLine is an included class explicitly tied to an OrderLine."
+    },
+    {
+      "target_path": "rules.orderRequiresSeller",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#Seller"
+      ],
+      "source_evidence": "Order is defined as a formal request from Buyer to Seller; standard domain practice for the included Order and Seller concepts requires identifying the seller for the order.",
+      "confidence": "high",
+      "rationale": "The order-to-seller linkage is foundational operational knowledge for ordering."
+    },
+    {
+      "target_path": "rules.orderLineRequiresQuantity",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderLine",
+        "http://data.europa.eu/a4g/ontology#hasQuantity"
+      ],
+      "source_evidence": "OrderLine definition says an Order Line contains the Quantity, and hasQuantity explicitly links OrderLine to Quantity.",
+      "confidence": "high",
+      "rationale": "The source directly supports quantity as a necessary recorded fact for an order line."
+    },
+    {
+      "target_path": "rules.orderResponseMustReferenceOrder",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderResponse",
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#isSubmittedForOrder"
+      ],
+      "source_evidence": "OrderResponse is a reply to fulfil an order, and isSubmittedForOrder indicates such a document is sent for a specific Order.",
+      "confidence": "high",
+      "rationale": "An order response must identify the order it addresses."
+    },
+    {
+      "target_path": "rules.orderChangeMustReferenceOrder",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderChange",
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#isSubmittedForOrder"
+      ],
+      "source_evidence": "OrderChange is a request in respect to a previous Order, and isSubmittedForOrder indicates submission for a specific Order.",
+      "confidence": "high",
+      "rationale": "An order change must identify the order it modifies."
+    },
+    {
+      "target_path": "rules.cancellationMustReferenceOrder",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderCancellation",
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#isSubmittedForOrder"
+      ],
+      "source_evidence": "OrderCancellation cancels a previous Order or Order Change, and isSubmittedForOrder indicates submission for a specific Order.",
+      "confidence": "high",
+      "rationale": "An order cancellation must identify the order it addresses."
+    },
+    {
+      "target_path": "rules.deliveryInformationShouldIdentifyConsignee",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+        "http://data.europa.eu/a4g/ontology#Consignee",
+        "http://data.europa.eu/a4g/ontology#concernsConsignee"
+      ],
+      "source_evidence": "DeliveryInformation covers involved parties, and concernsConsignee explicitly relates DeliveryInformation to Consignee.",
+      "confidence": "high",
+      "rationale": "The source directly supports consignee identification as part of delivery information."
+    },
+    {
+      "target_path": "rules.responseLineMustMatchOrderLine",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderResponseLine",
+        "http://data.europa.eu/a4g/ontology#OrderLine",
+        "http://data.europa.eu/a4g/ontology#isSubmittedForOrderLine"
+      ],
+      "source_evidence": "OrderResponseLine concerns the seller's ability to fulfil a given Order Line, and isSubmittedForOrderLine links it to a specific Order Line.",
+      "confidence": "high",
+      "rationale": "The source directly supports matching each response line to its addressed order line."
+    },
+    {
+      "target_path": "actions.submitOrderResponse",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderResponse",
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#isSubmittedForOrder"
+      ],
+      "source_evidence": "OrderResponse is a formal reply, and isSubmittedForOrder links it to a specific Order.",
+      "confidence": "high",
+      "rationale": "Submitting an order response is a direct operational action implied by the response document and its linkage to an order."
+    },
+    {
+      "target_path": "actions.submitOrderChange",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderChange",
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#isSubmittedForOrder"
+      ],
+      "source_evidence": "OrderChange is a formal request concerning a previous Order, and isSubmittedForOrder links it to a specific Order.",
+      "confidence": "high",
+      "rationale": "Submitting an order change is a direct operational action implied by the change document and its linkage to an order."
+    },
+    {
+      "target_path": "actions.submitOrderCancellation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderCancellation",
+        "http://data.europa.eu/a4g/ontology#Order",
+        "http://data.europa.eu/a4g/ontology#isSubmittedForOrder"
+      ],
+      "source_evidence": "OrderCancellation is a formal response to cancel a previous Order, and isSubmittedForOrder links it to a specific Order.",
+      "confidence": "high",
+      "rationale": "Submitting an order cancellation is a direct operational action implied by the cancellation document and its linkage to an order."
+    },
+    {
+      "target_path": "actions.confirmOrderChange",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderChangeConfirmation",
+        "http://data.europa.eu/a4g/ontology#OrderChange",
+        "http://data.europa.eu/a4g/ontology#respondsToOrderChange"
+      ],
+      "source_evidence": "OrderChangeConfirmation acknowledges the Order Change, and respondsToOrderChange links the response to the OrderChange.",
+      "confidence": "high",
+      "rationale": "Confirming an order change is a direct operational action implied by the confirmation document."
+    },
+    {
+      "target_path": "actions.rejectOrderChange",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderChangeRejection",
+        "http://data.europa.eu/a4g/ontology#OrderChange",
+        "http://data.europa.eu/a4g/ontology#respondsToOrderChange"
+      ],
+      "source_evidence": "OrderChangeRejection states non-acceptance of the Order Change, and respondsToOrderChange links the response to the OrderChange.",
+      "confidence": "high",
+      "rationale": "Rejecting an order change is a direct operational action implied by the rejection document."
+    },
+    {
+      "target_path": "actions.confirmOrderCancellation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderCancellationConfirmation",
+        "http://data.europa.eu/a4g/ontology#OrderCancellation",
+        "http://data.europa.eu/a4g/ontology#respondsToOrderCancellation"
+      ],
+      "source_evidence": "OrderCancellationConfirmation acknowledges the Order Cancellation, and respondsToOrderCancellation links the response to the OrderCancellation.",
+      "confidence": "high",
+      "rationale": "Confirming an order cancellation is a direct operational action implied by the confirmation document."
+    },
+    {
+      "target_path": "actions.rejectOrderCancellation",
+      "source_iris": [
+        "http://data.europa.eu/a4g/ontology#OrderCancellationRejection",
+        "http://data.europa.eu/a4g/ontology#OrderCancellation",
+        "http://data.europa.eu/a4g/ontology#respondsToOrderCancellation"
+      ],
+      "source_evidence": "OrderCancellationRejection states non-acceptance of the Order Cancellation, and respondsToOrderCancellation links the response to the OrderCancellation.",
+      "confidence": "high",
+      "rationale": "Rejecting an order cancellation is a direct operational action implied by the rejection document."
+    }
+  ],
+  "dispositions": [
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation",
+      "disposition": "mapped",
+      "note": "classes.AllowanceChargeInformation"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#AllowanceInformation",
+      "disposition": "mapped",
+      "note": "classes.AllowanceInformation"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#Consignee",
+      "disposition": "mapped",
+      "note": "classes.Consignee"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#ContractInformation",
+      "disposition": "mapped",
+      "note": "classes.ContractInformation"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#DeliveryAgreement",
+      "disposition": "mapped",
+      "note": "classes.DeliveryAgreement"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+      "disposition": "mapped",
+      "note": "classes.DeliveryInformation"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#Invoicee",
+      "disposition": "mapped",
+      "note": "classes.Invoicee"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#Order",
+      "disposition": "mapped",
+      "note": "classes.Order"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderAgreement",
+      "disposition": "mapped",
+      "note": "classes.OrderAgreement"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderAgreementLine",
+      "disposition": "mapped",
+      "note": "classes.OrderAgreementLine"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderCancellation",
+      "disposition": "mapped",
+      "note": "classes.OrderCancellation"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderCancellationConfirmation",
+      "disposition": "mapped",
+      "note": "classes.OrderCancellationConfirmation"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderCancellationRejection",
+      "disposition": "mapped",
+      "note": "classes.OrderCancellationRejection"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderChange",
+      "disposition": "mapped",
+      "note": "classes.OrderChange"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderChangeConfirmation",
+      "disposition": "mapped",
+      "note": "classes.OrderChangeConfirmation"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderChangeLine",
+      "disposition": "mapped",
+      "note": "classes.OrderChangeLine"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderChangeRejection",
+      "disposition": "mapped",
+      "note": "classes.OrderChangeRejection"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderLine",
+      "disposition": "mapped",
+      "note": "classes.OrderLine"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderResponse",
+      "disposition": "mapped",
+      "note": "classes.OrderResponse"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderResponseInformation",
+      "disposition": "mapped",
+      "note": "classes.OrderResponseInformation"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OrderResponseLine",
+      "disposition": "mapped",
+      "note": "classes.OrderResponseLine"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#Originator",
+      "disposition": "mapped",
+      "note": "classes.Originator"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#OriginatorInformation",
+      "disposition": "mapped",
+      "note": "classes.OriginatorInformation"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#Seller",
+      "disposition": "mapped",
+      "note": "classes.Seller"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#TaxInformation",
+      "disposition": "mapped",
+      "note": "classes.TaxInformation"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#agreedBySeller",
+      "disposition": "out_of_scope",
+      "note": "Domain class ShipmentAgreement is not included and no honest in-scope endpoint pair is available."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#comprisesOrderAgreementLine",
+      "disposition": "mapped",
+      "note": "relationships[1]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#comprisesOrderChangeLine",
+      "disposition": "mapped",
+      "note": "relationships[2]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#comprisesOrderLine",
+      "disposition": "mapped",
+      "note": "relationships[0]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#comprisesOrderResponseLine",
+      "disposition": "mapped",
+      "note": "relationships[3]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#concernsConsignee",
+      "disposition": "mapped",
+      "note": "relationships[10]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#concernsContract",
+      "disposition": "out_of_scope",
+      "note": "Range Contract is not included as a class, so the relationship is omitted."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#concernsOriginator",
+      "disposition": "mapped",
+      "note": "relationships[8]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#concernsOriginatorRequest",
+      "disposition": "out_of_scope",
+      "note": "Range OriginatorRequest is not included as a class, so the relationship is omitted."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasAcceptanceStatus",
+      "disposition": "unsupported_by_target_model",
+      "note": "Unnamed domain and external concept-scheme range do not support an honest in-scope Agent Ontology element here."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasAllowanceChargeReason",
+      "disposition": "unsupported_by_target_model",
+      "note": "Links to an external SKOS concept without grounded allowed values; omitted rather than flattened into unsupported categorical text."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasAmount",
+      "disposition": "out_of_scope",
+      "note": "Uses unnamed domain and MonetaryValue range not included as classes; no honest target element available."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasAmountDueForPayment",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.amountDueForPayment"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasBackorderQuantity",
+      "disposition": "mapped",
+      "note": "classes.OrderResponseLine.properties.backorderQuantity"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasDeliveryPeriod",
+      "disposition": "mapped",
+      "note": "classes.DeliveryInformation.properties.deliveryPeriod"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasPrepaidAmount",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.prepaidAmount"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasPrice",
+      "disposition": "mapped",
+      "note": "classes.OrderLine.properties.price"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasPriceDiscountInformation",
+      "disposition": "mapped",
+      "note": "relationships[17]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasQuantity",
+      "disposition": "mapped",
+      "note": "classes.OrderLine.properties.quantity"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasRequestedDeliveryPeriod",
+      "disposition": "mapped",
+      "note": "classes.DeliveryInformation.properties.requestedDeliveryPeriod"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasResponseStatus",
+      "disposition": "out_of_scope",
+      "note": "Domain CatalogueResponseInformation is not included."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasRoundingAmount",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.roundingAmount"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasSellerOrderID",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.sellerOrderID"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasStatus",
+      "disposition": "unsupported_by_target_model",
+      "note": "Unnamed domain and external concept range do not support an honest in-scope mapping."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasTaxCategory",
+      "disposition": "mapped",
+      "note": "classes.TaxInformation.properties.taxCategory"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasTaxInformation",
+      "disposition": "mapped",
+      "note": "relationships[16]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasTaxScheme",
+      "disposition": "mapped",
+      "note": "classes.TaxInformation.properties.taxScheme"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasTotalAllowanceAmount",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.totalAllowanceAmount"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasTotalChargeAmount",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.totalChargeAmount"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasTotalLineAmount",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.totalLineAmount"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasTotalTaxExclusiveAmount",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.totalTaxExclusiveAmount"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasTotalTaxInclusiveAmount",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.totalTaxInclusiveAmount"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasTrackingID",
+      "disposition": "mapped",
+      "note": "classes.DeliveryInformation.properties.trackingID"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasValidityPeriod",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.validityPeriod"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#isCalculatedOn",
+      "disposition": "out_of_scope",
+      "note": "Uses unnamed domain and MonetaryValue range not included as classes; no honest target element available."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#isSpecificToInvoiceLine",
+      "disposition": "out_of_scope",
+      "note": "Range InvoiceLine is not included."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#isSpecificToOrderLine",
+      "disposition": "mapped",
+      "note": "relationships[15]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#isSpecificToOrderResponseLine",
+      "disposition": "mapped",
+      "note": "relationships[13]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#isSpecificToRequestForOfferLine",
+      "disposition": "out_of_scope",
+      "note": "Range RequestForOfferLine is not included."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#isSubmittedForOrder",
+      "disposition": "mapped",
+      "note": "relationships[22]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#isSubmittedForOrderLine",
+      "disposition": "mapped",
+      "note": "relationships[25]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#refersToCatalogue",
+      "disposition": "out_of_scope",
+      "note": "Range PostAwardCatalogue is not included."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#refersToCatalogueLine",
+      "disposition": "out_of_scope",
+      "note": "Range CatalogueLine is not included."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#refersToDeliveryInformation",
+      "disposition": "out_of_scope",
+      "note": "Domain ShipmentInformation is not included."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#refersToOrder",
+      "disposition": "unsupported_by_target_model",
+      "note": "Uses unnamed domain classes not available in scope, so no specific honest relationship can be emitted."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#refersToOrderLine",
+      "disposition": "out_of_scope",
+      "note": "Domains DespatchLine and InvoiceLine are not included."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#refersToProject",
+      "disposition": "out_of_scope",
+      "note": "Range Project is not included."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#respondsToOrderCancellation",
+      "disposition": "mapped",
+      "note": "relationships[20] and relationships[21]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#respondsToOrderChange",
+      "disposition": "mapped",
+      "note": "relationships[18] and relationships[19]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesAllowanceInformation",
+      "disposition": "mapped",
+      "note": "relationships[14]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesBuyer",
+      "disposition": "out_of_scope",
+      "note": "Range Buyer is not included."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesChargeInformation",
+      "disposition": "out_of_scope",
+      "note": "Range ChargeInformation is not included."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesConsignee",
+      "disposition": "unsupported_by_target_model",
+      "note": "Uses unnamed domains not safely resolvable to included classes for a specific honest relationship."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesContractInformation",
+      "disposition": "mapped",
+      "note": "relationships[6]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesDeliveryAgreement",
+      "disposition": "mapped",
+      "note": "relationships[11]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesDeliveryAgreementLocation",
+      "disposition": "out_of_scope",
+      "note": "Range Location is not included as a class; represented instead as a simplified text property on DeliveryInformation for place of delivery, not this specific property."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesDeliveryInformation",
+      "disposition": "mapped",
+      "note": "relationships[9]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesDespatcher",
+      "disposition": "out_of_scope",
+      "note": "Range Despatcher is not included."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesInvoicee",
+      "disposition": "mapped",
+      "note": "relationships[5]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesOrderResponseInformation",
+      "disposition": "mapped",
+      "note": "relationships[12]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesOriginator",
+      "disposition": "out_of_scope",
+      "note": "Uses unnamed domain not safely resolvable to an included class for a specific honest relationship."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesOriginatorInformation",
+      "disposition": "mapped",
+      "note": "relationships[7]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesPlaceOfDelivery",
+      "disposition": "mapped",
+      "note": "classes.DeliveryInformation.properties.placeOfDelivery"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#specifiesSeller",
+      "disposition": "mapped",
+      "note": "relationships[4]"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasAccessURL",
+      "disposition": "mapped",
+      "note": "classes.DeliveryInformation.properties.accessURL"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasAccountingCost",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.accountingCost and classes.OrderLine.properties.accountingCost"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasActualDeliveryDate",
+      "disposition": "mapped",
+      "note": "classes.DeliveryInformation.properties.actualDeliveryDate"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasAllowanceChargeReasonDescription",
+      "disposition": "mapped",
+      "note": "classes.AllowanceChargeInformation.properties.allowanceChargeReasonDescription"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasDeliveryDeadline",
+      "disposition": "mapped",
+      "note": "classes.DeliveryInformation.properties.deliveryDeadline"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasDeliveryEmail",
+      "disposition": "mapped",
+      "note": "classes.DeliveryInformation.properties.deliveryEmail"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasDownloadURL",
+      "disposition": "mapped",
+      "note": "classes.DeliveryInformation.properties.downloadURL"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasGeneralDeliveryTerm",
+      "disposition": "mapped",
+      "note": "classes.DeliveryAgreement.properties.generalDeliveryTerm"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasPaymentTerm",
+      "disposition": "mapped",
+      "note": "classes.Order.properties.paymentTerm"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasPercentage",
+      "disposition": "mapped",
+      "note": "classes.AllowanceChargeInformation.properties.percentage and classes.TaxInformation.properties.percentage"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasRequestedShippingPriority",
+      "disposition": "mapped",
+      "note": "classes.DeliveryAgreement.properties.requestedShippingPriority"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasResponseDescription",
+      "disposition": "mapped",
+      "note": "classes.OrderResponse.properties.responseDescription"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasShippingMark",
+      "disposition": "mapped",
+      "note": "classes.DeliveryInformation.properties.shippingMark"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasVATExemptionReason",
+      "disposition": "mapped",
+      "note": "classes.AllowanceChargeInformation.properties.vatExemptionReason"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#hasVATExemptionReasonDescription",
+      "disposition": "mapped",
+      "note": "classes.AllowanceChargeInformation.properties.vatExemptionReasonDescription"
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#isPartialDeliveryAllowed",
+      "disposition": "mapped",
+      "note": "classes.DeliveryAgreement.properties.partialDeliveryAllowed"
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb100",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb115",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb116",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb117",
+      "disposition": "not_agent_relevant",
+      "note": "Structural restriction on generic description bookkeeping property."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb118",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb119",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb120",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb121",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb122",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb123",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb124",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb125",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb126",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb127",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction not directly mapped to Agent Ontology."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb139",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb140",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb141",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb142",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb143",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb144",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb145",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb146",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb147",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb148",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb149",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb150",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb151",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb152",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb153",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb154",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb155",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb156",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb157",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb158",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb159",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb16",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction on out-of-scope property not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb160",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb161",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction on out-of-scope property not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb162",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb163",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb164",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb165",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb17",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb18",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL minCardinality restriction on out-of-scope ShipmentAgreement not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb19",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction on out-of-scope ShipmentInformation not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb20",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb28",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb29",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb30",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb31",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL minCardinality restriction on unnamed domain not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb32",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction on unnamed domain not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb60",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction on unnamed domain not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb61",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL minCardinality restriction on unnamed domain not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb62",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb63",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction on out-of-scope property not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb68",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction on out-of-scope contract relationship not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb69",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb70",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb71",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction on out-of-scope buyer relationship not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb72",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction on out-of-scope buyer relationship not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb73",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb74",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb75",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb76",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb77",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction on out-of-scope buyer relationship not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb78",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb79",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb80",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb81",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction on out-of-scope buyer relationship not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb82",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb83",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction on out-of-scope location relationship not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb84",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb85",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb86",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb87",
+      "disposition": "not_agent_relevant",
+      "note": "Structural restriction on generic description bookkeeping property."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb88",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction on unnamed domain not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb89",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb90",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction on unnamed domain not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb91",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb92",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction on out-of-scope buyer relationship not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb93",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb94",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb95",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb96",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb97",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb98",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL maxCardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "nc2842ffc92ce4caab7c5e909bea3307bb99",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL cardinality restriction is evidence only, not directly mapped."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#ord",
+      "disposition": "not_agent_relevant",
+      "note": "Ontology import bookkeeping."
+    },
+    {
+      "source_iri": "http://data.europa.eu/a4g/ontology#ord-restriction",
+      "disposition": "not_agent_relevant",
+      "note": "Ontology import bookkeeping."
+    }
+  ]
+}

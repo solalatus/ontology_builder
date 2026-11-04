@@ -30,7 +30,7 @@ class EveryDomainHasItsOriginalSourceTests(unittest.TestCase):
     def test_there_are_manifests_to_check(self):
         self.assertEqual(
             sorted(m.parent.name for m in MANIFESTS),
-            ["brick-hvac", "fibo-loans", "iof-maintenance", "iof-supply-chain"],
+            ["brick-hvac", "epo-ordering", "fibo-loans", "iof-maintenance", "iof-supply-chain"],
         )
 
     def test_every_domain_folder_has_a_source_folder_with_provenance(self):

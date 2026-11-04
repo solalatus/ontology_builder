@@ -1,0 +1,24 @@
+id: epo-ordering
+source_url: https://raw.githubusercontent.com/OP-TED/ePO/v5.2.0/implementation/eOrdering/owl_ontology/eOrdering.ttl
+source_version: v5.2.0
+source_license: EUPL-1.2, (c) European Union, Publications Office of the European Union (dct:license
+  embedded in each file; see ../LICENSE-NOTE.md)
+source_sha256: eb0d543c9c9e4e2a3660e8a01af8dbadb37e339c00f3fc67365cdc1c5f3d8f60
+# ePO publishes each module as two files: the main file (classes, properties,
+# definitions) has no rdfs:domain/rdfs:range at all; every domain/range triple
+# and every OWL restriction is in the *_restrictions.ttl companion. Both are
+# merged before extraction, the same way fibo-loans adds Debt.rdf.
+extra_source_urls:
+  - https://raw.githubusercontent.com/OP-TED/ePO/v5.2.0/implementation/eOrdering/owl_ontology/eOrdering_restrictions.ttl
+extra_source_sha256:
+  - 2cdf212e3cdb07cd61ac30a2e5e632a98a73646e58c6b99a6924e4965ee7ca7d
+scope:
+  # No roots: eOrdering is a small single-purpose module (25 locally declared
+  # classes, 64 object and 16 datatype properties). Terms it only references
+  # from ePO core or sibling modules (MonetaryValue, Concept, Invoice, ...)
+  # get explicit source dispositions from the compiler, as IOF Core terms did
+  # for iof-maintenance.
+  roots: []
+compiler:
+  prompt_version: compiler-prompt
+  runs: 3

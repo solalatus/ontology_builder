@@ -1,0 +1,566 @@
+{
+  "rounds": [
+    {
+      "round": 1,
+      "date": "2026-11-04",
+      "reviewer": "coding agent (Claude subagent), in-session; NOT yet reviewed by the repo owner -- owner review pending",
+      "artefact_definition": "every individually source-mapped element in translation.json mappings list -- classes, class properties, relationships, rules, actions. Competency questions excluded.",
+      "sampling": {
+        "method": "stratified by artefact type, proportional allocation (largest remainder), seed=6 (sixth benchmark domain; this domain has no GitHub issue number)",
+        "population": 104,
+        "population_by_type": {
+          "classes": 25,
+          "properties": 38,
+          "relationships": 26,
+          "rules": 8,
+          "actions": 7
+        },
+        "sample_size": 10,
+        "allocation": {
+          "classes": 2,
+          "properties": 4,
+          "relationships": 2,
+          "rules": 1,
+          "actions": 1
+        }
+      },
+      "source_ir": "freshly regenerated with extract.py from the two committed, checksum-verified files in source/",
+      "items": [
+        {
+          "target_path": "classes.OrderResponse",
+          "target_content": {
+            "meaning": "A formal reply from the seller to the buyer stating the seller's ability to fulfil the order.",
+            "properties": {
+              "responseDescription": {
+                "type": "text"
+              }
+            }
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#OrderResponse"
+            ],
+            "source_evidence": "\"A formal reply from the Seller to the Buyer stating the Seller's ability to fulfil the order.\"",
+            "confidence": "high",
+            "rationale": "Directly mapped from the source class using its definition as the class meaning."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderResponse",
+              "kind": "class",
+              "labels": [
+                "Order Response"
+              ],
+              "definitions": [
+                "A formal reply from the Seller to the Buyer stating the Seller's ability to fulfil the order. Additional Information: The Order Response is used to inform on the acceptance or rejection of an Order or to make a counter-offer."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#Order"
+              ]
+            }
+          ],
+          "verdict": "accept",
+          "reviewer_note": "Meaning is the source definition's first sentence, near-verbatim. The responseDescription property is a real datatype property on the class."
+        },
+        {
+          "target_path": "classes.Consignee",
+          "target_content": {
+            "meaning": "A role of an agent that receives the shipment of the procurement and takes possession, often on behalf of the customer."
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#Consignee"
+            ],
+            "source_evidence": "\"A Role of an Agent that receives the Shipment of the Procurement ... and who is taking possession.\"",
+            "confidence": "high",
+            "rationale": "Directly mapped from the source class using its definition as the class meaning."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#Consignee",
+              "kind": "class",
+              "labels": [
+                "Consignee"
+              ],
+              "definitions": [
+                "A Role of an Agent that receives the Shipment of the Procurement (service, goods or works) and who is taking possession. Additional information: The Role is carried out by the Customer or on behalf of the Customer. The possession of the goods does not necessary imply ownership. The Consignee may be the end-user or the beneficiary. (Consignee) Definition from PEPPOL Despatch: The Consignee is the person or Organisation to which the products will be shipped and who is taking possession. The Role is carried out by the Customer or on behalf of the Customer."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#AcquiringParty"
+              ]
+            }
+          ],
+          "verdict": "accept",
+          "reviewer_note": "Meaning condenses the source definition (receives the shipment, takes possession, on behalf of the customer). Nothing added."
+        },
+        {
+          "target_path": "classes.OrderLine.properties.price",
+          "target_content": {
+            "type": "number",
+            "unit": "monetary value"
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#OrderLine",
+              "http://data.europa.eu/a4g/ontology#hasPrice"
+            ],
+            "source_evidence": "\"Relation indicating that the instance of the concept has a Price.\"",
+            "confidence": "high",
+            "rationale": "The source explicitly gives OrderLine a price, simplified into a numeric property."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderLine",
+              "kind": "class",
+              "labels": [
+                "Order Line"
+              ],
+              "definitions": [
+                "Details concerning a given unit of goods, services or works requested in the Order. Additional information: In general, an Order Line contains the Quantity and Price of the goods, services and goods requested in the Order. However, in certain cases, the Price may not be known, as the Price may fluctuate from one day to the other."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#Line"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#hasPrice",
+              "kind": "object_property",
+              "labels": [
+                "has Price"
+              ],
+              "definitions": [
+                "Relation indicating that the instance of the concept has a Price."
+              ],
+              "domain": [
+                "http://data.europa.eu/a4g/ontology#OrderLine"
+              ],
+              "range": [
+                "http://data.europa.eu/a4g/ontology#Price"
+              ]
+            }
+          ],
+          "verdict": "accept",
+          "reviewer_note": "hasPrice has rdfs:domain OrderLine and range Price (an ePO-core class outside this module). Flattened to a number with unit 'monetary value': the same accepted simplification of a structured value as fibo-loans/iof-supply-chain. The class definition itself says an order line contains quantity and price."
+        },
+        {
+          "target_path": "classes.DeliveryInformation.properties.shippingMark",
+          "target_content": {
+            "type": "text"
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+              "http://data.europa.eu/a4g/ontology#hasShippingMark"
+            ],
+            "source_evidence": "\"A text that the buyer requests to be printed on the packing labels. (epo-ord:DeliveryInformation)\"",
+            "confidence": "high",
+            "rationale": "Direct datatype property on DeliveryInformation mapped to a text property."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+              "kind": "class",
+              "labels": [
+                "Delivery Information"
+              ],
+              "definitions": [
+                "Information about the timing, the delivery destination, the delivery agreement and the involved parties."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#InformationHub"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#hasShippingMark",
+              "kind": "datatype_property",
+              "labels": [
+                "has Shipping Mark"
+              ],
+              "definitions": [
+                "A text that the buyer requests to be printed on the packing labels. (epo-ord:DeliveryInformation)"
+              ],
+              "domain": [
+                "http://data.europa.eu/a4g/ontology#DeliveryInformation"
+              ],
+              "range": [
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral"
+              ]
+            }
+          ],
+          "verdict": "accept",
+          "reviewer_note": "hasShippingMark is a datatype property with rdfs:domain DeliveryInformation; text type matches the plain-literal range."
+        },
+        {
+          "target_path": "classes.AllowanceChargeInformation.properties.vatExemptionReason",
+          "target_content": {
+            "type": "text"
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation",
+              "http://data.europa.eu/a4g/ontology#hasVATExemptionReason"
+            ],
+            "source_evidence": "\"Explanation on why the instance of the concept is not subject to value-added tax. (epo-ord:AllowanceChargeInformation)\"",
+            "confidence": "high",
+            "rationale": "Direct datatype property on AllowanceChargeInformation mapped to a text property."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation",
+              "kind": "class",
+              "labels": [
+                "Allowance Charge Information"
+              ],
+              "definitions": [
+                "Information about discounts, taxes, duties and fees imposed."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#InformationHub"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#hasVATExemptionReason",
+              "kind": "datatype_property",
+              "labels": [
+                "has VAT Exemption Reason"
+              ],
+              "definitions": [
+                "Explanation on why the instance of the concept is not subject to value-added tax. (epo-ord:AllowanceChargeInformation)"
+              ],
+              "domain": [
+                "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation"
+              ],
+              "range": [
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral"
+              ]
+            }
+          ],
+          "verdict": "accept",
+          "reviewer_note": "hasVATExemptionReason is a datatype property with rdfs:domain AllowanceChargeInformation; text type matches the plain-literal range."
+        },
+        {
+          "target_path": "classes.AllowanceChargeInformation.properties.allowanceChargeReasonDescription",
+          "target_content": {
+            "type": "text"
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation",
+              "http://data.europa.eu/a4g/ontology#hasAllowanceChargeReasonDescription"
+            ],
+            "source_evidence": "\"Explanatory text about the motive of the Allowance Charge. (epo-ord:AllowanceChargeInformation)\"",
+            "confidence": "high",
+            "rationale": "Direct datatype property on AllowanceChargeInformation mapped to a text property."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation",
+              "kind": "class",
+              "labels": [
+                "Allowance Charge Information"
+              ],
+              "definitions": [
+                "Information about discounts, taxes, duties and fees imposed."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#InformationHub"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#hasAllowanceChargeReasonDescription",
+              "kind": "datatype_property",
+              "labels": [
+                "has Allowance Charge Reason Description"
+              ],
+              "definitions": [
+                "Explanatory text about the motive of the Allowance Charge. (epo-ord:AllowanceChargeInformation)"
+              ],
+              "domain": [
+                "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation"
+              ],
+              "range": [
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral"
+              ]
+            }
+          ],
+          "verdict": "accept",
+          "reviewer_note": "hasAllowanceChargeReasonDescription is a datatype property with rdfs:domain AllowanceChargeInformation; text type matches."
+        },
+        {
+          "target_path": "relationships[13]",
+          "target_content": {
+            "name": "isSpecificToOrderResponseLine",
+            "from": "OrderResponseInformation",
+            "to": "OrderResponseLine",
+            "meaning": "The order response information is particular to an order response line.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#isSpecificToOrderResponseLine",
+              "http://data.europa.eu/a4g/ontology#OrderResponseInformation",
+              "http://data.europa.eu/a4g/ontology#OrderResponseLine"
+            ],
+            "source_evidence": "\"Information that is particular to an Order Response Line.\" with domain OrderResponseInformation and range OrderResponseLine",
+            "confidence": "high",
+            "rationale": "Direct object property with matching included endpoints."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#isSpecificToOrderResponseLine",
+              "kind": "object_property",
+              "labels": [
+                "is Specific To Order Response Line"
+              ],
+              "definitions": [
+                "Information that is particular to an Order Response Line."
+              ],
+              "domain": [
+                "http://data.europa.eu/a4g/ontology#OrderResponseInformation"
+              ],
+              "range": [
+                "http://data.europa.eu/a4g/ontology#OrderResponseLine"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderResponseInformation",
+              "kind": "class",
+              "labels": [
+                "Order Response Information"
+              ],
+              "definitions": [
+                "Information about an Order Response."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#InformationHub"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderResponseLine",
+              "kind": "class",
+              "labels": [
+                "Order Response Line"
+              ],
+              "definitions": [
+                "Details concerning the Seller's ability to fulfil a given Order Line. Additional Information: The Order Response Line is used to inform on the acceptance or rejection of an Order Line or to make a counter-offer."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#OrderLine"
+              ]
+            }
+          ],
+          "verdict": "accept",
+          "reviewer_note": "isSpecificToOrderResponseLine: rdfs:domain OrderResponseInformation, rdfs:range OrderResponseLine, both in the model. Direct."
+        },
+        {
+          "target_path": "relationships[5]",
+          "target_content": {
+            "name": "specifiesInvoicee",
+            "from": "Order",
+            "to": "Invoicee",
+            "meaning": "The order involves the invoicee.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#specifiesInvoicee",
+              "http://data.europa.eu/a4g/ontology#Order",
+              "http://data.europa.eu/a4g/ontology#Invoicee"
+            ],
+            "source_evidence": "\"Relation indicating that the instance of the concept involves the Invoicee.\" with domain Order and range Invoicee",
+            "confidence": "high",
+            "rationale": "Direct object property with matching included endpoints."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#specifiesInvoicee",
+              "kind": "object_property",
+              "labels": [
+                "specifies Invoicee"
+              ],
+              "definitions": [
+                "Relation indicating that the instance of the concept involves the Invoicee."
+              ],
+              "domain": [
+                "http://data.europa.eu/a4g/ontology#Order"
+              ],
+              "range": [
+                "http://data.europa.eu/a4g/ontology#Invoicee"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#Order",
+              "kind": "class",
+              "labels": [
+                "Order"
+              ],
+              "definitions": [
+                "A formal request of the Buyer to the Seller specifying the goods, services or works to be delivered. Additional Information: A Buyer submits an Order for delivery of goods, services or works to a Seller."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#PostAwardDocument"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#Invoicee",
+              "kind": "class",
+              "labels": [
+                "Invoicee"
+              ],
+              "definitions": [
+                "The Role of an Agent who receives and processes the Invoices."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#AcquiringParty"
+              ]
+            }
+          ],
+          "verdict": "accept",
+          "reviewer_note": "specifiesInvoicee: rdfs:domain Order, rdfs:range Invoicee, both in the model. Direct."
+        },
+        {
+          "target_path": "rules.taxInformationShouldBePresentWhenResponsePricingIsQualified",
+          "target_content": {
+            "conditions": [
+              "order response information has tax information",
+              "order response information has allowance information"
+            ]
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#OrderResponseInformation",
+              "http://data.europa.eu/a4g/ontology#TaxInformation",
+              "http://data.europa.eu/a4g/ontology#AllowanceInformation"
+            ],
+            "source_evidence": "Standard domain practice for included concepts OrderResponseInformation, TaxInformation, and AllowanceInformation is that when response pricing is qualified by allowances, accompanying tax information is typically recorded for financial interpretation.",
+            "confidence": "medium",
+            "rationale": "This is a standard operational consistency rule grounded in the included pricing-related concepts."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderResponseInformation",
+              "kind": "class",
+              "labels": [
+                "Order Response Information"
+              ],
+              "definitions": [
+                "Information about an Order Response."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#InformationHub"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#TaxInformation",
+              "kind": "class",
+              "labels": [
+                "Tax Information"
+              ],
+              "definitions": [
+                "Information about the imposition of mandatory levies required by law."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#InformationHub"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#AllowanceInformation",
+              "kind": "class",
+              "labels": [
+                "Allowance Information"
+              ],
+              "definitions": [
+                "Information about the discounts imposed."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#AllowanceChargeInformation"
+              ]
+            }
+          ],
+          "verdict": "accept",
+          "reviewer_note": "Accepted, flagged. Both conditions use links the source really has on OrderResponseInformation (hasTaxInformation and hasAllowanceInformation, restriction-grounded in eOrdering_restrictions.ttl). The normative part (tax details expected when allowances qualify the pricing) is cited as standard domain practice at medium confidence, not source text: the same disclosed standard-practice category accepted in iof-supply-chain round 2 (S8). Semantic judges: 4/5 supported (eval round 1), not contested in the final evaluation."
+        },
+        {
+          "target_path": "actions.submitOrderResponse",
+          "target_content": {
+            "input": "OrderResponse",
+            "preconditions": [
+              "orderResponseMustReferenceOrder"
+            ],
+            "effect": "order response becomes linked to the order it addresses",
+            "verification": "confirm the order response is submitted for the intended order"
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#OrderResponse",
+              "http://data.europa.eu/a4g/ontology#Order",
+              "http://data.europa.eu/a4g/ontology#isSubmittedForOrder"
+            ],
+            "source_evidence": "OrderResponse is a formal reply, and isSubmittedForOrder links it to a specific Order.",
+            "confidence": "high",
+            "rationale": "Submitting an order response is a direct operational action implied by the response document and its linkage to an order."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderResponse",
+              "kind": "class",
+              "labels": [
+                "Order Response"
+              ],
+              "definitions": [
+                "A formal reply from the Seller to the Buyer stating the Seller's ability to fulfil the order. Additional Information: The Order Response is used to inform on the acceptance or rejection of an Order or to make a counter-offer."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#Order"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#Order",
+              "kind": "class",
+              "labels": [
+                "Order"
+              ],
+              "definitions": [
+                "A formal request of the Buyer to the Seller specifying the goods, services or works to be delivered. Additional Information: A Buyer submits an Order for delivery of goods, services or works to a Seller."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#PostAwardDocument"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#isSubmittedForOrder",
+              "kind": "object_property",
+              "labels": [
+                "is Submitted For Order"
+              ],
+              "definitions": [
+                "Relation indicating that the instance of the concept is sent for a specific Order."
+              ],
+              "domain": [
+                "n311966a492934ba7aec3447c45f765d1b64"
+              ],
+              "range": [
+                "http://data.europa.eu/a4g/ontology#Order"
+              ]
+            }
+          ],
+          "verdict": "accept",
+          "reviewer_note": "The input class and the precondition rule exist. The effect and verification restate isSubmittedForOrder (range Order), which the source declares functional for the response documents. Direct."
+        }
+      ],
+      "verdicts": {
+        "classes.OrderResponse": "accept",
+        "classes.Consignee": "accept",
+        "classes.OrderLine.properties.price": "accept",
+        "classes.DeliveryInformation.properties.shippingMark": "accept",
+        "classes.AllowanceChargeInformation.properties.vatExemptionReason": "accept",
+        "classes.AllowanceChargeInformation.properties.allowanceChargeReasonDescription": "accept",
+        "relationships[13]": "accept",
+        "relationships[5]": "accept",
+        "rules.taxInformationShouldBePresentWhenResponsePricingIsQualified": "accept",
+        "actions.submitOrderResponse": "accept"
+      },
+      "result": "10/10 accept, 0/10 reject"
+    }
+  ]
+}

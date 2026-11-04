@@ -1,0 +1,2854 @@
+{
+  "domain": "epo-ordering",
+  "structural_validity": {
+    "ok": true,
+    "error_count": 0,
+    "warning_count": 0,
+    "issues": []
+  },
+  "provenance_completeness": {
+    "ok": true,
+    "element_provenance_coverage": 1.0,
+    "source_disposition_coverage": 1.0,
+    "missing_evidence": [],
+    "orphaned_mappings": [],
+    "missing_dispositions": [],
+    "unknown_dispositions": [
+      "http://data.europa.eu/a4g/ontology#ord",
+      "http://data.europa.eu/a4g/ontology#ord-restriction"
+    ]
+  },
+  "endpoint_citation_completeness": {
+    "ok": true,
+    "gaps": []
+  },
+  "referential_consistency": {
+    "ok": false,
+    "issue_count": 1,
+    "issues": [
+      {
+        "location": "rules.orderLineRequiresQuantity",
+        "field": "conditions",
+        "text": "order line quantity is recorded",
+        "class": "Order",
+        "property": "quantity"
+      }
+    ]
+  },
+  "reverse_coverage": {
+    "coverage": 1.0,
+    "silently_dropped": []
+  },
+  "translation_stability": {
+    "pairs": [
+      {
+        "run_a": 1,
+        "run_b": 2,
+        "classes": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "relationships": {
+          "precision": 0.10526315789473684,
+          "recall": 0.2222222222222222,
+          "f1": 0.14285714285714285
+        },
+        "properties": {
+          "precision": 0.9736842105263158,
+          "recall": 0.9487179487179487,
+          "f1": 0.9610389610389611
+        },
+        "allowed_values": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      },
+      {
+        "run_a": 1,
+        "run_b": 3,
+        "classes": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "relationships": {
+          "precision": 0.8421052631578947,
+          "recall": 0.9411764705882353,
+          "f1": 0.8888888888888888
+        },
+        "properties": {
+          "precision": 0.9736842105263158,
+          "recall": 0.9024390243902439,
+          "f1": 0.9367088607594938
+        },
+        "allowed_values": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      },
+      {
+        "run_a": 2,
+        "run_b": 3,
+        "classes": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "relationships": {
+          "precision": 0.1111111111111111,
+          "recall": 0.058823529411764705,
+          "f1": 0.07692307692307691
+        },
+        "properties": {
+          "precision": 1.0,
+          "recall": 0.9512195121951219,
+          "f1": 0.975
+        },
+        "allowed_values": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      }
+    ],
+    "average_f1": {
+      "classes": 1.0,
+      "relationships": 0.3695563695563695,
+      "properties": 0.9575826072661516,
+      "allowed_values": 1.0
+    }
+  },
+  "semantic_judging": {
+    "results": [
+      {
+        "target_path": "classes.AllowanceChargeInformation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class and its ground-truth definition, which states it is information about discounts, taxes, duties, and fees imposed."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class is directly grounded by the source ontology definition, which exactly matches 'Information about discounts, taxes, duties and fees imposed.'"
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class and its ground-truth definition, which explicitly states it is information about discounts, taxes, duties, and fees imposed."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.AllowanceChargeInformation.properties.allowanceChargeReasonDescription",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source is the actual definition of the property hasAllowanceChargeReasonDescription, which directly supports a text description field on AllowanceChargeInformation and is consistent with the class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source is the ground-truth definition of the specific property hasAllowanceChargeReasonDescription, which directly supports a text description field on AllowanceChargeInformation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly describes a text property giving the explanatory motive for an Allowance Charge on AllowanceChargeInformation, which directly matches allowanceChargeReasonDescription and is consistent with the class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.AllowanceChargeInformation.properties.vatExemptionReason",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition exactly states an explanation for why an AllowanceChargeInformation instance is not subject to VAT, which directly supports a text property named vatExemptionReason on that class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source exactly matches the ontology definition of the property 'has VAT Exemption Reason' for AllowanceChargeInformation, supporting a text property giving the explanation for VAT exemption."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly matches a VAT exemption reason text property on AllowanceChargeInformation, and it is consistent with the ground-truth class and property definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.AllowanceChargeInformation.properties.vatExemptionReasonDescription",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition exactly states that this is explanatory text about the VAT exemption reason for AllowanceChargeInformation, which directly supports mapping it to vatExemptionReasonDescription."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition exactly states that this is explanatory text about the VAT exemption reason for AllowanceChargeInformation, which directly matches the target text property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source directly matches the property label/definition for has VAT Exemption Reason Description on AllowanceChargeInformation, supporting a text property for vatExemptionReasonDescription."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.AllowanceChargeInformation.properties.percentage",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition for the specific property hasPercentage explicitly states a percentage-like factor for epo-ord:AllowanceChargeInformation, so mapping AllowanceChargeInformation.percentage as a numeric property is directly grounded and consistent with the class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition for the specific property `has Percentage` explicitly states a percentage-like factor for `AllowanceChargeInformation`, so mapping this class to a `percentage` property is directly grounded and consistent with the source definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly identifies a 'has Percentage' property for AllowanceChargeInformation as a factor relative to price, which adequately grounds a percentage property and is consistent with the class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.AllowanceInformation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class and its ground-truth definition, which states 'Information about the discounts imposed.'"
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class and is directly grounded by the identical source definition, with no inconsistency in the provided ground truth."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class matches the source class and its ground-truth definition exactly: 'Information about the discounts imposed.'"
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.AllowanceInformation.properties.percentage",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited ontology facts directly support that AllowanceInformation, as a subclass of AllowanceChargeInformation, can use hasPercentage with a decimal value, and this is consistent with the provided source definitions."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The subclass/domain/range evidence supports that AllowanceInformation can bear a decimal hasPercentage property, but the ground-truth definition of has Percentage describes a factor 'charged in addition,' which does not specifically justify mapping it as an allowance/discount percentage without qualification."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ontology facts directly support that AllowanceInformation, as a subclass of AllowanceChargeInformation, can use hasPercentage with decimal values, and this is consistent with the source definitions."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The subclass/domain/range evidence supports that AllowanceInformation can bear a decimal percentage property, but the ground-truth definition of has Percentage is specifically framed as a factor added to the price rather than clearly covering allowance/discount percentages as stated."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The subclass/domain/range evidence supports that AllowanceInformation can inherit a decimal percentage property, but the ground-truth definition of has Percentage is specifically framed as a factor added to the price, so it does not cleanly justify a generic allowance discount percentage without that nuance."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": true,
+        "confirmation_round": true
+      },
+      {
+        "target_path": "classes.Consignee",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence matches the source class definition for Consignee almost verbatim and fully supports the mapped class meaning without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence matches the source class definition essentially verbatim and fully justifies mapping the target class Consignee."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly matches the source class Consignee and the ground-truth class definition confirms the same meaning without contradiction."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.ContractInformation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for ContractInformation and fully supports the mapped class meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class ContractInformation is directly grounded by the source ontology definition 'Information about the Contract,' which exactly matches the stated class meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class name and ground-truth definition, which explicitly states 'Information about the Contract.'"
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryAgreement",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class definition for Delivery Agreement and directly supports mapping the target class DeliveryAgreement."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class definition for Delivery Agreement and directly justifies the target class meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly matches the DeliveryAgreement class meaning and is consistent with the ground-truth source definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryAgreement.properties.generalDeliveryTerm",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly defines hasGeneralDeliveryTerm on DeliveryAgreement as terms and conditions related to delivery of goods, which directly grounds a general text property and is consistent with the DeliveryAgreement definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly describes general delivery terms as terms and conditions related to delivery on a DeliveryAgreement, which matches a text-valued property and is consistent with the class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states that a DeliveryAgreement has terms and conditions related to delivery of goods, which directly grounds a general text property generalDeliveryTerm and is consistent with the source class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryAgreement.properties.requestedShippingPriority",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly matches a property on DeliveryAgreement describing the delivery's priority/sequence, which adequately supports mapping it as a requestedShippingPriority text property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition exactly states that DeliveryAgreement has a requested shipping priority as the level of importance or sequence assigned to the delivery, which supports mapping it as a text property on DeliveryAgreement."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly matches a DeliveryAgreement property describing the level of importance or sequence assigned to the delivery, which supports a requestedShippingPriority text property without contradicting the class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryAgreement.properties.partialDeliveryAllowed",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly states a boolean indicator for whether partial delivery is allowed on DeliveryAgreement, which directly matches the target property and is consistent with the class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly defines the DeliveryAgreement property 'is Partial Delivery Allowed' as a boolean-style indicator of whether partial delivery is allowed, which directly matches the target property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly states a boolean indicator for whether partial delivery is allowed on DeliveryAgreement, which directly matches the target property and is consistent with the class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryInformation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source ontology's ground-truth definition for DeliveryInformation and fully supports the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class and its ground-truth definition, which states the same meaning verbatim."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class definition provided, and the ground-truth source definition confirms the same wording and meaning."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryInformation.properties.accessURL",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition explicitly says has Access URL is the location where the DeliveryInformation resource can be accessed, which directly supports mapping DeliveryInformation.accessURL to a text/URL-valued property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition explicitly states that DeliveryInformation has an access URL meaning the location where the resource can be accessed, which directly supports the mapped accessURL property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition exactly states that has Access URL for DeliveryInformation is the location where the resource can be accessed, which directly supports an accessURL property on DeliveryInformation."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryInformation.properties.actualDeliveryDate",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly gives a DeliveryInformation property meaning 'The date when the Delivery occurred,' which directly grounds mapping it to actualDeliveryDate and is consistent with the class definition's timing-related scope."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly names a property 'has Actual Delivery Date' on DeliveryInformation as 'The date when the Delivery occured,' which directly grounds an actualDeliveryDate property and is consistent with the class definition's timing-related scope."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly states that DeliveryInformation has a property for the date when the delivery occurred, which directly grounds an actualDeliveryDate property and is consistent with the class definition mentioning timing information."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryInformation.properties.deliveryDeadline",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition explicitly states that has Delivery Deadline is the final accepted date for Delivery on DeliveryInformation, which directly supports a deliveryDeadline property on that class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition explicitly states that DeliveryInformation has a delivery deadline as the final accepted date for delivery, which matches the target property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly defines the property 'has Delivery Deadline' on DeliveryInformation as 'The final accepted date for Delivery,' which directly grounds a deliveryDeadline property on DeliveryInformation and is consistent with the class definition covering timing information."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryInformation.properties.deliveryEmail",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly defines the property hasDeliveryEmail on DeliveryInformation as an electronic address for delivery, which directly supports mapping DeliveryInformation.deliveryEmail as a text/datatype property and is consistent with the class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly defines the hasDeliveryEmail property as an electronic address for delivery on DeliveryInformation, which directly supports a deliveryEmail text property and is consistent with the class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly defines the property hasDeliveryEmail on DeliveryInformation as an electronic address for delivery, which directly grounds a deliveryEmail text property and is consistent with the class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryInformation.properties.downloadURL",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition explicitly states that DeliveryInformation has a download URL indicating the location where the resource can be downloaded, which matches the target property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition explicitly states that DeliveryInformation has a download URL meaning the location where the resource can be downloaded, which directly supports the mapped text property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly defines the property 'has Download URL' on DeliveryInformation as the location where the resource can be downloaded, which directly grounds a downloadURL property and is consistent with the provided class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryInformation.properties.trackingID",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly states a hasTrackingID relation for delivery traceability, which specifically supports modeling DeliveryInformation with a trackingID property and is not contradicted by the class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source directly defines a 'has Tracking ID' relation for delivery traceability, which specifically supports modeling DeliveryInformation with a trackingID property and is not contradicted by the class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly states a hasTrackingID relation for delivery traceability, which specifically supports modeling DeliveryInformation with a trackingID property and is not contradicted by the class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryInformation.properties.shippingMark",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition explicitly defines has Shipping Mark as a text on DeliveryInformation, matching the target property shippingMark."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source directly defines the property `has Shipping Mark` on `DeliveryInformation` as a text to be printed on packing labels, which matches a `shippingMark` text property without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth definition for has Shipping Mark exactly states it is a text on DeliveryInformation, matching the target datatype property shippingMark."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryInformation.properties.deliveryPeriod",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly states a delivery-period relation for Delivery Information, and representing that interval as a deliveryPeriod property is a justified simplification consistent with the class definition's inclusion of timing information."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source does support that Delivery Information has a delivery period expressing a delivery time range, but it does not specifically justify collapsing that relation/interval into a text property rather than preserving it as a structured relation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly defines a Delivery Information relation for the delivery time range, which adequately grounds a corresponding deliveryPeriod property on DeliveryInformation and is consistent with the class definition mentioning timing information."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly defines a delivery-period relation as the time range for delivery, which directly grounds a DeliveryInformation property named deliveryPeriod and is consistent with the class definition mentioning timing information."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source does support that DeliveryInformation has a delivery period expressing a delivery time range, but it describes a relation/interval and does not specifically justify collapsing that into a text property."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": true,
+        "confirmation_round": true
+      },
+      {
+        "target_path": "classes.DeliveryInformation.properties.requestedDeliveryPeriod",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source directly supports that Delivery Information has a requested delivery period expressing a sought time range, but it supports a relation to a period/range rather than the target's specific simplification into a text property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source directly supports that Delivery Information has a relation for a requested delivery time range, but it does not justify the mapping's simplification to a text property rather than a period/range relation."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source definition directly supports that Delivery Information has a requested delivery period relation for the sought delivery time range, but it does not justify the target's more specific simplification to a text property rather than a period/interval relation."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DeliveryInformation.properties.placeOfDelivery",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states that Delivery Information specifies the location of despatch, which adequately grounds a placeOfDelivery field on DeliveryInformation and is consistent with the class definition mentioning the delivery destination."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition directly states that Delivery Information specifies the location of despatch, which adequately grounds a corresponding placeOfDelivery field, and this is consistent with the class definition mentioning the delivery destination."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation for the location/place of despatch and the DeliveryInformation class definition includes the delivery destination, so representing this as a placeOfDelivery property is consistent and adequately grounded."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Invoicee",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Invoicee and fully grounds the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition of Invoicee and fully justifies the target class meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class Invoicee and directly supports the target element without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Order",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition of Order and fully grounds the mapped class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition of Order and fully justifies the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the ground-truth source definition for Order and fully supports mapping the target class to that concept."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Order.properties.paymentTerm",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly names the property 'has Payment Term' on Order as the condition/stipulation of payment, which adequately grounds a corresponding Order.paymentTerm text property and is consistent with the Order definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly identifies an Order property 'has Payment Term' meaning the condition and stipulation of payment, which directly supports mapping Order.paymentTerm as a text property and is consistent with the Order class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly names the property 'has Payment Term' on Order as the condition/stipulation of payment, which directly grounds an Order.paymentTerm text property and is consistent with the Order class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Order.properties.accountingCost",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source directly supports that Order has an accounting reference/bookkeeping field, but it does not establish that the mapped target property is specifically a cost amount rather than a general accounting reference text/code."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source clearly supports that Order has an accounting reference/accounting cost property, but it does not specifically justify the target property's exact name or representation as a text-valued `accountingCost` field."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source does support an Order property carrying an accounting reference, but it does not establish that this should specifically be modeled as an accountingCost field rather than a more general accounting reference/code."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Order.properties.sellerOrderID",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source text directly matches the source property's definition that an Order has a seller-given identifier for internal purposes, so mapping this to an Order text property sellerOrderID is justified and consistent with the Order definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence matches the source definition of has Seller Order ID exactly and supports modeling Order with a seller-provided identifier property for internal purposes."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence matches the source property definition almost verbatim and specifically supports an Order property for the seller-assigned order identifier, with no conflict with the Order class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Order.properties.amountDueForPayment",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source definition directly supports that Order can have an amount due for payment, but it specifies a relation to a Monetary Value rather than the target's simplified numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited ontology definition supports that an Order can have an amount due for payment, but it specifies a relation to a Monetary Value rather than the target's stronger simplification to a numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source clearly supports that Order has a relation for the monetary amount due for payment, but calling it a simplified numeric property adds implementation-specific detail not justified by the evidence."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Order.properties.prepaidAmount",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited definition supports that an Order can be related to a prepaid monetary value, but the target simplifies that relation to a numeric property and drops the explicitly monetary-value aspect not shown by the evidence."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source definition does support that an Order can have a prepaid amount, but it specifies a relation to a Monetary Value rather than directly justifying the target's simplification to a numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source supports that Order can be related to a prepaid monetary value via hasPrepaidAmount, but the target narrows this relation to a simplified numeric property rather than the source's Monetary Value relation."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Order.properties.roundingAmount",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly describes a 'has Rounding Amount' relation for an Order and supports mapping it to an Order roundingAmount property, with no contradiction from the Order class definition."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source definition directly supports that Order can have a rounding amount, but it specifies a Monetary Value relation and does not by itself justify reducing that to a generic numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source definition clearly supports that Order can have a rounding amount, but it specifies an adjustment Monetary Value rather than necessarily a simplified generic numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source does support an Order-related rounding amount concept via the 'has Rounding Amount' relation, but it specifies an adjustment Monetary Value rather than fully justifying the target's simplification to a generic numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited definition supports that Order can have a rounding amount as an adjustment monetary value, but it does not justify the target's stronger simplification of that relation into a purely numeric property."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": true,
+        "confirmation_round": true
+      },
+      {
+        "target_path": "classes.Order.properties.totalAllowanceAmount",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited definition supports that Order can have a total allowance amount representing an overall monetary value, but it does not justify the rationale's added simplification to a purely numeric property rather than a monetary-value relation."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited property definition directly supports that Order can have a total allowance amount, but it specifies an overall Monetary Value via a relation and does not itself justify the rationale's stronger simplification to a numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source definition specifically supports an Order-related total allowance amount as an overall monetary value, but the mapping's simplification to a plain numeric property is more specific than the evidence, which indicates a monetary-value relation rather than merely a number."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Order.properties.totalChargeAmount",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source directly supports that Order can have a total charge amount relation, but it defines this as a relation to a monetary value rather than specifically justifying the target's simplification to a numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source supports that an Order can have a total charge amount representing an overall monetary value, but it defines a relation to a monetary value rather than specifically justifying the mapping's simplification to a numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source directly supports that an Order can have a total charge amount expressing the overall monetary value of the charge, but it does not justify the rationale's extra simplification to a purely numeric property rather than a monetary value relation."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Order.properties.totalLineAmount",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited property and its Order domain support an Order property for a total line amount, but the definition explicitly describes the monetary value of a line, so the evidence does not fully justify the exact Order-level interpretation without qualification."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited property definition supports a monetary amount relation and the stated Order domain supports attaching it to Order, but the evidence is internally mixed because the definition explicitly says it is the value of the Line, so the exact Order-level meaning of totalLineAmount is not fully established."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited property label/definition and stated domain support that an Order can have a total line amount property, but the source definition specifically describes the monetary value of the Line, so mapping it as an unqualified Order-level totalLineAmount is only indirectly justified."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Order.properties.totalTaxExclusiveAmount",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited property definition supports that an Order can have a total tax-exclusive monetary value, but it only establishes a monetary value relation and does not by itself justify simplifying it to a plain numeric property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly matches an Order relation for overall monetary value without tax, which adequately grounds a totalTaxExclusiveAmount property and is consistent with the Order class definition."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source directly supports that an Order can have a total tax-exclusive amount, but it specifies an overall monetary value relation rather than a simplified numeric property, so the datatype simplification is not fully evidenced."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source explicitly supports that an Order can have a total tax-exclusive amount, but it defines it as a relation to an overall monetary value rather than specifically a simplified numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The source supports that an Order can have a total tax-exclusive monetary value, but it describes a monetary value relation rather than specifically justifying the target's simplification to a numeric property."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": true,
+        "confirmation_round": true
+      },
+      {
+        "target_path": "classes.Order.properties.totalTaxInclusiveAmount",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property definition explicitly states an Order can have a total tax inclusive amount as the overall monetary value with tax, which supports the target property despite the target simplifying the value representation."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source directly supports that an Order has a relation for an overall monetary value with tax, but the target narrows this to a simplified numeric property and that datatype simplification is not established by the evidence."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source does support that Order has a total tax-inclusive amount, but it specifies a relation to an overall monetary value rather than clearly justifying the mapping's simplification to a numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source definition directly supports that Order can have a total tax-inclusive monetary value, but it supports a monetary-value relation rather than fully justifying the target's simplification into a numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source directly supports that Order has a relation for an overall monetary value with tax, but it does not justify simplifying that source relation or monetary-value concept into a plain numeric property."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": true,
+        "confirmation_round": true
+      },
+      {
+        "target_path": "classes.Order.properties.validityPeriod",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that an Order is related to a validity period as a time interval, but it does not justify the target's stronger simplification to a text property rather than an interval-valued property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited ontology evidence specifically supports that an Order has a validity period whose value is a time:Interval, but it does not fully justify simplifying that interval-valued relation into a generic text property without loss of semantic detail."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited ontology evidence specifically supports that an Order has an associated validity period with range time:Interval, but it does not justify the added modeling choice that this interval is 'simplified into a text property' rather than preserved as an interval-valued structure."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderAgreement",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the ground-truth source definition for OrderAgreement and fully supports the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Order Agreement and directly grounds the target class without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for OrderAgreement and fully justifies the target class."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderAgreementLine",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Order Agreement Line and fully supports the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the ground-truth source definition for Order Agreement Line and fully supports the target class meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the ground-truth source definition for Order Agreement Line and directly supports the class mapping."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderCancellation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source ontology's ground-truth definition for OrderCancellation and fully justifies the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the ground-truth definition of the source class OrderCancellation and fully justifies the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class definition provided, and the ground truth definition confirms the same meaning without contradiction."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderCancellationConfirmation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for OrderCancellationConfirmation and fully justifies the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for OrderCancellationConfirmation and fully justifies the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Order Cancellation Confirmation and fully justifies the target class."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderCancellationRejection",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source ontology's ground-truth definition for OrderCancellationRejection and fully supports the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source class definition for OrderCancellationRejection and directly supports the mapped class meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the ground-truth source class definition for OrderCancellationRejection and directly supports the mapped class meaning."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderChange",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition matches the ground-truth source definition for OrderChange and directly supports the target class meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition matches the source class definition for Order Change essentially verbatim and fully supports mapping classes.OrderChange to that concept."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition matches the source class definition for Order Change and directly grounds the target class without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderChangeConfirmation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class definition provided, and the ground truth definition is identical to the cited evidence."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class and its provided definition, and the ground truth definition is identical to the cited evidence."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class definition provided, and the ground-truth source definition confirms the same wording."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderChangeLine",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the ground-truth definition of the source class OrderChangeLine and fully justifies the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the ground-truth source definition for OrderChangeLine and fully supports the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for OrderChangeLine and directly supports the target class as stated."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderChangeRejection",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for OrderChangeRejection and fully supports the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source class definition for OrderChangeRejection and fully justifies the target class meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for OrderChangeRejection and fully grounds the target class."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderLine",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source ontology's ground-truth definition for Order Line and directly supports the class mapping without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly matches the source ontology\u2019s ground-truth definition for Order Line and adequately supports the mapped class meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly matches the source class Order Line and fully supports mapping the target class OrderLine to that concept."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderLine.properties.accountingCost",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited source does support an accounting-reference property on OrderLine, but it only establishes a generic accounting cost/reference concept and does not specifically justify the exact target naming or datatype implied by mapping it to accountingCost."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition for has Accounting Cost explicitly applies to epo-ord:OrderLine and describes an accounting reference, which adequately grounds an OrderLine accountingCost text property and is consistent with the OrderLine definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition for has Accounting Cost explicitly applies the accounting reference to OrderLine, so mapping OrderLine to an accountingCost text-like property is directly grounded and consistent with the class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition for hasAccountingCost explicitly applies to OrderLine and describes an accounting reference for booking, which adequately supports an OrderLine accountingCost property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly states that an OrderLine can have an accounting reference via 'has Accounting Cost', which adequately grounds an accountingCost property for OrderLine and is consistent with the source definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": true,
+        "confirmation_round": true
+      },
+      {
+        "target_path": "classes.OrderLine.properties.quantity",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence and source definition clearly support that an OrderLine has a Quantity, but they justify a relation to a Quantity concept rather than specifically a simplified numeric property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence and source definition support that an OrderLine has an associated Quantity, but they do not specifically justify simplifying that relation to a numeric property rather than a separate Quantity-valued object or class."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence and ground-truth definition clearly support that an OrderLine has a Quantity, but they do not justify simplifying that relation to a specifically numeric property rather than a separate Quantity-valued object."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderLine.properties.price",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence and ground-truth definition support that an OrderLine can have a Price, but they do not justify simplifying that relation to a numeric property and the source explicitly notes the price may sometimes be unknown."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The ontology supports that an OrderLine may have a Price via hasPrice, but simplifying that relation to a numeric price property overstates the evidence because Price is modeled as its own concept and may sometimes be unknown."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The ontology supports that an OrderLine can have a Price via hasPrice, but the target narrows this to a numeric property and ignores that the source models Price as a related concept that may sometimes be unknown."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderResponse",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Order Response and is fully consistent with the provided ground truth definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Order Response and is consistent with the ground truth definition, adequately supporting the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Order Response and is fully consistent with the ground-truth class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderResponse.properties.responseDescription",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly says 'Explanation of the response' for OrderResponse, which directly grounds a text property named responseDescription and is consistent with the class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition explicitly says 'Explanation of the response' for OrderResponse, which directly supports mapping it to a textual responseDescription property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property definition explicitly says 'Explanation of the response' for OrderResponse, which directly grounds a text-valued responseDescription on OrderResponse and is consistent with the class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderResponseInformation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class and its ground-truth definition, which explicitly states 'Information about an Order Response.'"
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class is directly grounded by the source class's exact definition, which matches the stated meaning without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class and its ground-truth definition, which directly states 'Information about an Order Response.'"
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderResponseLine",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class definition for Order Response Line and directly grounds the target class without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition is the source class\u2019s own ground-truth definition and directly supports mapping the target class OrderResponseLine to that meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class and is consistent with the ground-truth definition for Order Response Line."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OrderResponseLine.properties.backorderQuantity",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly matches a backorder quantity property, and it is consistent with the ground-truth OrderResponseLine definition as fulfilment details for an order line."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition exactly supports a numeric backorderQuantity on OrderResponseLine, and the class definition about fulfilment ability is consistent with that property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly matches a backorder quantity property, and it is consistent with the ground-truth OrderResponseLine definition about fulfilment details for an order line."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Originator",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Originator and directly supports the target class meaning without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Originator and directly supports the class meaning stated by the target element."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Originator and fully supports the target class meaning."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OriginatorInformation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source class's ground-truth definition for OriginatorInformation and fully supports the mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the ground-truth source class definition for OriginatorInformation and fully supports the mapped class meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class name and its ground-truth definition, which directly states 'Information about the Originator of the Order.'"
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.Seller",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly matches the source ontology's ground-truth definition for Seller and fully supports the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly matches the source ontology's ground-truth definition of Seller and fully supports the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence directly matches the source ontology's own definition of Seller and fully supports the target class mapping without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.TaxInformation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the ground-truth source definition for Tax Information and fully supports mapping classes.TaxInformation to that class meaning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Tax Information and fully grounds the mapped class TaxInformation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for Tax Information and fully grounds the target class TaxInformation."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.TaxInformation.properties.percentage",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition for the cited property `has Percentage` explicitly includes `TaxInformation`, so mapping `TaxInformation.percentage` as a numeric percentage property is directly justified and consistent with the source definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition for the cited property explicitly includes TaxInformation as having a percentage factor, which supports mapping TaxInformation to a numeric percentage property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth definition for the property hasPercentage explicitly includes TaxInformation as a domain with this percentage factor, so mapping TaxInformation.percentage as a numeric property is directly justified."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.TaxInformation.properties.taxCategory",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly establishes that TaxInformation has a relation to a Tax Category, so representing this as a taxCategory property is justified and not contradicted by the ground-truth class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ground-truth property definition explicitly states a relation from Tax Information to a Tax Category, which adequately supports representing TaxInformation as having a taxCategory field even if modeled here as a simplified text property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly defines a property 'has Tax Category' as a relation indicating the tax category, which directly supports modeling TaxInformation with a taxCategory property and is consistent with the source class definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.TaxInformation.properties.taxScheme",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source directly defines a property 'has Tax Scheme' as a relation indicating the tax scheme, which specifically supports a TaxInformation property named taxScheme and is consistent with the TaxInformation class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition is an exact match for a TaxInformation-to-taxScheme relation, and nothing in the ground-truth TaxInformation definition conflicts with modeling that linked concept as a property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly names a hasTaxScheme relation for TaxInformation, and representing that relation as a taxScheme property is consistent with the provided ground-truth definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[0]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property explicitly states that an Order 'Incorporates Order Line' with domain Order and range OrderLine, which directly supports a hasLine-style relationship between those mapped endpoints and is consistent with the ground-truth class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property explicitly states that an Order incorporates/comprises an Order Line with the matching domain and range, which directly supports a hasLine-style relationship between Order and OrderLine and is consistent with the class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property explicitly links Order to Order Line ('Incorporates Order Line') with matching domain and range, and the ground-truth class definitions are consistent with an order having line items."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[1]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property explicitly states that an Order Agreement incorporates an Order Agreement Line, and the provided class definitions are consistent with mapping this to a hasLine-style relationship between those endpoints."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property explicitly states that an Order Agreement incorporates/comprises an Order Agreement Line, and the class definitions are fully consistent with mapping this to a hasLine-style relationship between those endpoints."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property explicitly states that an Order Agreement incorporates/comprises an Order Agreement Line, and the ground-truth class definitions are fully consistent with mapping this to a hasLine-style relationship between those endpoints."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[2]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source ontology explicitly defines a property 'comprises Order Change Line' as 'Incorporates Order Change Line' with domain OrderChange and range OrderChangeLine, which directly supports a hasLine-style relationship between those mapped endpoints."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source ontology explicitly defines a property 'comprises Order Change Line' as 'Incorporates Order Change Line' with domain OrderChange and range OrderChangeLine, which directly supports a hasLine-style relationship between those mapped endpoints and is consistent with the class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source explicitly defines an object property 'comprises Order Change Line' as 'Incorporates Order Change Line' with domain OrderChange and range OrderChangeLine, which directly supports a hasLine-style relationship between those mapped endpoints and is consistent with the class definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[3]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property explicitly states that an Order Response incorporates an Order Response Line, and the ground-truth class definitions for those endpoints are fully consistent with mapping this to a hasLine-style relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property explicitly states that an OrderResponse incorporates an OrderResponseLine, and the ground-truth endpoint definitions are fully consistent with a hasLine-style relationship between those two classes."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property explicitly states that an Order Response incorporates an Order Response Line, with matching domain and range, which directly supports mapping this pair to a hasLine-style relationship."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[4]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The Order definition explicitly says an order is a request from Buyer to Seller, and the cited specifiesSeller property further confirms seller involvement in order-related concepts, so an Order\u2013Seller relationship is directly grounded and consistent with the source definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth Order definition explicitly says an Order is a formal request from the Buyer to the Seller, and the cited specifiesSeller property further confirms seller involvement, so linking Order to Seller is specifically justified and consistent with the source."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition explicitly says an Order is a formal request from the Buyer to the Seller, and the cited specifiesSeller property further confirms seller involvement, so an Order\u2013Seller relationship is specifically justified."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[5]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states that an Order involves the Invoicee, and the provided ground-truth class definitions are consistent with those endpoints."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states involvement of the Invoicee and its declared domain/range match Order and Invoicee, consistent with the source class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation involving the Invoicee and its declared domain/range match Order and Invoicee, which is consistent with the provided ground-truth class definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[6]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation indicating Contract Information, and the given domain/range Order\u2192ContractInformation matches the ground-truth class definitions without contradiction."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation indicating Contract Information, and the given domain/range align with the ground-truth classes Order and ContractInformation without contradiction."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation indicating Contract Information and its domain/range match Order and ContractInformation, which is consistent with the source class definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[7]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation for Originator Information and the ground-truth endpoint classes Order and Originator Information match that relation without contradiction."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation for Originator Information and the ground-truth endpoint classes Order and Originator Information align directly with that relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation indicating Originator Information, and the provided domain/range plus ground-truth class definitions align specifically with linking an Order to Originator Information."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[8]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states it relates to Originator and the given domain/range align with the ground-truth classes OriginatorInformation and Originator."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly says it relates to Originator and the stated domain/range match the ground-truth classes Originator Information and Originator."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly says it relates to Originator and its stated domain/range align with the ground-truth classes OriginatorInformation and Originator."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[9]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly gives specifiesDeliveryInformation a domain including Order and a range of DeliveryInformation, matching the claimed Order\u2192DeliveryInformation relationship and aligning with the provided class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly has Order in its domain and DeliveryInformation in its range, which directly grounds the asserted Order\u2013DeliveryInformation relationship and is consistent with the class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly has Order in its domain and DeliveryInformation in its range, which directly grounds the Order\u2192DeliveryInformation relationship and is consistent with the provided class definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[10]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states 'Relates to Consignee' with domain DeliveryInformation and range Consignee, which directly matches the relationship and is consistent with the source class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation to Consignee with domain DeliveryInformation and range Consignee, which matches the target relationship and is consistent with the source class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation to Consignee with domain DeliveryInformation and range Consignee, and this aligns with the source class definitions mentioning involved parties in delivery information and the consignee as the receiving role."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[11]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation indicating the Delivery Agreement, and the provided domain/range plus class definitions consistently ground a relationship from Delivery Information to Delivery Agreement."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation indicating the Delivery Agreement, and the ground-truth class definitions align with DeliveryInformation containing delivery agreement information and DeliveryAgreement being the relevant target concept."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation indicating the Delivery Agreement, and the provided domain/range plus class definitions align directly with DeliveryInformation including delivery agreement information and DeliveryAgreement being the relevant concept."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[12]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation indicating Order Response Information, and the provided domain/range plus ground-truth class definitions align exactly with a relationship from OrderResponse to OrderResponseInformation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation indicating Order Response Information, and the provided domain/range plus ground-truth class definitions align directly with a relationship from OrderResponse to OrderResponseInformation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation indicating Order Response Information, and the domain/range align exactly with the ground-truth classes OrderResponse and OrderResponseInformation."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[13]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states information particular to an Order Response Line, and the provided domain and range align with the ground-truth classes OrderResponseInformation and OrderResponseLine without contradiction."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition exactly states that the information is particular to an Order Response Line, and the given domain and range align with the ground-truth classes OrderResponseInformation and OrderResponseLine."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition exactly states that the information is particular to an Order Response Line, and the provided domain/range align consistently with the ground-truth classes OrderResponseInformation and OrderResponseLine."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[14]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property explicitly has domain including Order and range AllowanceInformation, and its definition as a relation indicating the Allowance Information directly supports the Order\u2013AllowanceInformation relationship without conflicting with the class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property explicitly has domain Order and range AllowanceInformation with a matching definition, and this is consistent with the provided class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property explicitly has domain including Order and range AllowanceInformation, and its definition matches the claimed relationship without contradicting the provided class definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[15]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states that the information is particular to one or more Order Lines, and using Allowance Information as that information is consistent with its source definition as discount information and standard line-level ordering practice."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation to Order Line, and using AllowanceInformation as the line-specific information is consistent with the ground-truth class definitions and standard procurement practice for discounts on order lines."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly says the information is particular to one or multiple Order Lines, and using Allowance Information as that line-specific information is consistent with its source definition as information about discounts imposed."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[16]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly gives hasTaxInformation a domain that includes AllowanceChargeInformation and a range of TaxInformation, and the ground-truth class definitions are consistent with that repaired relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly gives has Tax Information a domain that includes AllowanceChargeInformation and a range of TaxInformation, and the ground-truth class definitions are consistent with attaching tax information to allowance/charge information rather than to OrderResponseInformation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ontology evidence explicitly gives has Tax Information a domain that includes AllowanceChargeInformation and a range of TaxInformation, and the ground-truth class definitions are consistent with that repaired relationship."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[17]",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that an Order Line generally has a Price and that Allowance Information applies to a Price, but the claimed direct OrderLine-to-AllowanceInformation relationship is an inferred simplification rather than something explicitly grounded in the source definitions."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that an Order Line generally contains a Price and that Allowance Information applies to a Price, but the asserted direct OrderLine-to-AllowanceInformation relationship is an inferred simplification rather than something explicitly grounded in the source definitions."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that an OrderLine generally has a Price and that AllowanceInformation applies to a Price, but the claimed direct OrderLine-to-AllowanceInformation relationship is an inferred shortcut rather than something explicitly grounded by the source definitions."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[18]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly say an Order Change Confirmation acknowledges an Order Change and the cited property respondsToOrderChange means taking action in reaction to an Order Change, which directly supports this relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited and ground-truth definitions align in showing that an Order Change Confirmation acknowledges and thus reacts to an Order Change, matching the respondsToOrderChange relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly state that OrderChangeConfirmation acknowledges an Order Change and that respondsToOrderChange means taking action in reaction to an Order Change, which directly supports this relationship."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[19]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions show that OrderChangeRejection is explicitly about non-acceptance of an Order Change and the property respondsToOrderChange means taking action in reaction to an Order Change, which directly supports this relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly state that OrderChangeRejection is a document about non-acceptance of an Order Change and that respondsToOrderChange means taking action in reaction to an Order Change, which directly supports this relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly state that an Order Change Rejection conveys non-acceptance of an Order Change and that respondsToOrderChange is action taken in reaction to an Order Change, which directly grounds this relationship."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[20]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly say OrderCancellationConfirmation acknowledges an Order Cancellation and the cited property means taking action in reaction to an Order Cancellation, which directly supports this relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly state that OrderCancellationConfirmation acknowledges an OrderCancellation and that respondsToOrderCancellation means taking action in reaction to an Order Cancellation, which directly supports this relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly say OrderCancellationConfirmation acknowledges an OrderCancellation and the cited property means taking action in reaction to an Order Cancellation, which directly supports this relationship."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[21]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions state that OrderCancellationRejection is a document about non-acceptance of an Order Cancellation and that respondsToOrderCancellation means taking action in reaction to an Order Cancellation, which directly supports this relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly state that OrderCancellationRejection is the non-acceptance of an OrderCancellation and that respondsToOrderCancellation denotes reacting to an Order Cancellation, which directly supports this relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly say OrderCancellationRejection is the non-acceptance of an OrderCancellation and that respondsToOrderCancellation means taking action in reaction to an Order Cancellation, which directly grounds this relationship."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[22]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states that the concept instance is sent for a specific Order, and the ground-truth definition of OrderResponse as a formal reply about fulfilling an Order is fully consistent with relating OrderResponse to Order via this relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly says the concept instance is sent for a specific Order, and the ground-truth definition of OrderResponse as a formal reply about fulfilling an Order is fully consistent with relating an OrderResponse to an Order via this relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition directly states a relation where something is sent for a specific Order, and the ground-truth definition of OrderResponse as a formal reply about fulfilling an Order is fully consistent with mapping OrderResponse to Order via this relationship."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[23]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definitions directly support that an OrderChange is submitted for a specific prior Order, matching the relationship claimed and consistent with the source class and property definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly says the instance is sent for a specific Order, and the OrderChange definition independently confirms it concerns a previous Order, so the relationship is directly grounded and consistent with the source definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definitions explicitly state that an OrderChange concerns a previous Order and that isSubmittedForOrder links an instance to a specific Order, which directly grounds the relationship."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[24]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition says an Order Cancellation cancels a previous Order or Order Change, and the cited property definition explicitly states something is submitted for a specific Order, which directly supports relating OrderCancellation to Order via isSubmittedForOrder."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly says something is sent for a specific Order, and the OrderCancellation definition is consistent with it being a document tied to canceling a previous Order or Order Change."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly says something is sent for a specific Order, and the OrderCancellation definition is consistent with linking an Order Cancellation document to the Order it cancels."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[25]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation where an instance is sent for a specific Order Line, and the ground-truth class definitions make OrderResponseLine specifically about fulfilling a given Order Line, directly supporting the relationship to OrderLine."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition explicitly states a relation where an instance is sent for a specific Order Line, and the source class definitions confirm that an Order Response Line is specifically about fulfilling a given Order Line, matching the relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited property definition directly states a relation where an instance is sent for a specific Order Line, and the ground-truth class definitions make OrderResponseLine specifically about responding to a given Order Line, so this relationship is directly justified."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.orderRequiresSeller",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly says an Order is submitted by a Buyer to a Seller, and standard ordering practice makes the seller identification requirement for an order a specific, consistent interpretation of those named concepts."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states an Order is submitted by a Buyer to a Seller, and standard practice for the specific Order/Seller concepts supports a rule that an order requires identifying its seller."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly says an Order is a formal request from Buyer to Seller, and standard procurement practice makes identifying that Seller a specific, grounded requirement for an order."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.orderLineRequiresQuantity",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition states that an Order Line in general contains the Quantity, and the has Quantity property specifically links an OrderLine to a Quantity, which adequately supports the rule that an order line requires quantity."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition states that an Order Line in general contains the Quantity, and the hasQuantity property explicitly indicates the concept has a Quantity, which supports the rule that an order line requires quantity."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition for Order Line says it generally contains the Quantity and the hasQuantity property explicitly links an OrderLine to a Quantity, which adequately supports a rule that an order line requires quantity."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.orderResponseMustReferenceOrder",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly describe Order Response as a reply about an Order and the isSubmittedForOrder relation as linking something sent for a specific Order, which directly supports the rule that an order response must reference the order it addresses."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited OrderResponse definition and the isSubmittedForOrder relation together specifically support the rule that an order response references the particular order it is replying to, and this matches the ground-truth definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions state that an Order Response is a reply concerning an Order and that the isSubmittedForOrder relation links a document to a specific Order, which directly supports the rule that an order response must reference the order it addresses."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.orderChangeMustReferenceOrder",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions state that an Order Change is in respect to a previous Order and that isSubmittedForOrder links something sent for a specific Order, which directly supports the rule that an order change must reference the order it modifies."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions state that an Order Change concerns a previous Order and that isSubmittedForOrder links something to a specific Order, which directly supports the rule that an order change must reference the order it modifies."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions state that an Order Change is a request made in respect to a previous Order and that isSubmittedForOrder links something to a specific Order, which specifically supports the rule that an order change must reference the order it modifies."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.cancellationMustReferenceOrder",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions say an Order Cancellation cancels a previous Order or Order Change and that isSubmittedForOrder relates something sent for a specific Order, which directly supports the rule that a cancellation must reference the order it addresses."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions state that an Order Cancellation cancels a previous Order and that isSubmittedForOrder links something sent for a specific Order, which directly supports the rule that a cancellation must reference the order it addresses."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions state that an Order Cancellation cancels a previous Order or Order Change and that isSubmittedForOrder relates something sent for a specific Order, which adequately supports the rule that a cancellation must reference the order it addresses."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.deliveryInformationShouldIdentifyConsignee",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition says Delivery Information includes involved parties, and the concernsConsignee relation specifically links it to a Consignee, which adequately supports the rule that delivery information should identify the consignee."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition says Delivery Information includes involved parties, and the concernsConsignee relation specifically links it to a Consignee, which adequately supports the rule that delivery information should identify the consignee."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition says Delivery Information includes involved parties, and the cited property explicitly links DeliveryInformation to Consignee, which specifically supports the rule that delivery information should identify the consignee."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.responseLineMustMatchOrderLine",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited class and property definitions specifically state that an Order Response Line concerns a given Order Line and is submitted for a specific Order Line, which supports the rule that a response line must match the order line it addresses."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition and property explicitly tie an Order Response Line to a specific Order Line it addresses, which supports the rule that a response line must match an order line."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The class and property definitions specifically state that an Order Response Line concerns a given Order Line and is submitted for a specific Order Line, which supports the rule that a response line must match the order line it addresses."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "actions.submitOrderResponse",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition says an Order Response is a formal reply about fulfilling an Order and the cited relation explicitly indicates it is sent for a specific Order, which adequately grounds an action of submitting an order response."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition says an Order Response is a formal reply about fulfilling an Order, and the cited relation explicitly says the instance is sent for a specific Order, which adequately grounds an action of submitting an order response."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition says an Order Response is a formal reply about fulfilling an Order and the cited relation explicitly indicates it is sent for a specific Order, which adequately grounds an action to submit an order response."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "actions.submitOrderChange",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly describe OrderChange as a formal request for changing a previous Order and the relation isSubmittedForOrder as being sent for a specific Order, which adequately grounds an action of submitting an order change."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions explicitly describe an OrderChange as a formal request concerning a previous Order and a relation showing it is sent for a specific Order, which specifically supports an action to submit an order change."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly describe an Order Change as a formal request specifying a requested change to a previous Order and a relation that it is sent for a specific Order, which adequately grounds an action to submit an order change."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "actions.submitOrderCancellation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly describe OrderCancellation as a formal response to cancel a previous Order and the relation as being sent for a specific Order, which adequately grounds an action to submit an order cancellation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly describe OrderCancellation as a formal response to cancel a previous Order and the relation as being sent for a specific Order, which adequately grounds an action to submit an order cancellation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source defines OrderCancellation as a formal response to cancel a previous Order and the cited relation specifies it is sent for a specific Order, which adequately grounds an action to submit an order cancellation without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "actions.confirmOrderChange",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly describe an Order Change Confirmation as acknowledging an Order Change and the respondsToOrderChange relation as taking action in reaction to an Order Change, which adequately grounds an action to confirm an order change."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions specifically state that an Order Change Confirmation acknowledges an Order Change and that respondsToOrderChange is a reaction to an Order Change, which adequately grounds an action named confirmOrderChange."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly ground a confirmation document as acknowledging an Order Change and a relation as reacting to an Order Change, which specifically supports an action concept of confirming an order change."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "actions.rejectOrderChange",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source and ground-truth definitions directly support an action of rejecting an Order Change, since an Order Change Rejection is defined as non-acceptance of an Order Change and the cited relation explicitly frames it as a reaction to that Order Change."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly describe an Order Change Rejection as documenting non-acceptance of an Order Change and the respondsToOrderChange relation as reacting to an Order Change, which specifically grounds an action of rejecting an order change."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source and ground-truth definitions specifically support an action of rejecting an order change, since an Order Change Rejection is defined as non-acceptance of an Order Change and the linked property explicitly denotes reacting to that Order Change."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "actions.confirmOrderCancellation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source ontology explicitly defines an Order Cancellation Confirmation as acknowledging an Order Cancellation and includes a relation for responding to an Order Cancellation, which directly grounds an action to confirm order cancellation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited class and property explicitly describe an acknowledgment document that takes action in reaction to an Order Cancellation, which adequately grounds an action to confirm order cancellation and is consistent with the source definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited class and property specifically describe acknowledging and reacting to an Order Cancellation, which adequately grounds an action named confirmOrderCancellation and is consistent with the source definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "actions.rejectOrderCancellation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions specifically describe a document for non-acceptance of an Order Cancellation and a relation that takes action in reaction to an Order Cancellation, which adequately grounds an action to reject an order cancellation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source defines an Order Cancellation Rejection as information on non-acceptance of an Order Cancellation and the cited relation as taking action in reaction to an Order Cancellation, which specifically grounds an action to reject an order cancellation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions specifically describe a document conveying non-acceptance of an Order Cancellation and a relation for taking action in reaction to that cancellation, which adequately grounds an action to reject an order cancellation."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      }
+    ],
+    "unsupported_count": 0,
+    "unsupported_paths": [],
+    "contested_count": 6,
+    "contested_paths": [
+      "classes.AllowanceInformation.properties.percentage",
+      "classes.DeliveryInformation.properties.deliveryPeriod",
+      "classes.Order.properties.roundingAmount",
+      "classes.Order.properties.totalTaxExclusiveAmount",
+      "classes.Order.properties.totalTaxInclusiveAmount",
+      "classes.OrderLine.properties.accountingCost"
+    ],
+    "total_cost_usd": 0.8457
+  },
+  "disposition_judging": {
+    "results": [
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#agreedBySeller",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property\u2014its domain class ShipmentAgreement is absent and thus there is no in-scope subject/object context to model it\u2014so the exclusion is substantively grounded."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property\u2014its domain ShipmentAgreement is absent from the generated ontology and therefore there is no valid in-scope subject/object context for modeling agreedBySeller."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property\u2014its domain ShipmentAgreement is not included and there is no retained in-scope relation to attach it to\u2014so the exclusion is substantively explained and not contradicted by any sibling evidence."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#concernsContract",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property\u2014its stated range class Contract was not included\u2014so omitting the relationship is substantively explained and not contradicted by any sibling evidence."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property\u2014its stated range class Contract was not included\u2014so omitting the relationship is substantively supported and not contradicted by any sibling evidence."
+          },
+          {
+            "verdict": "partially_justified",
+            "rationale": "The note gives a specific structural reason for omission\u2014its range class Contract was not modeled\u2014but the source definition is itself inconsistent/vague and without sibling comparisons it is hard to fully confirm the exclusion was necessary."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property\u2014its range class Contract was not included\u2014so omitting the relation is substantively explained and there are no included siblings contradicting that choice."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion gives a specific structural reason tied to this property\u2014its range class Contract was not modeled\u2014so omitting the relation is substantively explained and nothing in the provided context contradicts that choice."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": true,
+        "confirmation_round": true
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#concernsOriginatorRequest",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property\u2014its range class OriginatorRequest was not modeled\u2014so omitting the relation is substantively justified and there are no included siblings indicating inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property\u2014its range class OriginatorRequest was not modeled\u2014so omitting the relationship is substantively explained and not contradicted by any sibling evidence."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property itself\u2014its range class OriginatorRequest was not included\u2014so omitting the relation is substantively consistent and not contradicted by any sibling evidence."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#hasAcceptanceStatus",
+        "disposition": "unsupported_by_target_model",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note identifies specific modeling issues with this property\u2014its unnamed domain and dependence on an external concept-scheme range\u2014which is a concrete reason it cannot be cleanly represented in the scoped Agent Ontology."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note identifies a specific modeling issue with this property\u2014its unspecified domain and dependence on an external concept-scheme range\u2014which is a concrete reason not to mint a corresponding in-scope Agent Ontology element, and there are no included siblings suggesting inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note identifies specific modeling issues with this property\u2014its unnamed domain and dependence on an external concept-scheme range\u2014which is a concrete reason it does not cleanly fit an in-scope Agent Ontology element, and there are no included siblings to suggest inconsistent treatment."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#hasAllowanceChargeReason",
+        "disposition": "unsupported_by_target_model",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note specifically addresses that this property's value is an external SKOS-coded reason concept lacking a grounded target representation, which is a substantive modeling reason for exclusion and is not contradicted by any sibling comparison."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note specifically addresses this property's role as a link to an external controlled vocabulary without stable grounded values in the target model, which is a concrete modeling reason to omit it and there are no included siblings contradicting that choice."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason for excluding this property\u2014its value depends on an external SKOS concept scheme not represented in the target model\u2014rather than relying on generic scope language, and there are no included siblings indicating inconsistent treatment."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#hasAmount",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific modeling reason tied to this property\u2014its unnamed domain and dependence on a MonetaryValue class that was not included\u2014so excluding it for lack of an honest target element is substantively justified."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific modeling reason tied to this property itself\u2014its unnamed domain and dependence on a MonetaryValue class not represented in the target\u2014so excluding it is substantively justified."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific modeling reason tied to this property itself\u2014its unusable unnamed domain and dependence on a MonetaryValue class that was not carried over\u2014so the exclusion is substantively grounded and uncontradicted by sibling evidence."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#hasResponseStatus",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion gives a specific structural reason tied to this property\u2019s domain\u2014CatalogueResponseInformation\u2014which was not included, so omitting the dependent relation is substantively justified and there are no included siblings suggesting inconsistency."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion is specifically grounded in the fact that this property belongs to the omitted CatalogueResponseInformation domain, so the note gives a concrete scope-based reason rather than boilerplate."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion is specifically tied to this property's domain class, CatalogueResponseInformation, being omitted from the generated ontology, which is a concrete element-level reason and there are no included siblings suggesting inconsistent treatment."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#hasStatus",
+        "disposition": "unsupported_by_target_model",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note identifies a specific modeling problem with this property\u2014its undefined domain and external concept range\u2014which is a substantive reason that an in-scope target ontology may not be able to represent it faithfully."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note identifies concrete modeling issues specific to this property\u2014its unnamed domain and externally defined range\u2014which reasonably block a faithful mapping into the target model, and there is no sibling evidence of inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note points to a specific modeling issue with this property\u2014its lack of a declared domain and reliance on an external range concept\u2014which is a concrete reason that an in-scope target mapping could not be made, and there are no included siblings to suggest inconsistent treatment."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#isCalculatedOn",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific modeling reason for exclusion\u2014this property depends on omitted source-side classes/ranges rather than merely being hand-waved as out of scope\u2014and there are no included siblings indicating inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific modeling reason tied to this property itself\u2014its unnamed domain and dependence on a MonetaryValue range that was not included\u2014so excluding it for lack of an honest target mapping is substantively justified."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a concrete modeling reason tied to this specific property\u2014its usable domain is unnamed and its MonetaryValue range was not retained\u2014so excluding it for lack of a faithful target is substantively justified."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#isSpecificToInvoiceLine",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion gives a specific structural reason tied to this property\u2014its range is InvoiceLine, which is not part of the generated ontology\u2014so omitting it is substantively consistent."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion gives a specific structural reason tied to this property itself\u2014its range is InvoiceLine, which is not modeled in the generated ontology\u2014and there are no included siblings suggesting inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion gives a specific structural reason tied to this property\u2014its meaning depends on the class InvoiceLine, which was not included\u2014and there is no sibling evidence indicating inconsistent treatment."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#isSpecificToRequestForOfferLine",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion is specifically grounded in the fact that this property depends on the class RequestForOfferLine, whose absence from the generated ontology makes retaining the property unwarranted, and there are no included siblings indicating inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion gives a specific structural reason tied to this property\u2014its range class RequestForOfferLine is absent from the generated ontology\u2014and there are no included siblings indicating inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion is specifically grounded in the fact that this property's range class, RequestForOfferLine, is not part of the generated ontology, so omitting the dependent property is a coherent modeling decision and nothing in the sibling data contradicts it."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#refersToCatalogue",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason for exclusion\u2014this property's meaning depends on the omitted PostAwardCatalogue class\u2014and with no sibling evidence of inconsistent treatment, the exclusion is substantively supported."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason for exclusion\u2014this property's range is PostAwardCatalogue, which was itself not included\u2014so omitting the property is substantively consistent."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason for exclusion\u2014this property points to PostAwardCatalogue, which was not included\u2014so excluding the property is substantively consistent."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#refersToCatalogueLine",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion gives a specific structural reason tied to this property\u2014its target class CatalogueLine is absent from the generated ontology\u2014and nothing in the provided context suggests the property was independently needed despite that omission."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion gives a specific structural reason tied to this property\u2014its range class CatalogueLine is absent from the generated ontology\u2014and there are no included siblings indicating inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion is specifically grounded in this property's dependency on the omitted class CatalogueLine, so the note gives a concrete modeling reason rather than generic boilerplate."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#refersToDeliveryInformation",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion is specifically grounded in the fact that this property points to Delivery Information via ShipmentInformation, and with that domain not included there is a concrete modeling reason to omit it."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason for exclusion\u2014this property points into ShipmentInformation/Delivery Information content that is not part of the included ontology slice\u2014and there are no included siblings suggesting inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion is supported by a specific structural reason\u2014this property belongs to the ShipmentInformation area, which was not included\u2014and there are no included siblings indicating inconsistent treatment."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#refersToOrder",
+        "disposition": "unsupported_by_target_model",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific modeling reason tied to this property\u2014that its domain relies on unnamed classes outside the scoped target model\u2014so excluding it is substantively grounded and there are no included siblings suggesting inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific modeling reason tied to this property itself\u2014that its domain is unnamed and therefore cannot be represented faithfully in the target model\u2014and with no sibling inconsistency shown, excluding this otherwise thinly defined relation is justified."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property\u2014its domain classes are unnamed and unavailable in the selected scope\u2014so excluding it rather than fabricating an imprecise relation is substantively justified."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#refersToOrderLine",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion is specifically grounded in the fact that this property\u2019s domain classes, DespatchLine and InvoiceLine, are themselves omitted from the selected ontology slice, so the property would have no in-scope subjects to attach to."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific element-level reason for exclusion\u2014this property is only relevant via DespatchLine and InvoiceLine, which are themselves omitted\u2014so the exclusion is substantively grounded and uncontradicted by any sibling evidence."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion is specifically tied to this property's domain classes (DespatchLine and InvoiceLine) being omitted from the generated ontology, which is a concrete element-specific reason and is not contradicted by any included siblings."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#refersToProject",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion note gives a specific structural reason tied to this property itself\u2014its range class Project was omitted\u2014so excluding the property is substantively consistent and uncontradicted by any sibling evidence."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason for exclusion\u2014this property's only stated role is to point to the Project class, and that range was not included\u2014so excluding the property is substantively coherent with no sibling evidence against it."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific, element-level reason for exclusion\u2014this property's usefulness depends on the Project class, which was not included\u2014and there are no included siblings suggesting inconsistent treatment."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#specifiesBuyer",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion gives a specific structural reason tied to this property itself\u2014its range is Buyer, which is not modeled in the generated ontology\u2014and there are no included siblings suggesting inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion is specifically grounded in this property's dependency on the omitted Buyer class, so leaving out the relation is a coherent consequence of the selected ontology scope."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion gives a specific structural reason tied to this property itself\u2014its range class Buyer is not represented\u2014so omitting the relation is substantively consistent and there are no included siblings contradicting that choice."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#specifiesChargeInformation",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property itself\u2014its range class ChargeInformation was not included\u2014so excluding the property is substantively coherent and there are no included siblings indicating inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion note gives a specific structural reason tied to this property\u2014its range class ChargeInformation is not part of the generated ontology\u2014and with no sibling evidence of inconsistent treatment, that is a substantive basis for omission."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property itself\u2014its range class ChargeInformation is not represented\u2014so excluding the relation is substantively coherent and there are no included siblings suggesting inconsistent treatment."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#specifiesConsignee",
+        "disposition": "unsupported_by_target_model",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion note addresses a specific modeling issue with this property\u2014its domain cannot be safely tied to retained classes\u2014so the omission is substantively grounded and there are no included siblings to suggest inconsistent treatment."
+          },
+          {
+            "verdict": "partially_justified",
+            "rationale": "The note gives a specific modeling reason that this property\u2019s domain cannot be safely tied to included classes, but it is too vague and malformed to clearly show why a defined role relation like this could not be represented or mapped."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion note identifies a concrete modeling issue specific to this property\u2014its domain cannot be safely tied to retained classes\u2014so excluding it as unsupported by the target model is substantively justified, and there are no included siblings to suggest inconsistent treatment."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note identifies a specific modeling problem with this property\u2014its domain is unnamed and cannot be safely tied to retained classes\u2014so the exclusion rests on a concrete target-model incompatibility rather than boilerplate."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific structural reason tied to this property itself\u2014its domain cannot be safely mapped to included classes\u2014so excluding it as unsupported by the target model is substantively grounded and not contradicted by any sibling comparison."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": true,
+        "confirmation_round": true
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#specifiesDeliveryAgreementLocation",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific modeling reason tied to this property\u2014its Location range was intentionally flattened into a simpler text field for place of delivery\u2014so excluding this precise relation is substantively explained and not contradicted by any siblings."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific modeling reason tied to this property\u2014its target Location class was not retained and delivery place was intentionally flattened into a text field on DeliveryInformation\u2014so the exclusion is substantively explained rather than boilerplate."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific modeling reason tied to this property\u2014its Location range was intentionally collapsed into a simpler text field on DeliveryInformation rather than preserving this exact relation\u2014and with no sibling inconsistency shown, the exclusion is substantively justified."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#specifiesDespatcher",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion note gives a specific structural reason tied to this property\u2014its range class Despatcher was not included\u2014so omitting the relation is substantively coherent and nothing in the sibling evidence contradicts it."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion note gives a specific structural reason tied to this property\u2014its range class Despatcher is absent from the generated ontology\u2014so excluding the relation is substantively justified and nothing in the sibling data contradicts that."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion note gives a specific structural reason tied to this property\u2014its range class Despatcher is absent from the generated ontology\u2014and there are no included siblings showing inconsistent treatment."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "source_iri": "http://data.europa.eu/a4g/ontology#specifiesOriginator",
+        "disposition": "out_of_scope",
+        "raw_judgments": [
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific ontology-engineering reason tied to this property itself\u2014its unnamed domain cannot be reliably mapped to an included class\u2014so excluding it is substantively justified and nothing in the sibling evidence contradicts that."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The exclusion note gives a specific structural reason tied to this property itself\u2014its unnamed domain cannot be safely mapped to any included class\u2014so the omission is substantively grounded and not contradicted by sibling evidence."
+          },
+          {
+            "verdict": "justified",
+            "rationale": "The note gives a specific modeling reason tied to this property itself\u2014its unnamed domain cannot be safely mapped to any included class\u2014so excluding it is substantively justified and there are no included siblings indicating inconsistent treatment."
+          }
+        ],
+        "majority_verdict": "justified",
+        "contested": false,
+        "confirmation_round": false
+      }
+    ],
+    "unjustified_count": 0,
+    "unjustified_iris": [],
+    "contested_count": 2,
+    "contested_iris": [
+      "http://data.europa.eu/a4g/ontology#concernsContract",
+      "http://data.europa.eu/a4g/ontology#specifiesConsignee"
+    ],
+    "total_cost_usd": 0.2036
+  },
+  "round_trip": {
+    "sampled": 5,
+    "results": [
+      {
+        "target_path": "classes.AllowanceChargeInformation",
+        "reconstruction": "A line-item or document-level charge/allowance detail used in invoicing or trade documents, describing discounts, taxes, duties, fees, or exemptions applied. It likely captures the reason for the adjustment or VAT exemption and any applicable percentage rate.",
+        "score": 0.9,
+        "rationale": "The reconstruction closely matches the source by describing information about discounts, taxes, duties, and fees, though it adds extra invoicing context and details about exemptions and rates not explicit in the source."
+      },
+      {
+        "target_path": "classes.AllowanceChargeInformation.properties.allowanceChargeReasonDescription",
+        "reconstruction": "A free-text field used to describe why an allowance or charge was applied to a transaction, such as a discount, surcharge, fee, or rebate. It most likely captures the human-readable explanation of the reason behind that monetary adjustment.",
+        "score": 0.94,
+        "rationale": "The reconstruction accurately captures that this is explanatory free text describing the reason or motive for an allowance or charge, adding only minor examples not explicit in the source."
+      },
+      {
+        "target_path": "classes.AllowanceChargeInformation.properties.vatExemptionReason",
+        "reconstruction": "A text field describing why a particular allowance or charge is exempt from value-added tax (VAT). It most likely stores the legal or business reason for not applying VAT to that discount, fee, or surcharge.",
+        "score": 0.96,
+        "rationale": "The reconstruction closely matches the source by describing a textual explanation for why an allowance/charge instance is exempt from VAT, with only minor added interpretation about legal or business reasons."
+      },
+      {
+        "target_path": "classes.AllowanceChargeInformation.properties.vatExemptionReasonDescription",
+        "reconstruction": "A text field describing why VAT does not apply to a specific allowance or charge line. It most likely records the human-readable reason for the VAT exemption associated with that charge or discount.",
+        "score": 0.97,
+        "rationale": "The reconstruction closely matches the source by describing explanatory text for the VAT exemption reason on an allowance or charge line, with only minor added specificity."
+      },
+      {
+        "target_path": "classes.AllowanceChargeInformation.properties.percentage",
+        "reconstruction": "This most likely represents the percentage rate used to calculate an allowance or charge, such as a discount, surcharge, or fee applied to a transaction amount. It indicates how much of the base amount the allowance or charge represents, expressed as a percent.",
+        "score": 0.76,
+        "rationale": "The reconstruction captures a percentage-based factor for an allowance or charge, but it broadens the meaning and misses the source\u2019s narrower wording about a factor relative to an additional charged price."
+      }
+    ],
+    "average_score": 0.906,
+    "total_cost_usd": 0.0112
+  },
+  "cq_support": {
+    "results": [
+      {
+        "question": "For a given order, who is the seller that the order specifies?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes the classes Order and Seller and the relationship specifiesSeller from Order to Seller, which is sufficient to reason about which seller a given order specifies."
+      },
+      {
+        "question": "For a given order, which invoicee is designated to receive and process invoices?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes the Invoicee role and the specifiesInvoicee relationship from Order to Invoicee, which is sufficient to determine for a given order which invoicee is designated to receive and process invoices."
+      },
+      {
+        "question": "What delivery information is specified for an order, including the consignee and any delivery agreement?",
+        "supported": true,
+        "rationale": "The ontology provides the needed orientation by linking Order to DeliveryInformation, DeliveryInformation to Consignee, and DeliveryInformation to DeliveryAgreement, with relevant delivery properties and agreement terms defined."
+      },
+      {
+        "question": "Who is the originator associated with an order through its originator information?",
+        "supported": true,
+        "rationale": "The ontology provides a clear path from Order to OriginatorInformation via specifiesOriginatorInformation and from OriginatorInformation to Originator via concernsOriginator, which is sufficient to reason about the associated originator."
+      },
+      {
+        "question": "Which order lines are included in a given order?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes the Order and OrderLine classes and a hasLine relationship from Order to OrderLine, which is sufficient to reason about which order lines belong to a given order."
+      },
+      {
+        "question": "What allowance or discount information applies to a given order line?",
+        "supported": true,
+        "rationale": "The ontology includes AllowanceInformation plus relationships from OrderLine to allowance/discount data and from Order to overall allowance data, which is sufficient orientation to reason about allowance or discount information for a given order line."
+      },
+      {
+        "question": "For a given order response, which order does it reference, and which response lines correspond to which order lines?",
+        "supported": true,
+        "rationale": "The ontology explicitly supports linking an OrderResponse to an Order via isSubmittedForOrder and mapping each OrderResponseLine to an OrderLine via isSubmittedForOrderLine, which is sufficient to reason about both parts of the question."
+      },
+      {
+        "question": "For a given order response line, what order line does it address, and what order response information is specific to that response line?",
+        "supported": true,
+        "rationale": "The ontology directly supports this by linking OrderResponseLine to the addressed OrderLine via isSubmittedForOrderLine and linking OrderResponseInformation to the specific response line via isSpecificToOrderResponseLine."
+      },
+      {
+        "question": "For a given order change or order cancellation, which order was it submitted for, and was it later confirmed or rejected?",
+        "supported": true,
+        "rationale": "The ontology includes OrderChange and OrderCancellation linked to Order via isSubmittedForOrder, plus confirmation and rejection document classes linked back via respondsToOrderChange/respondsToOrderCancellation, which is sufficient to reason about the referenced order and later confirmed-or-rejected status."
+      },
+      {
+        "question": "Before submitting an order response, order change, or order cancellation, does the document satisfy the relevant rule that it must reference an order, and do response lines match order lines where applicable?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes document-to-order reference relationships and rules for order responses, changes, and cancellations, plus an order-response-line to order-line matching relationship and rule, which together provide enough structure to reason about the stated submission checks."
+      }
+    ],
+    "support_score": 1.0,
+    "total_cost_usd": 0.0865,
+    "generation_cost_usd": 0.008
+  },
+  "hard_gates_ok": true
+}

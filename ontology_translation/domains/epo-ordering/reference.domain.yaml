@@ -1,0 +1,392 @@
+competency_questions:
+- id: cq1
+  text: Which seller is specified for a given order?
+- id: cq2
+  text: Which invoicee and originator information are associated with an order?
+- id: cq3
+  text: What order lines are included in an order, and what quantity and price does
+    each line carry?
+- id: cq4
+  text: Which delivery information applies to an order, including deadline, requested
+    period, and consignee?
+- id: cq5
+  text: What delivery agreement terms and shipping priority apply to a delivery?
+- id: cq6
+  text: Which order response was submitted for an order, and does it accept, reject,
+    or counter the request?
+- id: cq7
+  text: What order response lines correspond to each order line, including any backorder
+    quantity?
+- id: cq8
+  text: Which order change was submitted for an order, and what changed lines does
+    it comprise?
+- id: cq9
+  text: Which document responds to an order change, and is it a confirmation or a
+    rejection?
+- id: cq10
+  text: Which order cancellation was submitted for an order?
+- id: cq11
+  text: Which document responds to an order cancellation, and is it a confirmation
+    or a rejection?
+- id: cq12
+  text: What payment, tax, allowance, charge, and total amount information is recorded
+    for an order?
+classes:
+  AllowanceChargeInformation:
+    meaning: Information about discounts, taxes, duties and fees imposed.
+    properties:
+      allowanceChargeReasonDescription:
+        type: text
+      vatExemptionReason:
+        type: text
+      vatExemptionReasonDescription:
+        type: text
+      percentage:
+        type: number
+        unit: percent
+  AllowanceInformation:
+    meaning: Information about the discounts imposed.
+    properties:
+      percentage:
+        type: number
+        unit: percent
+  Consignee:
+    meaning: A role of an agent that receives the shipment of the procurement and
+      takes possession, often on behalf of the customer.
+  ContractInformation:
+    meaning: Information about the contract.
+  DeliveryAgreement:
+    meaning: Terms applying to the delivery of goods, services and works.
+    properties:
+      generalDeliveryTerm:
+        type: text
+      requestedShippingPriority:
+        type: text
+      partialDeliveryAllowed:
+        type: boolean
+  DeliveryInformation:
+    meaning: Information about the timing, destination, delivery agreement, and involved
+      parties for delivery.
+    properties:
+      accessURL:
+        type: text
+      actualDeliveryDate:
+        type: date
+      deliveryDeadline:
+        type: date
+      deliveryEmail:
+        type: text
+      downloadURL:
+        type: text
+      trackingID:
+        type: text
+      shippingMark:
+        type: text
+      deliveryPeriod:
+        type: text
+      requestedDeliveryPeriod:
+        type: text
+      placeOfDelivery:
+        type: text
+  Invoicee:
+    meaning: The role of an agent who receives and processes invoices.
+  Order:
+    meaning: A formal request from the buyer to the seller specifying the goods, services,
+      or works to be delivered.
+    properties:
+      paymentTerm:
+        type: text
+      accountingCost:
+        type: text
+      sellerOrderID:
+        type: text
+      amountDueForPayment:
+        type: number
+        unit: monetary value
+      prepaidAmount:
+        type: number
+        unit: monetary value
+      roundingAmount:
+        type: number
+        unit: monetary value
+      totalAllowanceAmount:
+        type: number
+        unit: monetary value
+      totalChargeAmount:
+        type: number
+        unit: monetary value
+      totalLineAmount:
+        type: number
+        unit: monetary value
+      totalTaxExclusiveAmount:
+        type: number
+        unit: monetary value
+      totalTaxInclusiveAmount:
+        type: number
+        unit: monetary value
+      validityPeriod:
+        type: text
+  OrderAgreement:
+    meaning: A document sent from the seller to the buyer specifying the goods, services,
+      or works to be delivered for a specific order.
+  OrderAgreementLine:
+    meaning: Details concerning a given unit of goods, services, or works mentioned
+      in an order agreement.
+  OrderCancellation:
+    meaning: A document containing the buyer's formal response to cancel a previous
+      order or order change.
+  OrderCancellationConfirmation:
+    meaning: A document acknowledging an order cancellation.
+  OrderCancellationRejection:
+    meaning: A document stating the non-acceptance of an order cancellation.
+  OrderChange:
+    meaning: A document containing the buyer's formal request to change goods, services,
+      or works in a previous order.
+  OrderChangeConfirmation:
+    meaning: A document acknowledging an order change.
+  OrderChangeLine:
+    meaning: Details concerning a given unit of goods, services, or works requested
+      in an order change.
+  OrderChangeRejection:
+    meaning: A document stating the non-acceptance of an order change.
+  OrderLine:
+    meaning: Details concerning a given unit of goods, services, or works requested
+      in an order.
+    properties:
+      accountingCost:
+        type: text
+      quantity:
+        type: number
+        unit: quantity
+      price:
+        type: number
+        unit: monetary value
+  OrderResponse:
+    meaning: A formal reply from the seller to the buyer stating the seller's ability
+      to fulfil the order.
+    properties:
+      responseDescription:
+        type: text
+  OrderResponseInformation:
+    meaning: Information about an order response.
+  OrderResponseLine:
+    meaning: Details concerning the seller's ability to fulfil a given order line.
+    properties:
+      backorderQuantity:
+        type: number
+        unit: quantity
+  Originator:
+    meaning: A role of an agent that expresses the needs that trigger the procurement.
+  OriginatorInformation:
+    meaning: Information about the originator of the order.
+  Seller:
+    meaning: A role of an agent who transfers ownership of the procurement results
+      to the buyer and is legally bound by the contract.
+  TaxInformation:
+    meaning: Information about the imposition of mandatory levies required by law.
+    properties:
+      percentage:
+        type: number
+        unit: percent
+      taxCategory:
+        type: text
+      taxScheme:
+        type: text
+relationships:
+- name: hasLine
+  from: Order
+  to: OrderLine
+  meaning: The order incorporates an order line.
+  aliases: []
+- name: hasLine
+  from: OrderAgreement
+  to: OrderAgreementLine
+  meaning: The order agreement incorporates an order agreement line.
+  aliases: []
+- name: hasLine
+  from: OrderChange
+  to: OrderChangeLine
+  meaning: The order change incorporates an order change line.
+  aliases: []
+- name: hasLine
+  from: OrderResponse
+  to: OrderResponseLine
+  meaning: The order response incorporates an order response line.
+  aliases: []
+- name: specifiesSeller
+  from: Order
+  to: Seller
+  meaning: The order involves the seller.
+  aliases: []
+- name: specifiesInvoicee
+  from: Order
+  to: Invoicee
+  meaning: The order involves the invoicee.
+  aliases: []
+- name: specifiesContractInformation
+  from: Order
+  to: ContractInformation
+  meaning: The order includes contract information.
+  aliases: []
+- name: specifiesOriginatorInformation
+  from: Order
+  to: OriginatorInformation
+  meaning: The order includes originator information.
+  aliases: []
+- name: concernsOriginator
+  from: OriginatorInformation
+  to: Originator
+  meaning: The originator information relates to the originator.
+  aliases: []
+- name: specifiesDeliveryInformation
+  from: Order
+  to: DeliveryInformation
+  meaning: The order includes delivery information.
+  aliases: []
+- name: concernsConsignee
+  from: DeliveryInformation
+  to: Consignee
+  meaning: The delivery information relates to the consignee.
+  aliases: []
+- name: specifiesDeliveryAgreement
+  from: DeliveryInformation
+  to: DeliveryAgreement
+  meaning: The delivery information specifies the delivery agreement.
+  aliases: []
+- name: specifiesOrderResponseInformation
+  from: OrderResponse
+  to: OrderResponseInformation
+  meaning: The order response includes order response information.
+  aliases: []
+- name: isSpecificToOrderResponseLine
+  from: OrderResponseInformation
+  to: OrderResponseLine
+  meaning: The order response information is particular to an order response line.
+  aliases: []
+- name: specifiesAllowanceInformation
+  from: Order
+  to: AllowanceInformation
+  meaning: The order specifies allowance information.
+  aliases: []
+- name: isSpecificToOrderLine
+  from: AllowanceInformation
+  to: OrderLine
+  meaning: The allowance information is particular to one or more order lines.
+  aliases: []
+- name: hasTaxInformation
+  from: AllowanceChargeInformation
+  to: TaxInformation
+  meaning: The allowance charge information includes tax information.
+  aliases: []
+- name: hasPriceDiscountInformation
+  from: OrderLine
+  to: AllowanceInformation
+  meaning: The order line price can have discount information through its price.
+  aliases: []
+- name: respondsToOrderChange
+  from: OrderChangeConfirmation
+  to: OrderChange
+  meaning: The confirmation acknowledges the order change.
+  aliases: []
+- name: respondsToOrderChange
+  from: OrderChangeRejection
+  to: OrderChange
+  meaning: The rejection states non-acceptance of the order change.
+  aliases: []
+- name: respondsToOrderCancellation
+  from: OrderCancellationConfirmation
+  to: OrderCancellation
+  meaning: The confirmation acknowledges the order cancellation.
+  aliases: []
+- name: respondsToOrderCancellation
+  from: OrderCancellationRejection
+  to: OrderCancellation
+  meaning: The rejection states non-acceptance of the order cancellation.
+  aliases: []
+- name: isSubmittedForOrder
+  from: OrderResponse
+  to: Order
+  meaning: The order response is sent for a specific order.
+  aliases: []
+- name: isSubmittedForOrder
+  from: OrderChange
+  to: Order
+  meaning: The order change is sent for a specific order.
+  aliases: []
+- name: isSubmittedForOrder
+  from: OrderCancellation
+  to: Order
+  meaning: The order cancellation is sent for a specific order.
+  aliases: []
+- name: isSubmittedForOrderLine
+  from: OrderResponseLine
+  to: OrderLine
+  meaning: The order response line is sent for a specific order line.
+  aliases: []
+rules:
+  orderRequiresSeller:
+    conditions:
+    - order specifies a seller
+  orderLineRequiresQuantity:
+    conditions:
+    - order line quantity is recorded
+  orderResponseMustReferenceOrder:
+    conditions:
+    - order response is submitted for an order
+  orderChangeMustReferenceOrder:
+    conditions:
+    - order change is submitted for an order
+  cancellationMustReferenceOrder:
+    conditions:
+    - order cancellation is submitted for an order
+  deliveryInformationShouldIdentifyConsignee:
+    conditions:
+    - delivery information concerns a consignee
+  responseLineMustMatchOrderLine:
+    conditions:
+    - order response line is submitted for an order line
+actions:
+  submitOrderResponse:
+    input: OrderResponse
+    preconditions:
+    - orderResponseMustReferenceOrder
+    effect: order response becomes linked to the order it addresses
+    verification: confirm the order response is submitted for the intended order
+  submitOrderChange:
+    input: OrderChange
+    preconditions:
+    - orderChangeMustReferenceOrder
+    effect: order change becomes linked to the order it modifies
+    verification: confirm the order change is submitted for the intended order
+  submitOrderCancellation:
+    input: OrderCancellation
+    preconditions:
+    - cancellationMustReferenceOrder
+    effect: order cancellation becomes linked to the order it cancels
+    verification: confirm the order cancellation is submitted for the intended order
+  confirmOrderChange:
+    input: OrderChangeConfirmation
+    preconditions:
+    - orderChangeMustReferenceOrder
+    effect: order change confirmation becomes linked to the order change it acknowledges
+    verification: confirm the confirmation responds to the intended order change
+  rejectOrderChange:
+    input: OrderChangeRejection
+    preconditions:
+    - orderChangeMustReferenceOrder
+    effect: order change rejection becomes linked to the order change it refuses
+    verification: confirm the rejection responds to the intended order change
+  confirmOrderCancellation:
+    input: OrderCancellationConfirmation
+    preconditions:
+    - cancellationMustReferenceOrder
+    effect: order cancellation confirmation becomes linked to the order cancellation
+      it acknowledges
+    verification: confirm the confirmation responds to the intended order cancellation
+  rejectOrderCancellation:
+    input: OrderCancellationRejection
+    preconditions:
+    - cancellationMustReferenceOrder
+    effect: order cancellation rejection becomes linked to the order cancellation
+      it refuses
+    verification: confirm the rejection responds to the intended order cancellation
