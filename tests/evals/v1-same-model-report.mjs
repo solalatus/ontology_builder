@@ -149,6 +149,16 @@ export function renderReport(res) {
     const a = x.relayAudit ? `${x.relayAudit.toolRequests} / ${x.relayAudit.violations.length} / ${x.relayAudit.skipNotesRewritten}` : "";
     L.push(`| ${arm} | ${d} | ${x.runId} | ${x.stoppedReason} | ${x.scoredOn} | ${x.turns} | ${typeof x.costUsd === "number" ? x.costUsd.toFixed(2) : "n/a"} | ${p1(x.row.composite)} | ${p1(x.row.relF1)} | ${x.interviewerFirstPer100 === null ? "n/a" : x.interviewerFirstPer100.toFixed(1)} | ${a} |`);
   }
+  // Interviews cut off by infrastructure (DESIGN.md): kept, not averaged, rerun alone.
+  const failed = [];
+  for (const root of [path.join(OUT_DIR, "failed-attempts"), path.join(RESULTS, "final-scores", "failed-attempts")]) {
+    if (!fs.existsSync(root)) continue;
+    for (const name of fs.readdirSync(root).sort()) {
+      const pr = readJson(path.join(root, name, "progress.json")) || {};
+      failed.push(`\`${path.relative(RESULTS, path.join(root, name))}/\`: phase ${pr.phase || "?"}, ${pr.turnsUsed ?? "?"} turns, ${typeof pr.costUsd === "number" ? pr.costUsd.toFixed(2) : "?"} USD${pr.failureKind ? `, ${pr.failureKind}` : ""}`);
+    }
+  }
+  L.push("", "## Interruptions", "", ...(failed.length ? failed.map((x) => `- ${x}; not averaged, the interview was rerun alone.`) : ["- none"]));
   const inc = Object.entries(res.incomplete).filter(([, v]) => v.length);
   if (inc.length) L.push("", `Not (yet) scored: ${inc.map(([a, v]) => `${a}: ${v.join(", ")}`).join("; ")}.`);
   const cost = (arm) => ALL.flatMap((d) => res.arms[arm][d].filter((x) => !(arm === "final" && ["run-01", "run-02", "run-03"].includes(x.runId))).map((x) => x.costUsd || 0)).reduce((a, b) => a + b, 0);
