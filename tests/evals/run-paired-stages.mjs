@@ -68,6 +68,28 @@ BLOCKS.baselines = {
   items: baselineItems,
 };
 
+// The persona ablation (results/persona-ablation/DESIGN.md): the final-scores
+// configuration on itops, with the first paper's persona model as the one
+// change.
+const FINAL_ENV = { ONTOLOGY_EVAL_COVERAGE_SWEEP: "", ONTOLOGY_EVAL_NAMING_PASS: "", ONTOLOGY_EVAL_SNAPSHOT_AT_WRAPUP: "1" };
+BLOCKS["persona-4omini"] = {
+  root: path.join(ROOT, "ontology_translation", "results", "persona-ablation"), dir: "runs", effort: null,
+  env: { ...FINAL_ENV, ONTOLOGY_EVAL_PERSONA_MODEL: "gpt-4o-mini" },
+  runs: ["run-01", "run-02", "run-03"].map((r) => `itops:${r}`),
+};
+// The held-out domain (results/epo-heldout/DESIGN.md): the final-scores
+// configuration, then the baselines-gpt6 B3 condition, on epo-ordering.
+BLOCKS["epo-interactive"] = {
+  root: path.join(ROOT, "ontology_translation", "results", "epo-heldout"), dir: "interactive", effort: null,
+  env: FINAL_ENV,
+  runs: ["run-01", "run-02", "run-03"].map((r) => `epo-ordering:${r}`),
+};
+BLOCKS["epo-b3"] = {
+  root: path.join(ROOT, "ontology_translation", "results", "epo-heldout"), dir: "b3-no-commit", effort: null,
+  env: { ...FINAL_ENV, ONTOLOGY_EVAL_CONDITION: "b3-no-commit", EVAL_RUN_COST_CAP_USD: "10" },
+  runs: ["run-01", "run-02", "run-03"].map((r) => `epo-ordering:${r}`),
+};
+
 /** The command, directory and clean end of one baseline item. */
 export function baselineCommand({ condition, domain, runId }, root) {
   const dir = path.join(root, condition);
