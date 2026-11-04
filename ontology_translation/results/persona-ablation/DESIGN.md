@@ -34,3 +34,28 @@ These are set beside the first paper's rescored runs and the final itops runs (`
 - Ablation − first paper = the share carried by the interviewer, prompt and tool changes, at the first paper's persona model.
 - The persona text also differs from the first paper's hand-written `persona-eszter.md`. So the ablation isolates the persona *model*, not the persona as a whole. The article says so.
 - 3 runs per arm: descriptive. Differences are reported with the bootstrap interval of `tests/evals/run-intervals.mjs`.
+
+## Amendment 1: persona contribution checks
+
+**When:** written on 2026-11-04 at about 10:45 Berlin time. Run-01 had already finished (10:25) and run-02 was running. No score, match file or conversation log of any ablation run had been opened.
+
+**Why:** a review raised a concern about the gpt-4o-mini persona. A weak persona may mostly accept what the interviewer proposes, which would make the ablation measure the interviewer's prior knowledge rather than elicitation. The checks below make that visible. They add to the readings above and change none of them.
+
+**Checks.** All are offline and computed only after all three runs have ended. Each is reported for three arms: ablation, final itops (`final-scores/runs/*/itops`) and the first paper's rescored itops runs.
+
+1. **Who named first.** Run `tests/evals/interviewer-prior-knowledge-report.mjs` on each arm. Report two numbers:
+   - the share of gold identifiers that the interviewer introduced first;
+   - the same share among the scored heuristic matches.
+2. **Precision.** Report class, relationship and property precision next to recall, using the existing scorer.
+3. **Confirm-only persona turns.** Count persona turns in the class and relationship phases, with phase taken from `conversation-log.md`. A turn is confirm-only when both of these hold:
+   - (a) it introduces no gold identifier, or plain-word form of one, that has not already appeared in the conversation;
+   - (b) it opens with an assent (yes, yeah, correct, right, exactly, that's right, sounds good, agreed) or is under 25 words.
+
+   Report the share per run.
+
+**Reading (fixed now).** The rubber-stamping concern is called *supported* when the ablation arm, compared with final, has all three of the following:
+- a higher interviewer-first share among matches;
+- a confirm-only share at least 10 percentage points higher;
+- relationship precision no higher.
+
+Otherwise it is called *not supported*. With 3 runs per arm this is descriptive. The article reports the numbers either way.
