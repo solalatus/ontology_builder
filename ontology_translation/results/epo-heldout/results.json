@@ -1,0 +1,540 @@
+{
+  "draws": 10000,
+  "seed": 20261104,
+  "goldElements": 88,
+  "band": {
+    "lo": 0.68,
+    "hi": 0.911,
+    "below": 0.577
+  },
+  "arms": {
+    "interactive": [
+      {
+        "run": "run-01",
+        "turns": 74,
+        "costUsd": 1.3890178,
+        "stopped": "stages_complete",
+        "full": {
+          "composite": 1,
+          "classes": {
+            "f1": 1,
+            "precision": 1,
+            "recall": 1
+          },
+          "relationships": {
+            "f1": 1,
+            "precision": 1,
+            "recall": 1
+          },
+          "properties": {
+            "f1": 1,
+            "precision": 1,
+            "recall": 1
+          },
+          "rulesF1": 0,
+          "actionsF1": 1
+        },
+        "practical": {
+          "composite": 0.6785714285714285,
+          "classes": {
+            "f1": 0.8095238095238095,
+            "precision": 0.68,
+            "recall": 1
+          },
+          "relationships": {
+            "f1": 0.8095238095238095,
+            "precision": 0.68,
+            "recall": 1
+          },
+          "properties": {
+            "f1": 0.4166666666666667,
+            "precision": 0.2631578947368421,
+            "recall": 1
+          },
+          "rulesF1": 0,
+          "actionsF1": 1
+        },
+        "endpoint": {
+          "ratio": 1,
+          "conditionalRate": 1,
+          "classRecall": 1,
+          "relRecall": 1
+        },
+        "interviewerFirstPer100": 0,
+        "personaFirstRaw": 0
+      },
+      {
+        "run": "run-02",
+        "turns": 72,
+        "costUsd": 1.3373552000000002,
+        "stopped": "stages_complete",
+        "full": {
+          "composite": 0.9358895073180786,
+          "classes": {
+            "f1": 0.9795918367346939,
+            "precision": 1,
+            "recall": 0.96
+          },
+          "relationships": {
+            "f1": 0.9795918367346939,
+            "precision": 1,
+            "recall": 0.96
+          },
+          "properties": {
+            "f1": 0.8484848484848484,
+            "precision": 1,
+            "recall": 0.7368421052631579
+          },
+          "rulesF1": 0,
+          "actionsF1": 1
+        },
+        "practical": {
+          "composite": 0.7282841249465126,
+          "classes": {
+            "f1": 0.8292682926829268,
+            "precision": 0.7083333333333334,
+            "recall": 1
+          },
+          "relationships": {
+            "f1": 0.8292682926829268,
+            "precision": 0.7083333333333334,
+            "recall": 1
+          },
+          "properties": {
+            "f1": 0.5263157894736842,
+            "precision": 0.35714285714285715,
+            "recall": 1
+          },
+          "rulesF1": 0,
+          "actionsF1": 1
+        },
+        "endpoint": {
+          "ratio": 1,
+          "conditionalRate": 1,
+          "classRecall": 0.96,
+          "relRecall": 0.96
+        },
+        "interviewerFirstPer100": 0,
+        "personaFirstRaw": 0
+      },
+      {
+        "run": "run-03",
+        "turns": 83,
+        "costUsd": 1.3533732000000003,
+        "stopped": "stages_complete",
+        "full": {
+          "composite": 0.9678760393046106,
+          "classes": {
+            "f1": 0.9795918367346939,
+            "precision": 1,
+            "recall": 0.96
+          },
+          "relationships": {
+            "f1": 0.9795918367346939,
+            "precision": 1,
+            "recall": 0.96
+          },
+          "properties": {
+            "f1": 0.9444444444444444,
+            "precision": 1,
+            "recall": 0.8947368421052632
+          },
+          "rulesF1": 0.42857142857142855,
+          "actionsF1": 1
+        },
+        "practical": {
+          "composite": 0.7043606799704359,
+          "classes": {
+            "f1": 0.8292682926829268,
+            "precision": 0.7083333333333334,
+            "recall": 1
+          },
+          "relationships": {
+            "f1": 0.8292682926829268,
+            "precision": 0.7083333333333334,
+            "recall": 1
+          },
+          "properties": {
+            "f1": 0.45454545454545453,
+            "precision": 0.29411764705882354,
+            "recall": 1
+          },
+          "rulesF1": 0.42857142857142855,
+          "actionsF1": 1
+        },
+        "endpoint": {
+          "ratio": 1,
+          "conditionalRate": 1,
+          "classRecall": 0.96,
+          "relRecall": 0.96
+        },
+        "interviewerFirstPer100": 0,
+        "personaFirstRaw": 0
+      }
+    ],
+    "b3": [
+      {
+        "run": "run-01",
+        "turns": 92,
+        "costUsd": 1.3305166000000002,
+        "stopped": "stages_complete",
+        "full": {
+          "composite": 0.6878787878787879,
+          "classes": {
+            "f1": 0.888888888888889,
+            "precision": 1,
+            "recall": 0.8
+          },
+          "relationships": {
+            "f1": 0.8636363636363636,
+            "precision": 1,
+            "recall": 0.76
+          },
+          "properties": {
+            "f1": 0.3111111111111111,
+            "precision": 1,
+            "recall": 0.18421052631578946
+          },
+          "rulesF1": 0.125,
+          "actionsF1": 0
+        },
+        "practical": {
+          "composite": 0.8198787022316433,
+          "classes": {
+            "f1": 0.8648648648648648,
+            "precision": 0.8,
+            "recall": 0.9411764705882353
+          },
+          "relationships": {
+            "f1": 0.8888888888888888,
+            "precision": 0.8421052631578947,
+            "recall": 0.9411764705882353
+          },
+          "properties": {
+            "f1": 0.7058823529411764,
+            "precision": 0.8571428571428571,
+            "recall": 0.6
+          },
+          "rulesF1": 0.125,
+          "actionsF1": 0
+        },
+        "endpoint": {
+          "ratio": 0.95,
+          "conditionalRate": 1,
+          "classRecall": 0.8,
+          "relRecall": 0.76
+        },
+        "interviewerFirstPer100": 0,
+        "personaFirstRaw": 0
+      },
+      {
+        "run": "run-02",
+        "turns": 129,
+        "costUsd": 2.0586776,
+        "stopped": "stages_complete",
+        "full": {
+          "composite": 0.9640171858216972,
+          "classes": {
+            "f1": 0.9795918367346939,
+            "precision": 1,
+            "recall": 0.96
+          },
+          "relationships": {
+            "f1": 0.9387755102040817,
+            "precision": 0.9583333333333334,
+            "recall": 0.92
+          },
+          "properties": {
+            "f1": 0.9736842105263158,
+            "precision": 0.9736842105263158,
+            "recall": 0.9736842105263158
+          },
+          "rulesF1": 0.1,
+          "actionsF1": 0
+        },
+        "practical": {
+          "composite": 0.6917344173441734,
+          "classes": {
+            "f1": 0.8292682926829268,
+            "precision": 0.7083333333333334,
+            "recall": 1
+          },
+          "relationships": {
+            "f1": 0.8292682926829268,
+            "precision": 0.7083333333333334,
+            "recall": 1
+          },
+          "properties": {
+            "f1": 0.4166666666666667,
+            "precision": 0.2631578947368421,
+            "recall": 1
+          },
+          "rulesF1": 0.1,
+          "actionsF1": 0
+        },
+        "endpoint": {
+          "ratio": 0.9583333333333334,
+          "conditionalRate": 1,
+          "classRecall": 0.96,
+          "relRecall": 0.92
+        },
+        "interviewerFirstPer100": 0,
+        "personaFirstRaw": 0
+      },
+      {
+        "run": "run-03",
+        "turns": 71,
+        "costUsd": 1.0201002,
+        "stopped": "stages_complete",
+        "full": {
+          "composite": 0.5945745076179859,
+          "classes": {
+            "f1": 0.717948717948718,
+            "precision": 1,
+            "recall": 0.56
+          },
+          "relationships": {
+            "f1": 0.717948717948718,
+            "precision": 1,
+            "recall": 0.56
+          },
+          "properties": {
+            "f1": 0.34782608695652173,
+            "precision": 1,
+            "recall": 0.21052631578947367
+          },
+          "rulesF1": 0.13333333333333333,
+          "actionsF1": 0
+        },
+        "practical": {
+          "composite": 0.7813620071684587,
+          "classes": {
+            "f1": 0.8387096774193549,
+            "precision": 0.9285714285714286,
+            "recall": 0.7647058823529411
+          },
+          "relationships": {
+            "f1": 0.8387096774193549,
+            "precision": 0.9285714285714286,
+            "recall": 0.7647058823529411
+          },
+          "properties": {
+            "f1": 0.6666666666666665,
+            "precision": 0.75,
+            "recall": 0.6
+          },
+          "rulesF1": 0.13333333333333333,
+          "actionsF1": 0
+        },
+        "endpoint": {
+          "ratio": 1,
+          "conditionalRate": 1,
+          "classRecall": 0.56,
+          "relRecall": 0.56
+        },
+        "interviewerFirstPer100": 0,
+        "personaFirstRaw": 0
+      }
+    ]
+  },
+  "means": {
+    "interactive": {
+      "composite": {
+        "mean": 0.9679218488742297,
+        "min": 0.9358895073180786,
+        "max": 1
+      },
+      "classF1": {
+        "mean": 0.9863945578231292,
+        "min": 0.9795918367346939,
+        "max": 1
+      },
+      "relF1": {
+        "mean": 0.9863945578231292,
+        "min": 0.9795918367346939,
+        "max": 1
+      },
+      "propF1": {
+        "mean": 0.9309764309764309,
+        "min": 0.8484848484848484,
+        "max": 1
+      },
+      "relP": {
+        "mean": 1,
+        "min": 1,
+        "max": 1
+      },
+      "relR": {
+        "mean": 0.9733333333333333,
+        "min": 0.96,
+        "max": 1
+      },
+      "classR": {
+        "mean": 0.9733333333333333,
+        "min": 0.96,
+        "max": 1
+      },
+      "rulesF1": {
+        "mean": 0.14285714285714285,
+        "min": 0,
+        "max": 0.42857142857142855
+      },
+      "actionsF1": {
+        "mean": 1,
+        "min": 1,
+        "max": 1
+      },
+      "practicalComposite": {
+        "mean": 0.7037387444961256,
+        "min": 0.6785714285714285,
+        "max": 0.7282841249465126
+      },
+      "endpointRatio": {
+        "mean": 1,
+        "min": 1,
+        "max": 1
+      },
+      "conditionalRate": {
+        "mean": 1,
+        "min": 1,
+        "max": 1
+      },
+      "interviewerFirstPer100": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "b3": {
+      "composite": {
+        "mean": 0.7488234937728236,
+        "min": 0.5945745076179859,
+        "max": 0.9640171858216972
+      },
+      "classF1": {
+        "mean": 0.8621431478574336,
+        "min": 0.717948717948718,
+        "max": 0.9795918367346939
+      },
+      "relF1": {
+        "mean": 0.8401201972630544,
+        "min": 0.717948717948718,
+        "max": 0.9387755102040817
+      },
+      "propF1": {
+        "mean": 0.5442071361979829,
+        "min": 0.3111111111111111,
+        "max": 0.9736842105263158
+      },
+      "relP": {
+        "mean": 0.9861111111111112,
+        "min": 0.9583333333333334,
+        "max": 1
+      },
+      "relR": {
+        "mean": 0.7466666666666667,
+        "min": 0.56,
+        "max": 0.92
+      },
+      "classR": {
+        "mean": 0.7733333333333334,
+        "min": 0.56,
+        "max": 0.96
+      },
+      "rulesF1": {
+        "mean": 0.11944444444444445,
+        "min": 0.1,
+        "max": 0.13333333333333333
+      },
+      "actionsF1": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      },
+      "practicalComposite": {
+        "mean": 0.7643250422480917,
+        "min": 0.6917344173441734,
+        "max": 0.8198787022316433
+      },
+      "endpointRatio": {
+        "mean": 0.9694444444444444,
+        "min": 0.95,
+        "max": 1
+      },
+      "conditionalRate": {
+        "mean": 1,
+        "min": 1,
+        "max": 1
+      },
+      "interviewerFirstPer100": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      }
+    }
+  },
+  "differences": {
+    "composite: interactive - B3": {
+      "estimate": 0.21909835510140607,
+      "lo": 0.014566840381376567,
+      "hi": 0.3733473412562438
+    },
+    "relF1: interactive - B3": {
+      "estimate": 0.1462743605600748,
+      "lo": 0.04761904761904756,
+      "hi": 0.2684458398744113
+    },
+    "classF1: interactive - B3": {
+      "estimate": 0.12425140996569561,
+      "lo": 0.006802721088435493,
+      "hi": 0.2684458398744113
+    },
+    "propF1: interactive - B3": {
+      "estimate": 0.386769294778448,
+      "lo": -0.024189261031366316,
+      "hi": 0.6581320450885668
+    }
+  },
+  "reading": {
+    "generalisation": "above the published range (the fixed rule has no label for this case)",
+    "overfittingCheck": "interactive clearly ahead of B3: the itops pattern (B3 level with interactive) is specific to itops"
+  },
+  "postHoc": {
+    "personaBeyondBriefing": {
+      "interactive": [
+        {
+          "multiWordClasses": 20,
+          "absentFromBriefing": 14,
+          "personaSaidFirst": 12
+        },
+        {
+          "multiWordClasses": 20,
+          "absentFromBriefing": 14,
+          "personaSaidFirst": 10
+        },
+        {
+          "multiWordClasses": 20,
+          "absentFromBriefing": 14,
+          "personaSaidFirst": 13
+        }
+      ],
+      "b3": [
+        {
+          "multiWordClasses": 20,
+          "absentFromBriefing": 14,
+          "personaSaidFirst": 9
+        },
+        {
+          "multiWordClasses": 20,
+          "absentFromBriefing": 14,
+          "personaSaidFirst": 10
+        },
+        {
+          "multiWordClasses": 20,
+          "absentFromBriefing": 14,
+          "personaSaidFirst": 9
+        }
+      ]
+    }
+  }
+}

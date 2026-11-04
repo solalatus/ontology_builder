@@ -1,0 +1,429 @@
+{
+  "label": "A",
+  "turn": 72,
+  "stage": "interview",
+  "elapsedSec": 793,
+  "counts": {
+    "classes": 24,
+    "relationships": 24,
+    "properties": 28,
+    "allowedValueLists": 0,
+    "rules": 7,
+    "actions": 7,
+    "droppedEdges": 0
+  },
+  "metrics": {
+    "classes": {
+      "recall": 0.96,
+      "precision": 1,
+      "f1": 0.9795918367346939,
+      "matched": 24,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 24
+    },
+    "relationships": {
+      "recall": 0.96,
+      "precision": 1,
+      "f1": 0.9795918367346939,
+      "matched": 24,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 24
+    },
+    "properties": {
+      "recall": 0.7368421052631579,
+      "precision": 1,
+      "f1": 0.8484848484848484,
+      "matched": 28,
+      "groundTruthTotal": 38,
+      "recoveredTotal": 28
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.9358895073180786,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 1,
+      "precision": 0.7083333333333334,
+      "f1": 0.8292682926829268,
+      "matched": 17,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 24
+    },
+    "relationships": {
+      "recall": 1,
+      "precision": 0.7083333333333334,
+      "f1": 0.8292682926829268,
+      "matched": 17,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 24
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.35714285714285715,
+      "f1": 0.5263157894736842,
+      "matched": 10,
+      "groundTruthTotal": 10,
+      "recoveredTotal": 28
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.7282841249465126,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": {
+    "classes": {
+      "recall": 0.96,
+      "precision": 1,
+      "f1": 0.9795918367346939,
+      "matched": 24,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 24
+    },
+    "relationships": {
+      "recall": 0.96,
+      "precision": 1,
+      "f1": 0.9795918367346939,
+      "matched": 24,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 24
+    },
+    "properties": {
+      "recall": 0.7368421052631579,
+      "precision": 1,
+      "f1": 0.8484848484848484,
+      "matched": 28,
+      "groundTruthTotal": 38,
+      "recoveredTotal": 28
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.9358895073180786,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 0,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "ContractInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [],
+      "properties": [
+        {
+          "goldId": "DeliveryInformation.accessURL",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.deliveryEmail",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.downloadURL",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.trackingID",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.shippingMark",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.deliveryPeriod",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.sellerOrderID",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.validityPeriod",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderLine.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.96,
+        "precision": 1,
+        "f1": 0.9795918367346939,
+        "matched": 24,
+        "groundTruthTotal": 25,
+        "recoveredTotal": 24
+      },
+      "relationships": {
+        "recall": 0.96,
+        "precision": 1,
+        "f1": 0.9795918367346939,
+        "matched": 24,
+        "groundTruthTotal": 25,
+        "recoveredTotal": 24
+      },
+      "properties": {
+        "recall": 0.7368421052631579,
+        "precision": 1,
+        "f1": 0.8484848484848484,
+        "matched": 28,
+        "groundTruthTotal": 38,
+        "recoveredTotal": 28
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.9358895073180786,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {}
+  },
+  "semanticScopedMetrics": {
+    "classes": {
+      "recall": 1,
+      "precision": 0.7083333333333334,
+      "f1": 0.8292682926829268,
+      "matched": 17,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 24
+    },
+    "relationships": {
+      "recall": 1,
+      "precision": 0.7083333333333334,
+      "f1": 0.8292682926829268,
+      "matched": 17,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 24
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.35714285714285715,
+      "f1": 0.5263157894736842,
+      "matched": 10,
+      "groundTruthTotal": 10,
+      "recoveredTotal": 28
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.7282841249465126,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 0,
+    "judgments": {
+      "classes": [],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 1,
+        "precision": 0.7083333333333334,
+        "f1": 0.8292682926829268,
+        "matched": 17,
+        "groundTruthTotal": 17,
+        "recoveredTotal": 24
+      },
+      "relationships": {
+        "recall": 1,
+        "precision": 0.7083333333333334,
+        "f1": 0.8292682926829268,
+        "matched": 17,
+        "groundTruthTotal": 17,
+        "recoveredTotal": 24
+      },
+      "properties": {
+        "recall": 1,
+        "precision": 0.35714285714285715,
+        "f1": 0.5263157894736842,
+        "matched": 10,
+        "groundTruthTotal": 10,
+        "recoveredTotal": 28
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.7282841249465126,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {}
+  },
+  "ruleMetrics": {
+    "recall": 0,
+    "precision": 0,
+    "f1": 0,
+    "matched": 0,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 7
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 7,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 7
+    },
+    "inputClassAccuracy": 1,
+    "inputClassChecked": 7,
+    "preconditionRecovery": 0.17007278435849862,
+    "effectRecovery": 0.31125541125541123,
+    "verificationRecovery": 0.3971861471861472
+  },
+  "semanticRuleActionMetrics": {
+    "rules": {
+      "recall": 0.42857142857142855,
+      "precision": 0.42857142857142855,
+      "f1": 0.42857142857142855,
+      "matched": 3,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 7
+    },
+    "actions": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 7,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 7,
+      "components": {
+        "identification": {
+          "recall": 1,
+          "precision": 1,
+          "f1": 1,
+          "matched": 7,
+          "groundTruthTotal": 7,
+          "recoveredTotal": 7
+        },
+        "inputClassAccuracy": 1,
+        "inputClassChecked": 7,
+        "preconditionRecovery": 0.17007278435849862,
+        "effectRecovery": 0.31125541125541123,
+        "verificationRecovery": 0.3971861471861472
+      }
+    },
+    "judgeCallCount": 1,
+    "judgments": {
+      "rules": [
+        {
+          "goldId": "orderRequiresSeller",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "orderLineRequiresQuantity",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "orderResponseMustReferenceOrder",
+          "recoveredId": "canSubmitOrderResponse",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "orderChangeMustReferenceOrder",
+          "recoveredId": "canSendOrderChange",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "cancellationMustReferenceOrder",
+          "recoveredId": "canSendOrderCancellation",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "deliveryInformationShouldIdentifyConsignee",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "responseLineMustMatchOrderLine",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "actions": []
+    },
+    "resolvedMatches": {
+      "rules": [
+        {
+          "goldId": "orderResponseMustReferenceOrder",
+          "recoveredId": "canSubmitOrderResponse"
+        },
+        {
+          "goldId": "orderChangeMustReferenceOrder",
+          "recoveredId": "canSendOrderChange"
+        },
+        {
+          "goldId": "cancellationMustReferenceOrder",
+          "recoveredId": "canSendOrderCancellation"
+        }
+      ],
+      "actions": []
+    },
+    "heuristic": {
+      "rules": {
+        "recall": 0,
+        "precision": 0,
+        "f1": 0,
+        "matched": 0,
+        "groundTruthTotal": 7,
+        "recoveredTotal": 7
+      },
+      "actions": {
+        "identification": {
+          "recall": 1,
+          "precision": 1,
+          "f1": 1,
+          "matched": 7,
+          "groundTruthTotal": 7,
+          "recoveredTotal": 7
+        },
+        "inputClassAccuracy": 1,
+        "inputClassChecked": 7,
+        "preconditionRecovery": 0.17007278435849862,
+        "effectRecovery": 0.31125541125541123,
+        "verificationRecovery": 0.3971861471861472
+      }
+    },
+    "rawResponses": {
+      "rules": "1: NO MATCH -- No candidate requires an order to specify a seller.\n2: NO MATCH -- No candidate concerns recording an order line quantity.\n3: MATCH 1 -- Both require an order response to reference the order it answers.\n4: MATCH 2 -- Both require an order change to reference the order it modifies.\n5: MATCH 3 -- Both require an order cancellation to reference the order it cancels.\n6: NO MATCH -- No candidate concerns identifying a consignee.\n7: NO MATCH -- No candidate concerns matching a response line to an order line."
+    }
+  },
+  "offlineRescoreAgrees": true
+}

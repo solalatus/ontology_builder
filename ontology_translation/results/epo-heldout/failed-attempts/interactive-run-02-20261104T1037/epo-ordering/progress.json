@@ -1,0 +1,15 @@
+{
+ "domain": "epo-ordering",
+ "runId": "run-02",
+ "model": "gpt-6-sol",
+ "startedAt": "2026-11-04T10:23:48.281Z",
+ "elapsedSec": 827,
+ "phase": "failed",
+ "failureKind": "rate_limited",
+ "error": "epo-ordering/run-02: chat call failed: HTTP 429 Your requests to gpt-6-sol for gpt-6-sol in eastus2 have exceeded token rate limit.",
+ "costUsd": 0.246,
+ "appCalls": 34,
+ "promptTokens": 652744,
+ "cachedShare": 0.967,
+ "reasoningTokens": 2564
+}

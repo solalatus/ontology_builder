@@ -1,0 +1,188 @@
+{
+  "classes": [
+    {
+      "goldId": "Consignee",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "DeliveryInformation",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "Order",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderCancellation",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderCancellationConfirmation",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderCancellationRejection",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderChange",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderChangeConfirmation",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderChangeLine",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderChangeRejection",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderLine",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderResponse",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "Seller",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderResponseLine",
+      "recoveredId": "n5",
+      "weight": 0.6666666666666666
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_0",
+      "edgeId": "e1",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_2",
+      "edgeId": "e5",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_3",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_4",
+      "edgeId": "e2",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_9",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_10",
+      "edgeId": "e9",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_18",
+      "edgeId": "e11",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_19",
+      "edgeId": "e12",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_20",
+      "edgeId": "e13",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_21",
+      "edgeId": "e14",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_22",
+      "edgeId": "e6",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_23",
+      "edgeId": "e4",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_24",
+      "edgeId": "e10",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_25",
+      "edgeId": "e8",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "DeliveryInformation.actualDeliveryDate",
+      "hostNodeId": "n6",
+      "matchedPropertyName": "actualDeliveryDate"
+    },
+    {
+      "goldId": "DeliveryInformation.deliveryDeadline",
+      "hostNodeId": "n6",
+      "matchedPropertyName": "deliveryDeadline"
+    },
+    {
+      "goldId": "DeliveryInformation.requestedDeliveryPeriod",
+      "hostNodeId": "n6",
+      "matchedPropertyName": "requestedDeliveryPeriod"
+    },
+    {
+      "goldId": "DeliveryInformation.placeOfDelivery",
+      "hostNodeId": "n6",
+      "matchedPropertyName": "placeOfDelivery"
+    },
+    {
+      "goldId": "OrderLine.quantity",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "quantity"
+    },
+    {
+      "goldId": "OrderLine.price",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "price"
+    },
+    {
+      "goldId": "OrderResponseLine.backorderQuantity",
+      "hostNodeId": "n5",
+      "matchedPropertyName": "backorderQuantity"
+    },
+    {
+      "goldId": "OrderResponse.responseDescription",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "overallResponseDescription"
+    }
+  ]
+}

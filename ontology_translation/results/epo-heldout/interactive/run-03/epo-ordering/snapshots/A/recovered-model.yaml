@@ -1,0 +1,458 @@
+competency_questions:
+  - id: cq1
+    text: Which seller is an order going to?
+  - id: cq2
+    text: Who receives the invoice for an order?
+  - id: cq3
+    text: "What goods, services or works were requested on each order line?"
+  - id: cq4
+    text: What quantity was requested on each order line?
+  - id: cq5
+    text: What price is recorded on each order line?
+  - id: cq6
+    text: Where is the order to be delivered?
+  - id: cq7
+    text: What is the delivery deadline for the order?
+  - id: cq8
+    text: What delivery period was requested for the order?
+  - id: cq9
+    text: Who is the consignee for the order?
+  - id: cq10
+    text: What delivery terms apply to the order?
+  - id: cq11
+    text: What shipping priority was requested for the order?
+  - id: cq12
+    text: Is partial delivery allowed for the order?
+  - id: cq13
+    text: When was the order actually delivered?
+  - id: cq14
+    text: Has the seller responded to the order?
+  - id: cq15
+    text: "Did the seller's response accept, reject, or counter the order request?"
+  - id: cq16
+    text: Which order line does each seller response line answer?
+  - id: cq17
+    text: "What backorder quantity is recorded on a seller response line, where applicable?"
+  - id: cq18
+    text: What does the seller say about its ability to fulfil the order?
+  - id: cq19
+    text: Which order was a change sent for?
+  - id: cq20
+    text: What does each changed line request?
+  - id: cq21
+    text: Did the seller confirm or reject a particular change?
+  - id: cq22
+    text: Which order does a cancellation call off?
+  - id: cq23
+    text: Did the seller confirm or reject a particular cancellation?
+  - id: cq24
+    text: "Who or what originated the need for an order, according to its associated originator information?"
+  - id: cq25
+    text: What payment terms are recorded on the order?
+  - id: cq26
+    text: What allowances or discounts are specified for the order?
+  - id: cq27
+    text: Which order lines does each allowance or discount apply to?
+  - id: cq28
+    text: "Is discount information attached to an order line's price?"
+  - id: cq29
+    text: "What percentage is recorded in an allowance's information?"
+  - id: cq30
+    text: What reason and percentage are recorded in allowance or charge details?
+  - id: cq31
+    text: "Where VAT does not apply, what exemption reason and description are recorded in allowance or charge details?"
+  - id: cq32
+    text: "What tax category, scheme and percentage are recorded in the tax information associated with allowance or charge details?"
+  - id: cq33
+    text: "What is the order's total line amount?"
+  - id: cq34
+    text: "What is the order's total allowance amount?"
+  - id: cq35
+    text: "What is the order's total charge amount?"
+  - id: cq36
+    text: "What is the order's total before tax?"
+  - id: cq37
+    text: "What is the order's total after tax?"
+  - id: cq38
+    text: What amount was prepaid on the order?
+  - id: cq39
+    text: What rounding amount is recorded on the order?
+  - id: cq40
+    text: What is the final amount due for payment on the order?
+  - id: cq41
+    text: "What lines are included in a particular seller-issued order agreement, and what does each line say will be delivered?"
+  - id: cq42
+    text: What delivery period is recorded in the delivery information?
+  - id: cq43
+    text: What shipping mark is recorded in the delivery information?
+  - id: cq44
+    text: What tracking ID is recorded in the delivery information?
+  - id: cq45
+    text: What delivery e-mail is recorded for digital delivery?
+  - id: cq46
+    text: What access link is recorded for digital delivery?
+  - id: cq47
+    text: What download link is recorded for digital delivery?
+classes:
+  Order:
+    meaning: "A formal request to a seller for goods, services or works."
+    aliases: []
+    properties:
+      paymentTerm:
+        type: text
+      totalLineAmount:
+        type: number
+      totalAllowanceAmount:
+        type: number
+      totalChargeAmount:
+        type: number
+      totalTaxExclusiveAmount:
+        type: number
+      totalTaxInclusiveAmount:
+        type: number
+      prepaidAmount:
+        type: number
+      roundingAmount:
+        type: number
+      amountDueForPayment:
+        type: number
+  Order Line:
+    meaning: "A line of an order recording requested goods, services or works, their quantity, and their price."
+    aliases: []
+    properties:
+      quantity:
+        type: number
+      price:
+        type: number
+  Seller:
+    meaning: The party supplying an order.
+    aliases: []
+    properties: {}
+  Invoicee:
+    meaning: The party that receives and processes the invoice for an order.
+    aliases: []
+    properties: {}
+  Consignee:
+    meaning: "The party that physically receives and takes possession of a delivery, sometimes on another party's behalf."
+    aliases: []
+    properties: {}
+  Originator Information:
+    meaning: Information on an order about the need that prompted the purchase.
+    aliases: []
+    properties: {}
+  Originator:
+    meaning: The person or unit whose need prompted an order.
+    aliases: []
+    properties: {}
+  Delivery Information:
+    meaning: The order detail that records the delivery destination and timing and identifies the consignee.
+    aliases: []
+    properties:
+      placeOfDelivery:
+        type: text
+      deliveryDeadline:
+        type: date
+      requestedDeliveryPeriod:
+        type: text
+      actualDeliveryDate:
+        type: date
+      deliveryPeriod:
+        type: text
+      shippingMark:
+        type: text
+      trackingID:
+        type: text
+      deliveryEmail:
+        type: text
+      accessLink:
+        type: text
+      downloadLink:
+        type: text
+  Order Response:
+    meaning: "A seller's reply to a particular order describing its ability to fulfil the order."
+    aliases:
+      - seller response
+    properties:
+      responseDescription:
+        type: text
+  Order Response Line:
+    meaning: "A line of an order response answering a particular order line and, where applicable, recording a backorder quantity."
+    aliases:
+      - seller response line
+    properties:
+      backorderQuantity:
+        type: number
+  Order Change:
+    meaning: A request sent to a seller to change a particular order.
+    aliases: []
+    properties: {}
+  Order Change Line:
+    meaning: A line of an order change setting out a particular part of what the buyer wants changed.
+    aliases:
+      - changed line
+    properties: {}
+  Order Cancellation:
+    meaning: A request sent to a seller to cancel a particular order.
+    aliases: []
+    properties: {}
+  Order Change Confirmation:
+    meaning: A seller document confirming a particular order change.
+    aliases: []
+    properties: {}
+  Order Change Rejection:
+    meaning: A seller document rejecting a particular order change.
+    aliases: []
+    properties: {}
+  Order Cancellation Confirmation:
+    meaning: A seller document confirming a particular order cancellation.
+    aliases: []
+    properties: {}
+  Order Cancellation Rejection:
+    meaning: A seller document rejecting a particular order cancellation.
+    aliases: []
+    properties: {}
+  Delivery Agreement:
+    meaning: "The delivery terms applying to an order, as specified by its delivery information."
+    aliases: []
+    properties:
+      deliveryTerm:
+        type: text
+      requestedShippingPriority:
+        type: text
+      partialDeliveryAllowed:
+        type: boolean
+  Allowance Information:
+    meaning: Information specified by an order recording a discount that can be particular to one or more order lines.
+    aliases: []
+    properties:
+      percentage:
+        type: number
+        unit: percent
+  Allowance and Charge Information:
+    meaning: "Fuller details of discounts and charges, including their reason, percentage and any applicable VAT exemption explanation."
+    aliases:
+      - allowance or charge details
+    properties:
+      allowanceOrChargeReasonDescription:
+        type: text
+      percentage:
+        type: number
+        unit: percent
+      vatExemptionReason:
+        type: text
+      vatExemptionReasonDescription:
+        type: text
+  Tax Information:
+    meaning: "The tax category, scheme and percentage associated with allowance and charge information."
+    aliases: []
+    properties:
+      taxCategory:
+        type: text
+      taxScheme:
+        type: text
+      percentage:
+        type: number
+        unit: percent
+  Order Response Information:
+    meaning: "Information included in an order response that can be specific to a response line, distinct from the response description."
+    aliases: []
+    properties: {}
+  Order Agreement:
+    meaning: A seller-issued document setting out what will be delivered for a specific order.
+    aliases: []
+    properties: {}
+  Order Agreement Line:
+    meaning: An individual detail within an order agreement setting out what the seller says will be delivered.
+    aliases: []
+    properties: {}
+relationships:
+  - name: specifiesSeller
+    from: Order
+    to: Seller
+    meaning: The order identifies the seller it is going to.
+    aliases: []
+  - name: specifiesInvoicee
+    from: Order
+    to: Invoicee
+    meaning: The order identifies who receives and processes its invoice.
+    aliases: []
+  - name: hasOrderLine
+    from: Order
+    to: Order Line
+    meaning: The order has lines stating what is requested.
+    aliases: []
+  - name: specifiesOriginatorInformation
+    from: Order
+    to: Originator Information
+    meaning: The order records information about the need behind the purchase.
+    aliases:
+      - records originator information
+  - name: specifiesDeliveryInformation
+    from: Order
+    to: Delivery Information
+    meaning: "The order specifies its delivery timing, destination and other delivery details."
+    aliases: []
+  - name: concernsConsignee
+    from: Delivery Information
+    to: Consignee
+    meaning: Delivery information concerns the party that receives the delivery.
+    aliases: []
+  - name: specifiesDeliveryAgreement
+    from: Delivery Information
+    to: Delivery Agreement
+    meaning: Delivery information specifies the terms that apply to delivery.
+    aliases: []
+  - name: concernsOriginator
+    from: Originator Information
+    to: Originator
+    meaning: Originator information concerns the person or unit whose need prompted the purchase.
+    aliases: []
+  - name: submittedForOrder
+    from: Order Response
+    to: Order
+    meaning: The order response answers the order for which it was submitted.
+    aliases: []
+  - name: hasOrderResponseLine
+    from: Order Response
+    to: Order Response Line
+    meaning: The order response has lines setting out line-by-line replies.
+    aliases: []
+  - name: specifiesOrderResponseInformation
+    from: Order Response
+    to: Order Response Information
+    meaning: The order response includes its order response information.
+    aliases: []
+  - name: submittedForOrderLine
+    from: Order Response Line
+    to: Order Line
+    meaning: The response line answers a particular order line.
+    aliases: []
+  - name: specificToOrderResponseLine
+    from: Order Response Information
+    to: Order Response Line
+    meaning: Order response information relates to a particular response line when it is line-specific.
+    aliases: []
+  - name: submittedForOrder
+    from: Order Change
+    to: Order
+    meaning: The order change requests changes to the order for which it was submitted.
+    aliases: []
+  - name: hasOrderChangeLine
+    from: Order Change
+    to: Order Change Line
+    meaning: The order change has lines describing the requested changes.
+    aliases: []
+  - name: submittedForOrder
+    from: Order Cancellation
+    to: Order
+    meaning: The order cancellation calls off the order for which it was submitted.
+    aliases: []
+  - name: respondsTo
+    from: Order Change Confirmation
+    to: Order Change
+    meaning: "The seller's change confirmation answers the particular order change."
+    aliases: []
+  - name: respondsTo
+    from: Order Change Rejection
+    to: Order Change
+    meaning: "The seller's change rejection answers the particular order change."
+    aliases: []
+  - name: respondsTo
+    from: Order Cancellation Confirmation
+    to: Order Cancellation
+    meaning: "The seller's cancellation confirmation answers the particular order cancellation."
+    aliases: []
+  - name: respondsTo
+    from: Order Cancellation Rejection
+    to: Order Cancellation
+    meaning: "The seller's cancellation rejection answers the particular order cancellation."
+    aliases: []
+  - name: specifiesAllowanceInformation
+    from: Order
+    to: Allowance Information
+    meaning: The order specifies an allowance.
+    aliases: []
+  - name: specificToOrderLine
+    from: Allowance Information
+    to: Order Line
+    meaning: The allowance information applies to a particular order line.
+    aliases: []
+  - name: hasTaxInformation
+    from: Allowance and Charge Information
+    to: Tax Information
+    meaning: Allowance and charge information has its associated tax details.
+    aliases: []
+  - name: hasOrderAgreementLine
+    from: Order Agreement
+    to: Order Agreement Line
+    meaning: The order agreement has the individual lines setting out what the seller says will be delivered.
+    aliases: []
+rules:
+  canSubmitOrderResponse:
+    conditions:
+      - The order answered by the Order Response has been identified for its submittedForOrder relationship.
+  canSubmitOrderChange:
+    conditions:
+      - The order for which the Order Change is submitted has been identified for its submittedForOrder relationship.
+  canSubmitOrderCancellation:
+    conditions:
+      - The order for which the Order Cancellation is submitted has been identified for its submittedForOrder relationship.
+  canRecordOrderChangeConfirmation:
+    conditions:
+      - The particular Order Change answered by the Order Change Confirmation has been identified for its respondsTo relationship.
+      - That Order Change identifies the Order for which it was submitted through submittedForOrder.
+  canRecordOrderChangeRejection:
+    conditions:
+      - The particular Order Change answered by the Order Change Rejection has been identified for its respondsTo relationship.
+      - That Order Change identifies the Order for which it was submitted through submittedForOrder.
+  canRecordOrderCancellationConfirmation:
+    conditions:
+      - The particular Order Cancellation answered by the Order Cancellation Confirmation has been identified for its respondsTo relationship.
+      - That Order Cancellation identifies the Order for which it was submitted through submittedForOrder.
+  canRecordOrderCancellationRejection:
+    conditions:
+      - The particular Order Cancellation answered by the Order Cancellation Rejection has been identified for its respondsTo relationship.
+      - That Order Cancellation identifies the Order for which it was submitted through submittedForOrder.
+actions:
+  submitOrderResponse:
+    input: Order Response
+    preconditions:
+      - canSubmitOrderResponse
+    effect: Record the Order Response submittedForOrder link to the identified Order.
+    verification: Read the Order Response submittedForOrder link and confirm it points to the intended Order.
+  submitOrderChange:
+    input: Order Change
+    preconditions:
+      - canSubmitOrderChange
+    effect: Record the Order Change submittedForOrder link to the identified Order.
+    verification: Read the Order Change submittedForOrder link and confirm it points to the intended Order.
+  submitOrderCancellation:
+    input: Order Cancellation
+    preconditions:
+      - canSubmitOrderCancellation
+    effect: Record the Order Cancellation submittedForOrder link to the identified Order.
+    verification: Read the Order Cancellation submittedForOrder link and confirm it points to the intended Order.
+  recordOrderChangeConfirmation:
+    input: Order Change Confirmation
+    preconditions:
+      - canRecordOrderChangeConfirmation
+    effect: Record the Order Change Confirmation respondsTo link to the identified Order Change.
+    verification: Read the Order Change Confirmation respondsTo link and confirm it points to the intended Order Change.
+  recordOrderChangeRejection:
+    input: Order Change Rejection
+    preconditions:
+      - canRecordOrderChangeRejection
+    effect: Record the Order Change Rejection respondsTo link to the identified Order Change.
+    verification: Read the Order Change Rejection respondsTo link and confirm it points to the intended Order Change.
+  recordOrderCancellationConfirmation:
+    input: Order Cancellation Confirmation
+    preconditions:
+      - canRecordOrderCancellationConfirmation
+    effect: Record the Order Cancellation Confirmation respondsTo link to the identified Order Cancellation.
+    verification: Read the Order Cancellation Confirmation respondsTo link and confirm it points to the intended Order Cancellation.
+  recordOrderCancellationRejection:
+    input: Order Cancellation Rejection
+    preconditions:
+      - canRecordOrderCancellationRejection
+    effect: Record the Order Cancellation Rejection respondsTo link to the identified Order Cancellation.
+    verification: Read the Order Cancellation Rejection respondsTo link and confirm it points to the intended Order Cancellation.

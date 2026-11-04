@@ -1,0 +1,19 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [],
+    "properties": [
+      {
+        "goldId": "AllowanceChargeInformation.vatExemptionReason",
+        "matchedPropertyName": "VATExemptionReason"
+      }
+    ],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

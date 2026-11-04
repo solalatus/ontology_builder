@@ -1,0 +1,223 @@
+classes:
+  Order:
+    meaning: "Our formal request to a seller for goods, services or works to be delivered."
+    aliases: []
+    properties: {}
+  OrderLine:
+    meaning: "The part of an order that sets out a particular unit of goods, services or works requested, with its quantity and recorded price."
+    aliases: []
+    properties:
+      quantity:
+        type: number
+      price:
+        type: number
+  Seller:
+    meaning: "The party supplying what was ordered and bound to the buyer under the contract."
+    aliases:
+      - Supplier
+    properties: {}
+  OrderResponse:
+    meaning: "The seller’s formal reply to a particular order, saying what they can fulfil."
+    aliases: []
+    properties:
+      overallResponseDescription:
+        type: text
+  ResponseLine:
+    meaning: "The part of an order response about a particular order line, where any backorder quantity is recorded."
+    aliases: []
+    properties:
+      backorderQuantity:
+        type: number
+  DeliveryInformation:
+    meaning: "The details associated with an order that say where and when delivery is requested, who receives it, and when it actually happened if that date is recorded."
+    aliases: []
+    properties:
+      placeOfDelivery:
+        type: text
+      deliveryDeadline:
+        type: date
+      requestedDeliveryPeriod:
+        type: text
+      actualDeliveryDate:
+        type: date
+  Consignee:
+    meaning: "The party that receives and takes possession of the delivery, sometimes on the buyer’s behalf."
+    aliases: []
+    properties: {}
+  OrderChange:
+    meaning: "Our formal request to alter what was requested in a particular order."
+    aliases: []
+    properties: {}
+  OrderChangeLine:
+    meaning: "A line within an order change setting out a particular part of the requested change."
+    aliases: []
+    properties: {}
+  OrderCancellation:
+    meaning: "Our formal document requesting that a previous order or order change be cancelled, submitted for a particular order."
+    aliases: []
+    properties: {}
+  OrderChangeConfirmation:
+    meaning: "The seller’s document acknowledging a particular order change."
+    aliases: []
+    properties: {}
+  OrderChangeRejection:
+    meaning: "The seller’s document saying it does not accept a particular order change."
+    aliases: []
+    properties: {}
+  OrderCancellationConfirmation:
+    meaning: "The seller’s document acknowledging a particular cancellation request."
+    aliases: []
+    properties: {}
+  OrderCancellationRejection:
+    meaning: "The seller’s document stating that it does not accept a particular cancellation request."
+    aliases: []
+    properties: {}
+
+relationships:
+  - name: has
+    from: Order
+    to: OrderLine
+    meaning: "The lines are the individual goods, services or works requested as part of that order."
+    aliases: []
+  - name: specifies
+    from: Order
+    to: Seller
+    meaning: "The order names the party asked to supply what is ordered."
+    aliases: []
+  - name: specifies
+    from: Order
+    to: DeliveryInformation
+    meaning: "The order includes the details used to arrange and record its delivery."
+    aliases: []
+  - name: isSubmittedFor
+    from: OrderChange
+    to: Order
+    meaning: "The change request identifies the particular earlier order it asks to modify."
+    aliases: []
+  - name: hasItsOwnChangeLines
+    from: OrderChange
+    to: OrderChangeLine
+    meaning: "The lines set out parts of the requested change without necessarily matching directly to original order lines."
+    aliases: []
+  - name: isSubmittedFor
+    from: OrderResponse
+    to: Order
+    meaning: "The seller’s reply identifies the particular order it answers."
+    aliases: []
+  - name: has
+    from: OrderResponse
+    to: ResponseLine
+    meaning: "The response lines break down what the seller says about fulfilling the order."
+    aliases: []
+  - name: isSubmittedFor
+    from: ResponseLine
+    to: OrderLine
+    meaning: "The response line addresses a particular requested order line, not merely a similar item."
+    aliases: []
+  - name: concerns
+    from: DeliveryInformation
+    to: Consignee
+    meaning: "The delivery information relates to the party that receives and takes possession of the delivery."
+    aliases: []
+  - name: isSubmittedFor
+    from: OrderCancellation
+    to: Order
+    meaning: "The cancellation request identifies the particular order it asks to call off."
+    aliases: []
+  - name: respondsTo
+    from: OrderChangeConfirmation
+    to: OrderChange
+    meaning: "The confirmation acknowledges the particular change request it answers."
+    aliases: []
+  - name: respondsTo
+    from: OrderChangeRejection
+    to: OrderChange
+    meaning: "The rejection says the particular change request it answers is not accepted."
+    aliases: []
+  - name: respondsTo
+    from: OrderCancellationConfirmation
+    to: OrderCancellation
+    meaning: "The confirmation acknowledges the particular cancellation request it answers."
+    aliases: []
+  - name: respondsTo
+    from: OrderCancellationRejection
+    to: OrderCancellation
+    meaning: "The rejection says the particular cancellation request it answers is not accepted."
+    aliases: []
+
+rules:
+  - name: orderLineNeedsQuantity
+    conditions:
+      - "An order line needs a recorded quantity to be complete for ordering."
+  - name: missingBackorderQuantityIsUnknown
+    conditions:
+      - "If a response line has no backorder quantity, its backorder amount is unknown from that line, not zero."
+  - name: missingActualDeliveryDateDoesNotProveNonDelivery
+    conditions:
+      - "If no actual delivery date is recorded, that does not prove delivery has not happened."
+  - name: submittedRequestIsNotAcceptedOutcome
+    conditions:
+      - "Submitting an order change or order cancellation does not establish that the seller accepted it."
+  - name: missingReplyIsNotRejection
+    conditions:
+      - "If no confirmation or rejection is found for a request, do not treat the request as rejected."
+  - name: backorderDoesNotEstablishFulfilledQuantity
+    conditions:
+      - "Do not calculate how much a response line can fulfil now from its backorder quantity alone."
+  - name: overallDescriptionIsNotLineByLineAnswer
+    conditions:
+      - "Do not present an order response’s overall response description as what the seller can fulfil on each line."
+  - name: unresolvedResponseLineIsNotMatched
+    conditions:
+      - "A response line cannot be treated as matched until the particular order line it addresses is established."
+      - "An unresolved response line does not by itself block recording the overall order response against its intended order."
+
+actions:
+  - name: recordOrderResponse
+    input: OrderResponse
+    preconditions:
+      - "Establish the particular order the response answers; stop rather than guess if it cannot be established."
+    effect: "Record the response against its intended order without implying that every response line is matched."
+    verification: "Check that the recorded link points to the intended order and retain the linked response as evidence."
+  - name: recordResponseLineAsMatched
+    input: ResponseLine
+    preconditions:
+      - "Establish the particular order line the response line addresses; do not attach it to a similar-looking line."
+    effect: "Record the response line as matched to that particular order line."
+    verification: "Check its link to the particular order line before treating it as a recorded line-by-line answer."
+  - name: submitOrderChange
+    input: OrderChange
+    preconditions:
+      - "Establish the particular order the change would modify; stop rather than guess if it cannot be established."
+    effect: "Submit the change linked to the intended order without treating submission as seller acceptance."
+    verification: "Check that the recorded link points to the intended order and retain the linked change as evidence."
+  - name: submitOrderCancellation
+    input: OrderCancellation
+    preconditions:
+      - "Establish the particular order the cancellation would call off; stop rather than guess if it cannot be established."
+    effect: "Submit the cancellation linked to the intended order without treating submission as seller acceptance."
+    verification: "Check that the recorded link points to the intended order and retain the linked cancellation as evidence."
+  - name: recordOrderChangeConfirmation
+    input: OrderChangeConfirmation
+    preconditions:
+      - "Establish the particular order change it answers and the order that change was submitted for; stop rather than guess if either cannot be established."
+    effect: "Record the confirmation linked to that particular change as the seller’s acknowledgement."
+    verification: "Check that the link points to the intended change and retain the linked confirmation as evidence."
+  - name: recordOrderChangeRejection
+    input: OrderChangeRejection
+    preconditions:
+      - "Establish the particular order change it answers and the order that change was submitted for; stop rather than guess if either cannot be established."
+    effect: "Record the rejection linked to that particular change as the seller’s non-acceptance."
+    verification: "Check that the link points to the intended change and retain the linked rejection as evidence."
+  - name: recordOrderCancellationConfirmation
+    input: OrderCancellationConfirmation
+    preconditions:
+      - "Establish the particular order cancellation it answers and the order that cancellation was submitted for; stop rather than guess if either cannot be established."
+    effect: "Record the confirmation linked to that particular cancellation as the seller’s acknowledgement."
+    verification: "Check that the link points to the intended cancellation and retain the linked confirmation as evidence."
+  - name: recordOrderCancellationRejection
+    input: OrderCancellationRejection
+    preconditions:
+      - "Establish the particular order cancellation it answers and the order that cancellation was submitted for; stop rather than guess if either cannot be established."
+    effect: "Record the rejection linked to that particular cancellation as the seller’s non-acceptance."
+    verification: "Check that the link points to the intended cancellation and retain the linked rejection as evidence."
