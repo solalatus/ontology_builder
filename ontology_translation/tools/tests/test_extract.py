@@ -111,6 +111,30 @@ class ExtractAllTests(unittest.TestCase):
         self.assertTrue(has_point["range"][0].endswith("Point"))
         self.assertTrue(has_point["inverseOf"][0].endswith("isPointOf"))
 
+    def test_union_domain_is_expanded_to_its_member_classes(self):
+        ttl = """
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <http://example.org/u#> .
+ex:A a owl:Class . ex:B a owl:Class . ex:C a owl:Class . ex:T a owl:Class .
+ex:hasTax a owl:ObjectProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( ex:A [ a owl:Class ; owl:unionOf ( ex:B ex:C ) ] ) ] ;
+    rdfs:range ex:T .
+ex:odd a owl:ObjectProperty ;
+    rdfs:domain [ a owl:Class ; owl:intersectionOf ( ex:A ex:B ) ] .
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "u.ttl"
+            path.write_text(ttl, encoding="utf-8")
+            ir = extract_all(parse_graph(path), source_ontology="u")
+        has_tax = next(p for p in ir["object_properties"] if p["iri"].endswith("hasTax"))
+        self.assertEqual([local_name(d) for d in has_tax["domain"]], ["A", "B", "C"])
+        self.assertEqual([local_name(r) for r in has_tax["range"]], ["T"])
+        odd = next(p for p in ir["object_properties"] if p["iri"].endswith("odd"))
+        self.assertEqual(len(odd["domain"]), 1)
+        self.assertFalse(odd["domain"][0].startswith("http"))  # non-union expression stays an opaque node id
+
     def test_datatype_property_extracted(self):
         names = [p["labels"][0] for p in self.ir["datatype_properties"]]
         self.assertIn("status", names)

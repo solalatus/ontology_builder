@@ -4,7 +4,7 @@ Human-style evidence supplementing the automated QA suite (issue #103).
 Full structured data is in `manual-spot-check.json`; this file is the
 readable summary.
 
-## Round 1 (2026-11-04) — 10/10 accept, 0/10 reject
+## Round 1 (2026-11-04) — 9/10 accept, 1/10 reject (corrected)
 
 **Reviewer:** coding agent (Claude subagent), in-session. **Not yet
 reviewed by the repo owner.** Every earlier domain's round was reviewed by
@@ -31,7 +31,7 @@ has no GitHub issue number to use as the seed).
 | actions | 7 | 1 |
 | **Total** | **104** | **10 (9.6%)** |
 
-## Result: 10 accept, 0 reject
+## Result: 9 accept, 1 reject (corrected 2026-11-04)
 
 All 10 sampled items were checked against a freshly regenerated
 `source_ir.json` (parsed straight from the two checksum-pinned files in
@@ -57,7 +57,13 @@ or the property/relationship has a real `rdfs:domain`/`rdfs:range` in
 - **`actions.submitOrderResponse`** — accepted. Effect and verification
   restate `isSubmittedForOrder` (range Order).
 - **`rules.taxInformationShouldBePresentWhenResponsePricingIsQualified`**
-  — **accepted, flagged.** Both conditions use links the source really
+  — **rejected (corrected; first recorded as "accepted, flagged").** The
+  original note below said both conditions use links the source has on
+  OrderResponseInformation. That is false: `hasTaxInformation`'s domain is
+  an `owl:unionOf` without OrderResponseInformation, and no source property
+  links OrderResponseInformation to AllowanceInformation. Repair round 2
+  dropped the rule and replaced both links (see Round 2). Original note, kept
+  for the record: "Both conditions use links the source really
   has on OrderResponseInformation (`hasTaxInformation`,
   `hasAllowanceInformation`, restriction-grounded). The normative part
   (tax details expected when allowances qualify the pricing) is cited as
@@ -99,3 +105,22 @@ One `repair.py` round on run-1 (3 items, 0.0158 USD):
   (`DeliveryInformation.deliveryPeriod`, `Order.validityPeriod`,
   `OrderLine.accountingCost`), all majority-supported. 0 contested
   exclusions.
+
+## Round 2 (2026-11-04) — 9/9 accept, 0/9 reject
+
+**Reviewer:** coding agent (Claude subagent), in-session. **Not yet reviewed by the repo owner.**
+**Candidate:** the round-2 gold, `reference.domain.yaml` sha256 `ecd6fe08…`, which every run was scored against.
+**Why round 2:** expanding the source's `owl:unionOf` domains showed four round-1 defects that neither the compiler nor the judges could see: two links with a wrong or missing source, the rule above built on them, and two correct items cited only as "standard practice". Repair round 2 fixed them: [9] and `AllowanceInformation.percentage` regrounded; the OrderResponseInformation→AllowanceInformation link replaced by `Order specifiesAllowanceInformation AllowanceInformation`; the OrderResponseInformation→TaxInformation link replaced by `AllowanceChargeInformation hasTaxInformation TaxInformation`; the rule dropped.
+
+**Sampling:** stratified, largest remainder, seed 7, round-1 paths excluded. 9 of 94: 2 classes, 3 properties, 2 relationships, 1 rule, 1 action.
+
+All 9 accepted. Each restates the source definition or matches a real domain/range once unions are expanded:
+- `classes.OrderCancellationConfirmation`, `classes.DeliveryInformation`;
+- `Order.totalTaxInclusiveAmount`, `DeliveryAgreement.generalDeliveryTerm`, `DeliveryAgreement.partialDeliveryAllowed`;
+- `relationships[2]` (OrderChange hasLine OrderChangeLine), `relationships[12]` (OrderResponse specifiesOrderResponseInformation);
+- `rules.orderChangeMustReferenceOrder`;
+- `actions.submitOrderCancellation` (`isSubmittedForOrder`'s union domain includes OrderChange and OrderCancellation).
+
+Drawn and reviewed before the runs. Written here after the runs, because the folder was frozen for them; the gold itself was not changed.
+
+**Known, kept:** `relationships[17]` OrderLine hasPriceDiscountInformation AllowanceInformation is a disclosed two-step shortcut through the out-of-module Price class. Three properties (`hasStatus`, `hasAmount`, `isCalculatedOn`) stay excluded with an inaccurate "unnamed domain" reason. That comes from the `extract.py` unionOf limitation, fixed after the runs; see `translation-report.md`.

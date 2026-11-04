@@ -19,5 +19,25 @@ translation of the ePO eOrdering module into this project's `.domain.yaml`
 format. Attribution: eProcurement Ontology (ePO) v5.2.0, eOrdering module,
 © European Union, Publications Office of the European Union.
 
-This note records the source licence and attribution only. How the derived
-files are licensed in this repository is not decided here.
+## Licence of this folder and of the ePO run outputs (decided 2026-11-04)
+
+The rest of this repository is MIT-licensed (`LICENSE`). This folder is the
+exception:
+
+- `source/` keeps its original notice and licence: EUPL-1.2, © European Union.
+- The derived files in this folder (`reference.domain.yaml`,
+  `translation.json`, `translation-evaluation.json`, `translation-report.md`,
+  `persona.md`, `manual-spot-check.*`, `source-manifest.yaml`, this note) are
+  a translation of the ePO eOrdering module. They are distributed under the
+  **EUPL-1.2**, the licence of the work they derive from, with the attribution
+  above. SPDX: `EUPL-1.2`.
+- The recovered models and transcripts under
+  `ontology_translation/results/epo-heldout/` reproduce the same vocabulary.
+  They carry the same licence and attribution; see the README in that folder.
+- The MIT licence of the tool, the pipeline and the evaluation code is not
+  affected. EUPL-1.2 covers only these ePO-derived files.
+
+Changes against the source: the module was translated by an LLM-assisted
+pipeline (gpt-5.4) into this project's `.domain.yaml` format, and repaired in
+two rounds. The process is documented in `translation-report.md` and
+`manual-spot-check.md`.

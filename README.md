@@ -234,3 +234,5 @@ node --test tests/evals/*.eval.spec.mjs
 ## License
 
 MIT — see `LICENSE`.
+
+Exception: the ePO eOrdering benchmark domain (`ontology_translation/domains/epo-ordering/`) and its run outputs (`ontology_translation/results/epo-heldout/`) derive from the EU eProcurement Ontology and are distributed under the EUPL-1.2, © European Union. See `ontology_translation/domains/epo-ordering/LICENSE-NOTE.md`.

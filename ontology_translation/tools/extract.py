@@ -160,6 +160,30 @@ def extract_classes(
     return records
 
 
+def _class_expression_iris(graph: rdflib.Graph, node) -> list[str]:
+    """Named classes a domain/range node stands for.
+
+    A named class is itself. An anonymous owl:unionOf class expression stands
+    for its members (expanded recursively), so a property declared with
+    ``rdfs:domain [ owl:unionOf (A B C) ]`` reports domain A, B and C instead
+    of an opaque blank-node id that matches no class. ePO, for example,
+    declares 19 of its 80 eOrdering properties this way. Any other anonymous
+    expression (intersection, complement, restriction) is kept as before: its
+    node id, which matches nothing and so stays visibly unresolved.
+    """
+    if not isinstance(node, rdflib.BNode):
+        return [str(node)]
+    union = graph.value(node, OWL.unionOf)
+    if union is None:
+        return [str(node)]
+    members = []
+    for member in rdflib.collection.Collection(graph, union):
+        for iri in _class_expression_iris(graph, member):
+            if iri not in members:
+                members.append(iri)
+    return members
+
+
 def _property_records(
     graph: rdflib.Graph, rdf_type, kind: str, source_ontology: str,
     extra_definition_preds: set = frozenset(), extra_alt_label_preds: set = frozenset(),
@@ -167,8 +191,8 @@ def _property_records(
     records = []
     for subject in sorted(graph.subjects(RDF.type, rdf_type)):
         record = _term_record(graph, subject, kind, source_ontology, extra_definition_preds, extra_alt_label_preds)
-        record["domain"] = sorted(str(d) for d in graph.objects(subject, RDFS.domain))
-        record["range"] = sorted(str(r) for r in graph.objects(subject, RDFS.range))
+        record["domain"] = sorted({iri for d in graph.objects(subject, RDFS.domain) for iri in _class_expression_iris(graph, d)})
+        record["range"] = sorted({iri for r in graph.objects(subject, RDFS.range) for iri in _class_expression_iris(graph, r)})
         record["inverseOf"] = sorted(str(i) for i in graph.objects(subject, OWL.inverseOf))
         records.append(record)
     return records

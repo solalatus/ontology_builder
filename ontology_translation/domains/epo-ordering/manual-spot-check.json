@@ -557,10 +557,532 @@
         "classes.AllowanceChargeInformation.properties.allowanceChargeReasonDescription": "accept",
         "relationships[13]": "accept",
         "relationships[5]": "accept",
-        "rules.taxInformationShouldBePresentWhenResponsePricingIsQualified": "accept",
+        "rules.taxInformationShouldBePresentWhenResponsePricingIsQualified": "reject",
         "actions.submitOrderResponse": "accept"
       },
-      "result": "10/10 accept, 0/10 reject"
+      "result": "9/10 accept, 1/10 reject",
+      "correction": "Corrected 2026-11-04 (after the runs, without changing the gold). The round-1 note called both conditions of this rule restriction-grounded. That is false: hasTaxInformation's domain is an owl:unionOf that does not include OrderResponseInformation, and no source property links OrderResponseInformation to AllowanceInformation. Found by expanding the source's unionOf domains (extract.py passes them on only as opaque blank-node ids). The rule was dropped and both links were replaced in repair round 2; the round-2 gold, against which every run was scored, no longer contains them. Relationship indices in this round refer to the round-1 candidate."
+    },
+    {
+      "round": 2,
+      "date": "2026-11-04",
+      "reviewer": "coding agent (Claude subagent), in-session; NOT yet reviewed by the repo owner -- owner review pending",
+      "artefact_definition": "every individually source-mapped element in translation.json mappings list -- classes, class properties, relationships, rules, actions. Competency questions excluded.",
+      "sampling": {
+        "method": "stratified by artefact type, proportional allocation (largest remainder), seed=7; round-1 paths excluded",
+        "population": {
+          "classes": 23,
+          "properties": 34,
+          "relationships": 24,
+          "rules": 7,
+          "actions": 6
+        },
+        "population_total": 94,
+        "allocation": {
+          "classes": 2,
+          "properties": 3,
+          "relationships": 2,
+          "rules": 1,
+          "actions": 1
+        },
+        "sample_size": 9
+      },
+      "candidate": "round-2 gold (reference.domain.yaml sha256 ecd6fe08106b8895c269829dab519c980dc2e8fdafaf44cad0a8491d091ce8d7)",
+      "items": [
+        {
+          "target_path": "classes.OrderCancellationConfirmation",
+          "target_content": {
+            "meaning": "A document acknowledging an order cancellation."
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#OrderCancellationConfirmation"
+            ],
+            "source_evidence": "\"A Document providing information on the acknowledgment of the Order Cancellation.\"",
+            "confidence": "high",
+            "rationale": "Directly mapped from the source class using its definition as the class meaning."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderCancellationConfirmation",
+              "kind": "class",
+              "labels": [
+                "Order Cancellation Confirmation"
+              ],
+              "definitions": [
+                "A Document providing information on the acknowledgment of the Order Cancellation."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#PostAwardDocument"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.DeliveryInformation",
+          "target_content": {
+            "meaning": "Information about the timing, destination, delivery agreement, and involved parties for delivery.",
+            "properties": {
+              "accessURL": {
+                "type": "text"
+              },
+              "actualDeliveryDate": {
+                "type": "date"
+              },
+              "deliveryDeadline": {
+                "type": "date"
+              },
+              "deliveryEmail": {
+                "type": "text"
+              },
+              "downloadURL": {
+                "type": "text"
+              },
+              "trackingID": {
+                "type": "text"
+              },
+              "shippingMark": {
+                "type": "text"
+              },
+              "deliveryPeriod": {
+                "type": "text"
+              },
+              "requestedDeliveryPeriod": {
+                "type": "text"
+              },
+              "placeOfDelivery": {
+                "type": "text"
+              }
+            }
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#DeliveryInformation"
+            ],
+            "source_evidence": "\"Information about the timing, the delivery destination, the delivery agreement and the involved parties.\"",
+            "confidence": "high",
+            "rationale": "Directly mapped from the source class using its definition as the class meaning."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#DeliveryInformation",
+              "kind": "class",
+              "labels": [
+                "Delivery Information"
+              ],
+              "definitions": [
+                "Information about the timing, the delivery destination, the delivery agreement and the involved parties."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#InformationHub"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.Order.properties.totalTaxInclusiveAmount",
+          "target_content": {
+            "type": "number",
+            "unit": "monetary value"
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#Order",
+              "http://data.europa.eu/a4g/ontology#hasTotalTaxInclusiveAmount"
+            ],
+            "source_evidence": "\"Relation indicating the overall Monetary Value with Tax.\"",
+            "confidence": "high",
+            "rationale": "The source explicitly gives Order a total tax inclusive amount, simplified into a numeric property."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#Order",
+              "kind": "class",
+              "labels": [
+                "Order"
+              ],
+              "definitions": [
+                "A formal request of the Buyer to the Seller specifying the goods, services or works to be delivered. Additional Information: A Buyer submits an Order for delivery of goods, services or works to a Seller."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#PostAwardDocument"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#hasTotalTaxInclusiveAmount",
+              "kind": "object_property",
+              "labels": [
+                "has Total Tax Inclusive Amount"
+              ],
+              "definitions": [
+                "Relation indicating the overall Monetary Value with Tax."
+              ],
+              "domain": [
+                "http://data.europa.eu/a4g/ontology#Order"
+              ],
+              "range": [
+                "http://data.europa.eu/a4g/ontology#MonetaryValue"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.DeliveryAgreement.properties.generalDeliveryTerm",
+          "target_content": {
+            "type": "text"
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#DeliveryAgreement",
+              "http://data.europa.eu/a4g/ontology#hasGeneralDeliveryTerm"
+            ],
+            "source_evidence": "\"Terms and conditions related to the delivery of goods. (epo-ord:DeliveryAgreement)\"",
+            "confidence": "high",
+            "rationale": "Direct datatype property on DeliveryAgreement mapped to a text property."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#DeliveryAgreement",
+              "kind": "class",
+              "labels": [
+                "Delivery Agreement"
+              ],
+              "definitions": [
+                "Term applying to the delivery of goods, services and works. Additional Information: Delivery terms identifier can normally be Incoterms accompanied by the description of specific conditions related to the delivery."
+              ],
+              "parents": []
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#hasGeneralDeliveryTerm",
+              "kind": "datatype_property",
+              "labels": [
+                "has General Delivery Term"
+              ],
+              "definitions": [
+                "Terms and conditions related to the delivery of goods. (epo-ord:DeliveryAgreement)"
+              ],
+              "domain": [
+                "http://data.europa.eu/a4g/ontology#DeliveryAgreement"
+              ],
+              "range": [
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.DeliveryAgreement.properties.partialDeliveryAllowed",
+          "target_content": {
+            "type": "boolean"
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#DeliveryAgreement",
+              "http://data.europa.eu/a4g/ontology#isPartialDeliveryAllowed"
+            ],
+            "source_evidence": "\"An indicator to state if partial delivery is allowed or not. (epo-ord:DeliveryAgreement)\"",
+            "confidence": "high",
+            "rationale": "Direct boolean datatype property on DeliveryAgreement mapped to a boolean property."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#DeliveryAgreement",
+              "kind": "class",
+              "labels": [
+                "Delivery Agreement"
+              ],
+              "definitions": [
+                "Term applying to the delivery of goods, services and works. Additional Information: Delivery terms identifier can normally be Incoterms accompanied by the description of specific conditions related to the delivery."
+              ],
+              "parents": []
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#isPartialDeliveryAllowed",
+              "kind": "datatype_property",
+              "labels": [
+                "is Partial Delivery Allowed"
+              ],
+              "definitions": [
+                "An indicator to state if partial delivery is allowed or not. (epo-ord:DeliveryAgreement)"
+              ],
+              "domain": [
+                "http://data.europa.eu/a4g/ontology#DeliveryAgreement"
+              ],
+              "range": [
+                "http://www.w3.org/2001/XMLSchema#boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "relationships[2]",
+          "target_content": {
+            "name": "hasLine",
+            "from": "OrderChange",
+            "to": "OrderChangeLine",
+            "meaning": "The order change incorporates an order change line.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#comprisesOrderChangeLine",
+              "http://data.europa.eu/a4g/ontology#OrderChange",
+              "http://data.europa.eu/a4g/ontology#OrderChangeLine"
+            ],
+            "source_evidence": "\"Incorporates Order Change Line.\" with domain OrderChange and range OrderChangeLine",
+            "confidence": "high",
+            "rationale": "Direct object property with matching included endpoints mapped to a hasLine relationship."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#comprisesOrderChangeLine",
+              "kind": "object_property",
+              "labels": [
+                "comprises Order Change Line"
+              ],
+              "definitions": [
+                "Incorporates Order Change Line."
+              ],
+              "domain": [
+                "http://data.europa.eu/a4g/ontology#OrderChange"
+              ],
+              "range": [
+                "http://data.europa.eu/a4g/ontology#OrderChangeLine"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderChange",
+              "kind": "class",
+              "labels": [
+                "Order Change"
+              ],
+              "definitions": [
+                "A Document providing information on the formal request from the Buyer to the Seller specifying the requested change in goods, services or works to be delivered in respect to a previous Order."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#Order"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderChangeLine",
+              "kind": "class",
+              "labels": [
+                "Order Change Line"
+              ],
+              "definitions": [
+                "Details concerning a given unit of goods, services or works requested in the Order Change."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#OrderLine"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "relationships[12]",
+          "target_content": {
+            "name": "specifiesOrderResponseInformation",
+            "from": "OrderResponse",
+            "to": "OrderResponseInformation",
+            "meaning": "The order response includes order response information.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#specifiesOrderResponseInformation",
+              "http://data.europa.eu/a4g/ontology#OrderResponse",
+              "http://data.europa.eu/a4g/ontology#OrderResponseInformation"
+            ],
+            "source_evidence": "\"Relation indicating the Order Response Information.\" with domain OrderResponse and range OrderResponseInformation",
+            "confidence": "high",
+            "rationale": "Direct object property with matching included endpoints."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#specifiesOrderResponseInformation",
+              "kind": "object_property",
+              "labels": [
+                "specifies Order Response Information"
+              ],
+              "definitions": [
+                "Relation indicating the Order Response Information."
+              ],
+              "domain": [
+                "http://data.europa.eu/a4g/ontology#OrderResponse"
+              ],
+              "range": [
+                "http://data.europa.eu/a4g/ontology#OrderResponseInformation"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderResponse",
+              "kind": "class",
+              "labels": [
+                "Order Response"
+              ],
+              "definitions": [
+                "A formal reply from the Seller to the Buyer stating the Seller's ability to fulfil the order. Additional Information: The Order Response is used to inform on the acceptance or rejection of an Order or to make a counter-offer."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#Order"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderResponseInformation",
+              "kind": "class",
+              "labels": [
+                "Order Response Information"
+              ],
+              "definitions": [
+                "Information about an Order Response."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#InformationHub"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "rules.orderChangeMustReferenceOrder",
+          "target_content": {
+            "conditions": [
+              "order change is submitted for an order"
+            ]
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#OrderChange",
+              "http://data.europa.eu/a4g/ontology#Order",
+              "http://data.europa.eu/a4g/ontology#isSubmittedForOrder"
+            ],
+            "source_evidence": "OrderChange is a request in respect to a previous Order, and isSubmittedForOrder indicates submission for a specific Order.",
+            "confidence": "high",
+            "rationale": "An order change must identify the order it modifies."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderChange",
+              "kind": "class",
+              "labels": [
+                "Order Change"
+              ],
+              "definitions": [
+                "A Document providing information on the formal request from the Buyer to the Seller specifying the requested change in goods, services or works to be delivered in respect to a previous Order."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#Order"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#Order",
+              "kind": "class",
+              "labels": [
+                "Order"
+              ],
+              "definitions": [
+                "A formal request of the Buyer to the Seller specifying the goods, services or works to be delivered. Additional Information: A Buyer submits an Order for delivery of goods, services or works to a Seller."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#PostAwardDocument"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#isSubmittedForOrder",
+              "kind": "object_property",
+              "labels": [
+                "is Submitted For Order"
+              ],
+              "definitions": [
+                "Relation indicating that the instance of the concept is sent for a specific Order."
+              ],
+              "domain": [
+                "n311966a492934ba7aec3447c45f765d1b64"
+              ],
+              "range": [
+                "http://data.europa.eu/a4g/ontology#Order"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "actions.submitOrderCancellation",
+          "target_content": {
+            "input": "OrderCancellation",
+            "preconditions": [
+              "cancellationMustReferenceOrder"
+            ],
+            "effect": "order cancellation becomes linked to the order it cancels",
+            "verification": "confirm the order cancellation is submitted for the intended order"
+          },
+          "mapping": {
+            "source_iris": [
+              "http://data.europa.eu/a4g/ontology#OrderCancellation",
+              "http://data.europa.eu/a4g/ontology#Order",
+              "http://data.europa.eu/a4g/ontology#isSubmittedForOrder"
+            ],
+            "source_evidence": "OrderCancellation is a formal response to cancel a previous Order, and isSubmittedForOrder links it to a specific Order.",
+            "confidence": "high",
+            "rationale": "Submitting an order cancellation is a direct operational action implied by the cancellation document and its linkage to an order."
+          },
+          "real_source_defs": [
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#OrderCancellation",
+              "kind": "class",
+              "labels": [
+                "Order Cancellation"
+              ],
+              "definitions": [
+                "A Document providing information on the formal response from the Buyer to the Seller to cancel a previous Order or Order Change."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#PostAwardDocument"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#Order",
+              "kind": "class",
+              "labels": [
+                "Order"
+              ],
+              "definitions": [
+                "A formal request of the Buyer to the Seller specifying the goods, services or works to be delivered. Additional Information: A Buyer submits an Order for delivery of goods, services or works to a Seller."
+              ],
+              "parents": [
+                "http://data.europa.eu/a4g/ontology#PostAwardDocument"
+              ]
+            },
+            {
+              "iri": "http://data.europa.eu/a4g/ontology#isSubmittedForOrder",
+              "kind": "object_property",
+              "labels": [
+                "is Submitted For Order"
+              ],
+              "definitions": [
+                "Relation indicating that the instance of the concept is sent for a specific Order."
+              ],
+              "domain": [
+                "n311966a492934ba7aec3447c45f765d1b64"
+              ],
+              "range": [
+                "http://data.europa.eu/a4g/ontology#Order"
+              ]
+            }
+          ]
+        }
+      ],
+      "verdicts": {
+        "classes.OrderCancellationConfirmation": "accept",
+        "classes.DeliveryInformation": "accept",
+        "classes.Order.properties.totalTaxInclusiveAmount": "accept",
+        "classes.DeliveryAgreement.properties.generalDeliveryTerm": "accept",
+        "classes.DeliveryAgreement.properties.partialDeliveryAllowed": "accept",
+        "relationships[2]": "accept",
+        "relationships[12]": "accept",
+        "rules.orderChangeMustReferenceOrder": "accept",
+        "actions.submitOrderCancellation": "accept"
+      },
+      "result": "9/9 accept, 0/9 reject",
+      "note": "Each item restates the source definition or matches a real rdfs:domain/rdfs:range, with owl:unionOf domains expanded (isSubmittedForOrder's union domain includes OrderChange and OrderCancellation). Drawn and reviewed before the runs; written to this file after the runs, because the folder was frozen for them."
     }
   ]
 }
