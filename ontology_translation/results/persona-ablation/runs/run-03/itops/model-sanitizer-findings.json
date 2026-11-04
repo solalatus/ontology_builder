@@ -1,0 +1,17 @@
+[
+  {
+    "severity": "strip",
+    "kind": "relationship",
+    "identity": "dependsOn (Configuration Item → Configuration Item)",
+    "field": "pair",
+    "pattern": "SELF_LOOP_DUPLICATE",
+    "detail": "self-loop dependsOn (Configuration Item → Configuration Item) duplicates the properly-typed dependsOn (Business Service → IT Service) elsewhere in the same model",
+    "relationship": {
+      "name": "dependsOn",
+      "from": "Configuration Item",
+      "to": "Configuration Item",
+      "meaning": "A configuration item relies on another configuration item to function.",
+      "aliases": []
+    }
+  }
+]

@@ -1,0 +1,15 @@
+{
+ "domain": "itops",
+ "runId": "run-02",
+ "model": "gpt-6-sol",
+ "startedAt": "2026-11-04T09:25:57.701Z",
+ "elapsedSec": 2250,
+ "phase": "done",
+ "turnsUsed": 144,
+ "stoppedReason": "stages_complete",
+ "costUsd": 3.899,
+ "appCalls": 226,
+ "promptTokens": 14181046,
+ "cachedShare": 0.986,
+ "reasoningTokens": 17609
+}

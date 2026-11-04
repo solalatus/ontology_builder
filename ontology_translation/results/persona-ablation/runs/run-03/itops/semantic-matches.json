@@ -1,0 +1,128 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "Communication",
+        "recoveredId": "n23"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_10",
+        "recoveredId": "e14"
+      },
+      {
+        "goldId": "rel_15",
+        "recoveredId": "e19"
+      },
+      {
+        "goldId": "rel_44",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "rel_88",
+        "recoveredId": "e29"
+      },
+      {
+        "goldId": "rel_116",
+        "recoveredId": "e26"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "BusinessService.healthState",
+        "semanticFidelity": 0.83
+      },
+      {
+        "id": "ItService.criticalityTier",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "ItService.healthState",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.impact",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.urgency",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "CorrectiveAction.status",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "Communication",
+        "recoveredId": "n23"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_10",
+        "recoveredId": "e14"
+      },
+      {
+        "goldId": "rel_44",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "rel_88",
+        "recoveredId": "e29"
+      },
+      {
+        "goldId": "rel_116",
+        "recoveredId": "e26"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "ItService.healthState",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.impact",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

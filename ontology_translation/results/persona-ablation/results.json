@@ -1,0 +1,640 @@
+{
+  "draws": 10000,
+  "seed": 20261104,
+  "arms": {
+    "first-paper": [
+      {
+        "run": "run-01",
+        "turns": null,
+        "costUsd": null,
+        "stopped": null,
+        "composite": 0.2577745540511498,
+        "classes": {
+          "f1": 0.44680851063829785,
+          "precision": 0.8076923076923077,
+          "recall": 0.3088235294117647
+        },
+        "relationships": {
+          "f1": 0.13333333333333333,
+          "precision": 0.23809523809523808,
+          "recall": 0.09259259259259259
+        },
+        "properties": {
+          "f1": 0.19318181818181818,
+          "precision": 0.26153846153846155,
+          "recall": 0.15315315315315314
+        },
+        "whoNamedFirst": {
+          "named": 42,
+          "interviewerFirst": 9,
+          "expertWordsFirst": 33,
+          "personaFirstRaw": 0,
+          "interviewerFirstShare": 0.21428571428571427,
+          "matchedNamed": 6,
+          "matchedInterviewerFirst": 5,
+          "interviewerFirstShareOfMatches": 0.8333333333333334
+        },
+        "confirmOnly": {
+          "first": 6,
+          "last": 40,
+          "turns": 35,
+          "confirmOnly": 1,
+          "share": 0.02857142857142857
+        }
+      },
+      {
+        "run": "run-02",
+        "turns": null,
+        "costUsd": null,
+        "stopped": null,
+        "composite": 0.2919901999185887,
+        "classes": {
+          "f1": 0.45652173913043487,
+          "precision": 0.875,
+          "recall": 0.3088235294117647
+        },
+        "relationships": {
+          "f1": 0.13513513513513514,
+          "precision": 0.25,
+          "recall": 0.09259259259259259
+        },
+        "properties": {
+          "f1": 0.28431372549019607,
+          "precision": 0.3118279569892473,
+          "recall": 0.26126126126126126
+        },
+        "whoNamedFirst": {
+          "named": 44,
+          "interviewerFirst": 13,
+          "expertWordsFirst": 31,
+          "personaFirstRaw": 0,
+          "interviewerFirstShare": 0.29545454545454547,
+          "matchedNamed": 4,
+          "matchedInterviewerFirst": 4,
+          "interviewerFirstShareOfMatches": 1
+        },
+        "confirmOnly": {
+          "first": 4,
+          "last": 51,
+          "turns": 47,
+          "confirmOnly": 1,
+          "share": 0.02127659574468085
+        }
+      },
+      {
+        "run": "run-03",
+        "turns": null,
+        "costUsd": null,
+        "stopped": null,
+        "composite": 0.21287743167442416,
+        "classes": {
+          "f1": 0.39999999999999997,
+          "precision": 0.8181818181818182,
+          "recall": 0.2647058823529412
+        },
+        "relationships": {
+          "f1": 0.05442176870748299,
+          "precision": 0.10256410256410256,
+          "recall": 0.037037037037037035
+        },
+        "properties": {
+          "f1": 0.18421052631578946,
+          "precision": 0.34146341463414637,
+          "recall": 0.12612612612612611
+        },
+        "whoNamedFirst": {
+          "named": 34,
+          "interviewerFirst": 8,
+          "expertWordsFirst": 26,
+          "personaFirstRaw": 0,
+          "interviewerFirstShare": 0.23529411764705882,
+          "matchedNamed": 5,
+          "matchedInterviewerFirst": 4,
+          "interviewerFirstShareOfMatches": 0.8
+        },
+        "confirmOnly": {
+          "first": 5,
+          "last": 42,
+          "turns": 38,
+          "confirmOnly": 1,
+          "share": 0.02631578947368421
+        }
+      }
+    ],
+    "ablation": [
+      {
+        "run": "run-01",
+        "turns": 202,
+        "costUsd": 5.9696218,
+        "stopped": "stages_complete",
+        "composite": 0.2665530337011453,
+        "classes": {
+          "f1": 0.4,
+          "precision": 0.7037037037037037,
+          "recall": 0.27941176470588236
+        },
+        "relationships": {
+          "f1": 0.18309859154929578,
+          "precision": 0.38235294117647056,
+          "recall": 0.12037037037037036
+        },
+        "properties": {
+          "f1": 0.2165605095541401,
+          "precision": 0.3695652173913043,
+          "recall": 0.15315315315315314
+        },
+        "whoNamedFirst": {
+          "named": 57,
+          "interviewerFirst": 0,
+          "expertWordsFirst": 57,
+          "personaFirstRaw": 0,
+          "interviewerFirstShare": 0,
+          "matchedNamed": 38,
+          "matchedInterviewerFirst": 0,
+          "interviewerFirstShareOfMatches": 0
+        },
+        "confirmOnly": {
+          "first": 14,
+          "last": 83,
+          "turns": 70,
+          "confirmOnly": 9,
+          "share": 0.12857142857142856
+        }
+      },
+      {
+        "run": "run-02",
+        "turns": 144,
+        "costUsd": 3.8989816,
+        "stopped": "stages_complete",
+        "composite": 0.34623617123617123,
+        "classes": {
+          "f1": 0.5454545454545454,
+          "precision": 0.8709677419354839,
+          "recall": 0.39705882352941174
+        },
+        "relationships": {
+          "f1": 0.2361111111111111,
+          "precision": 0.4722222222222222,
+          "recall": 0.1574074074074074
+        },
+        "properties": {
+          "f1": 0.2571428571428572,
+          "precision": 0.6206896551724138,
+          "recall": 0.16216216216216217
+        },
+        "whoNamedFirst": {
+          "named": 56,
+          "interviewerFirst": 0,
+          "expertWordsFirst": 56,
+          "personaFirstRaw": 0,
+          "interviewerFirstShare": 0,
+          "matchedNamed": 42,
+          "matchedInterviewerFirst": 0,
+          "interviewerFirstShareOfMatches": 0
+        },
+        "confirmOnly": {
+          "first": 10,
+          "last": 141,
+          "turns": 132,
+          "confirmOnly": 42,
+          "share": 0.3181818181818182
+        }
+      },
+      {
+        "run": "run-03",
+        "turns": 198,
+        "costUsd": 6.949717,
+        "stopped": "stages_complete",
+        "composite": 0.27053202225616024,
+        "classes": {
+          "f1": 0.46464646464646475,
+          "precision": 0.7419354838709677,
+          "recall": 0.3382352941176471
+        },
+        "relationships": {
+          "f1": 0.15384615384615383,
+          "precision": 0.25,
+          "recall": 0.1111111111111111
+        },
+        "properties": {
+          "f1": 0.19310344827586207,
+          "precision": 0.4117647058823529,
+          "recall": 0.12612612612612611
+        },
+        "whoNamedFirst": {
+          "named": 53,
+          "interviewerFirst": 0,
+          "expertWordsFirst": 53,
+          "personaFirstRaw": 0,
+          "interviewerFirstShare": 0,
+          "matchedNamed": 27,
+          "matchedInterviewerFirst": 0,
+          "interviewerFirstShareOfMatches": 0
+        },
+        "confirmOnly": {
+          "first": 12,
+          "last": 196,
+          "turns": 185,
+          "confirmOnly": 44,
+          "share": 0.23783783783783785
+        }
+      }
+    ],
+    "final": [
+      {
+        "run": "run-01",
+        "turns": 101,
+        "costUsd": 2.7784958,
+        "stopped": "stages_complete",
+        "composite": 0.46619299286160265,
+        "classes": {
+          "f1": 0.5531914893617021,
+          "precision": 1,
+          "recall": 0.38235294117647056
+        },
+        "relationships": {
+          "f1": 0.4755244755244756,
+          "precision": 0.9714285714285714,
+          "recall": 0.3148148148148148
+        },
+        "properties": {
+          "f1": 0.36986301369863017,
+          "precision": 0.7714285714285715,
+          "recall": 0.24324324324324326
+        },
+        "whoNamedFirst": {
+          "named": 68,
+          "interviewerFirst": 1,
+          "expertWordsFirst": 67,
+          "personaFirstRaw": 0,
+          "interviewerFirstShare": 0.014705882352941176,
+          "matchedNamed": 53,
+          "matchedInterviewerFirst": 1,
+          "interviewerFirstShareOfMatches": 0.018867924528301886
+        },
+        "confirmOnly": {
+          "first": 10,
+          "last": 39,
+          "turns": 30,
+          "confirmOnly": 4,
+          "share": 0.13333333333333333
+        }
+      },
+      {
+        "run": "run-02",
+        "turns": 137,
+        "costUsd": 4.0383356,
+        "stopped": "stages_complete",
+        "composite": 0.6574671870793064,
+        "classes": {
+          "f1": 0.7407407407407407,
+          "precision": 1,
+          "recall": 0.5882352941176471
+        },
+        "relationships": {
+          "f1": 0.6746987951807228,
+          "precision": 0.9655172413793104,
+          "recall": 0.5185185185185185
+        },
+        "properties": {
+          "f1": 0.5569620253164558,
+          "precision": 0.9361702127659575,
+          "recall": 0.3963963963963964
+        },
+        "whoNamedFirst": {
+          "named": 77,
+          "interviewerFirst": 1,
+          "expertWordsFirst": 76,
+          "personaFirstRaw": 0,
+          "interviewerFirstShare": 0.012987012987012988,
+          "matchedNamed": 66,
+          "matchedInterviewerFirst": 1,
+          "interviewerFirstShareOfMatches": 0.015151515151515152
+        },
+        "confirmOnly": {
+          "first": 12,
+          "last": 115,
+          "turns": 104,
+          "confirmOnly": 16,
+          "share": 0.15384615384615385
+        }
+      },
+      {
+        "run": "run-03",
+        "turns": 114,
+        "costUsd": 3.4217946,
+        "stopped": "stages_complete",
+        "composite": 0.6063910188487204,
+        "classes": {
+          "f1": 0.6534653465346535,
+          "precision": 1,
+          "recall": 0.4852941176470588
+        },
+        "relationships": {
+          "f1": 0.6202531645569621,
+          "precision": 0.98,
+          "recall": 0.4537037037037037
+        },
+        "properties": {
+          "f1": 0.5454545454545454,
+          "precision": 0.9767441860465116,
+          "recall": 0.3783783783783784
+        },
+        "whoNamedFirst": {
+          "named": 96,
+          "interviewerFirst": 10,
+          "expertWordsFirst": 86,
+          "personaFirstRaw": 0,
+          "interviewerFirstShare": 0.10416666666666667,
+          "matchedNamed": 78,
+          "matchedInterviewerFirst": 10,
+          "interviewerFirstShareOfMatches": 0.1282051282051282
+        },
+        "confirmOnly": {
+          "first": 9,
+          "last": 89,
+          "turns": 81,
+          "confirmOnly": 10,
+          "share": 0.12345679012345678
+        }
+      }
+    ]
+  },
+  "means": {
+    "first-paper": {
+      "composite": {
+        "mean": 0.25421406188138757,
+        "min": 0.21287743167442416,
+        "max": 0.2919901999185887
+      },
+      "classF1": {
+        "mean": 0.4344434165895776,
+        "min": 0.39999999999999997,
+        "max": 0.45652173913043487
+      },
+      "relF1": {
+        "mean": 0.1076300790586505,
+        "min": 0.05442176870748299,
+        "max": 0.13513513513513514
+      },
+      "propF1": {
+        "mean": 0.22056868999593457,
+        "min": 0.18421052631578946,
+        "max": 0.28431372549019607
+      },
+      "classP": {
+        "mean": 0.8336247086247086,
+        "min": 0.8076923076923077,
+        "max": 0.875
+      },
+      "relP": {
+        "mean": 0.19688644688644688,
+        "min": 0.10256410256410256,
+        "max": 0.25
+      },
+      "propP": {
+        "mean": 0.3049432777206184,
+        "min": 0.26153846153846155,
+        "max": 0.34146341463414637
+      },
+      "classR": {
+        "mean": 0.29411764705882354,
+        "min": 0.2647058823529412,
+        "max": 0.3088235294117647
+      },
+      "relR": {
+        "mean": 0.07407407407407407,
+        "min": 0.037037037037037035,
+        "max": 0.09259259259259259
+      },
+      "propR": {
+        "mean": 0.1801801801801802,
+        "min": 0.12612612612612611,
+        "max": 0.26126126126126126
+      },
+      "interviewerFirstShare": {
+        "mean": 0.24834479246243948,
+        "min": 0.21428571428571427,
+        "max": 0.29545454545454547
+      },
+      "interviewerFirstShareOfMatches": {
+        "mean": 0.8777777777777779,
+        "min": 0.8,
+        "max": 1
+      },
+      "confirmOnlyShare": {
+        "mean": 0.02538793792993121,
+        "min": 0.02127659574468085,
+        "max": 0.02857142857142857
+      }
+    },
+    "ablation": {
+      "composite": {
+        "mean": 0.29444040906449226,
+        "min": 0.2665530337011453,
+        "max": 0.34623617123617123
+      },
+      "classF1": {
+        "mean": 0.4700336700336701,
+        "min": 0.4,
+        "max": 0.5454545454545454
+      },
+      "relF1": {
+        "mean": 0.19101861883552027,
+        "min": 0.15384615384615383,
+        "max": 0.2361111111111111
+      },
+      "propF1": {
+        "mean": 0.22226893832428649,
+        "min": 0.19310344827586207,
+        "max": 0.2571428571428572
+      },
+      "classP": {
+        "mean": 0.7722023098367184,
+        "min": 0.7037037037037037,
+        "max": 0.8709677419354839
+      },
+      "relP": {
+        "mean": 0.3681917211328976,
+        "min": 0.25,
+        "max": 0.4722222222222222
+      },
+      "propP": {
+        "mean": 0.4673398594820237,
+        "min": 0.3695652173913043,
+        "max": 0.6206896551724138
+      },
+      "classR": {
+        "mean": 0.338235294117647,
+        "min": 0.27941176470588236,
+        "max": 0.39705882352941174
+      },
+      "relR": {
+        "mean": 0.12962962962962962,
+        "min": 0.1111111111111111,
+        "max": 0.1574074074074074
+      },
+      "propR": {
+        "mean": 0.14714714714714713,
+        "min": 0.12612612612612611,
+        "max": 0.16216216216216217
+      },
+      "interviewerFirstShare": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      },
+      "interviewerFirstShareOfMatches": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      },
+      "confirmOnlyShare": {
+        "mean": 0.22819702819702817,
+        "min": 0.12857142857142856,
+        "max": 0.3181818181818182
+      }
+    },
+    "final": {
+      "composite": {
+        "mean": 0.5766837329298764,
+        "min": 0.46619299286160265,
+        "max": 0.6574671870793064
+      },
+      "classF1": {
+        "mean": 0.6491325255456988,
+        "min": 0.5531914893617021,
+        "max": 0.7407407407407407
+      },
+      "relF1": {
+        "mean": 0.5901588117540535,
+        "min": 0.4755244755244756,
+        "max": 0.6746987951807228
+      },
+      "propF1": {
+        "mean": 0.4907598614898771,
+        "min": 0.36986301369863017,
+        "max": 0.5569620253164558
+      },
+      "classP": {
+        "mean": 1,
+        "min": 1,
+        "max": 1
+      },
+      "relP": {
+        "mean": 0.9723152709359605,
+        "min": 0.9655172413793104,
+        "max": 0.98
+      },
+      "propP": {
+        "mean": 0.8947809900803468,
+        "min": 0.7714285714285715,
+        "max": 0.9767441860465116
+      },
+      "classR": {
+        "mean": 0.4852941176470588,
+        "min": 0.38235294117647056,
+        "max": 0.5882352941176471
+      },
+      "relR": {
+        "mean": 0.4290123456790123,
+        "min": 0.3148148148148148,
+        "max": 0.5185185185185185
+      },
+      "propR": {
+        "mean": 0.33933933933933935,
+        "min": 0.24324324324324326,
+        "max": 0.3963963963963964
+      },
+      "interviewerFirstShare": {
+        "mean": 0.043953187335540274,
+        "min": 0.012987012987012988,
+        "max": 0.10416666666666667
+      },
+      "interviewerFirstShareOfMatches": {
+        "mean": 0.054074855961648405,
+        "min": 0.015151515151515152,
+        "max": 0.1282051282051282
+      },
+      "confirmOnlyShare": {
+        "mean": 0.13687875910098132,
+        "min": 0.12345679012345678,
+        "max": 0.15384615384615385
+      }
+    }
+  },
+  "differences": {
+    "composite: final - ablation": {
+      "estimate": 0.28224332386538414,
+      "lo": 0.1717525837971104,
+      "hi": 0.3725624344496275
+    },
+    "composite: ablation - first-paper": {
+      "estimate": 0.040226347183104694,
+      "lo": -0.01270562140995879,
+      "hi": 0.09315831577616815
+    },
+    "composite: final - first-paper": {
+      "estimate": 0.32246967104848884,
+      "lo": 0.22093546827205318,
+      "hi": 0.4125986585357784
+    },
+    "classF1: final - ablation": {
+      "estimate": 0.1790988555120287,
+      "lo": 0.06809758990083403,
+      "hi": 0.2901001211232234
+    },
+    "classF1: ablation - first-paper": {
+      "estimate": 0.0355902534440925,
+      "lo": -0.0344434165895775,
+      "hi": 0.11101112886496783
+    },
+    "classF1: final - first-paper": {
+      "estimate": 0.2146891089561212,
+      "lo": 0.12198581560283694,
+      "hi": 0.3030595813204509
+    },
+    "relF1: final - ablation": {
+      "estimate": 0.3991401929185332,
+      "lo": 0.29242588397517977,
+      "hi": 0.49295328522560156
+    },
+    "relF1: ablation - first-paper": {
+      "estimate": 0.08338853977686976,
+      "lo": 0.029062431879333273,
+      "hi": 0.13771464767440628
+    },
+    "relF1: final - first-paper": {
+      "estimate": 0.482528732695403,
+      "lo": 0.3678943964658251,
+      "hi": 0.5758246280567029
+    },
+    "propF1: final - ablation": {
+      "estimate": 0.26849092316559064,
+      "lo": 0.15541309580043633,
+      "hi": 0.3522037299938643
+    },
+    "propF1: ablation - first-paper": {
+      "estimate": 0.0017002483283519165,
+      "lo": -0.06204478716590958,
+      "hi": 0.056414451008819116
+    },
+    "propF1: final - first-paper": {
+      "estimate": 0.27019117149394256,
+      "lo": 0.14929432370269555,
+      "hi": 0.3650798457593927
+    }
+  },
+  "reading": {
+    "composite: share of the gain carried by interviewer/prompt/tools": 0.12474459087055034,
+    "composite: share of the gain carried by the stronger persona": 0.8752554091294497,
+    "relF1: share of the gain carried by interviewer/prompt/tools": 0.17281569806436564,
+    "relF1: share of the gain carried by the stronger persona": 0.8271843019356343,
+    "rubberStamping": {
+      "higherInterviewerFirstShareOfMatches": false,
+      "confirmOnlyAtLeast10ppHigher": false,
+      "relPrecisionNoHigher": true,
+      "verdict": "not supported"
+    }
+  }
+}

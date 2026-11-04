@@ -1,0 +1,698 @@
+competency_questions:
+  - id: cq1
+    text: Which business services are impacted by an incident?
+  - id: cq2
+    text: Which customer channels are impacted by an incident?
+  - id: cq3
+    text: Which IT services are affected by an incident?
+  - id: cq4
+    text: Which configuration items does an affected IT service depend on?
+  - id: cq5
+    text: Which third-party services does an affected IT service depend on?
+  - id: cq6
+    text: What is an incident’s current status?
+  - id: cq7
+    text: What actions have been taken on an incident so far?
+  - id: cq8
+    text: Who owns an affected IT service?
+  - id: cq9
+    text: Which resolver group should be assigned to an incident?
+  - id: cq10
+    text: Which on-call engineer should be assigned to an incident?
+  - id: cq11
+    text: Does an incident meet the criteria for a major incident?
+  - id: cq12
+    text: Which runbooks are available for this incident?
+  - id: cq13
+    text: Which workarounds are available for this incident?
+  - id: cq14
+    text: Can a proposed runbook or workaround be deployed safely in this situation?
+  - id: cq15
+    text: Have all active alerts and related events been correlated with an incident?
+  - id: cq16
+    text: Has the incident’s materiality assessment been completed?
+  - id: cq17
+    text: Does the incident require regulatory notification?
+  - id: cq18
+    text: Is incident evidence intact and complete before closure?
+  - id: cq19
+    text: Are stakeholder communications complete before incident closure?
+  - id: cq20
+    text: Which corrective actions from previous post-incident reviews are relevant to an affected service?
+  - id: cq21
+    text: Which corrective actions for an affected service remain open?
+classes:
+  Incident:
+    meaning: A disruption or potential disruption that requires management through the incident-response process.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - contained
+          - recovering
+          - monitoring
+          - resolved
+          - closed
+          - cancelled
+      action log:
+        type: text
+      incident type:
+        type: text
+      major incident classification:
+        type: text
+        allowed:
+          - classified
+          - unclassified
+      severity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      impact category:
+        type: text
+        allowed:
+          - enterprise-wide
+          - multiple-services
+          - single-service
+          - limited-users
+          - no-observed-impact
+      Required Evidence List:
+        type: text
+  IT Service:
+    meaning: A managed technology service that supports business services and may be impacted by an incident.
+    aliases: []
+    properties:
+      health state:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+          - recovering
+          - unknown
+      criticality tier:
+        type: text
+        allowed:
+          - Tier-1 Critical
+          - Tier-2 Important
+          - Tier-3 Standard
+          - Tier-4 Supporting
+  Business Service:
+    meaning: A business capability delivered to customers that relies on IT services.
+    aliases: []
+    properties: {}
+  Customer Channel:
+    meaning: A means through which customers access and interact with business services.
+    aliases: []
+    properties: {}
+  Configuration Item:
+    meaning: A managed component that is part of the infrastructure on which an IT service runs.
+    aliases: []
+    properties:
+      health state:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+          - recovering
+          - unknown
+  Third-Party Service:
+    meaning: An external service that provides capabilities relied upon by an IT service.
+    aliases: []
+    properties:
+      health state:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+          - recovering
+          - unknown
+  Alert:
+    meaning: A monitoring signal that indicates a potential issue and may lead to the opening of an incident or be correlated with existing incidents.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - suppressed
+          - escalated
+          - closed
+      summary:
+        type: text
+  Event:
+    meaning: An observed occurrence within the system that may provide context for or be correlated with an incident.
+    aliases: []
+    properties:
+      event type:
+        type: text
+      event status:
+        type: text
+      details:
+        type: text
+  Service Owner:
+    meaning: The person accountable for the management and performance of an IT service throughout its lifecycle.
+    aliases: []
+    properties: {}
+  Resolver Group:
+    meaning: A team designated to support IT services and manage the resolution of assigned incidents.
+    aliases: []
+    properties:
+      availability schedule:
+        type: text
+      on-call roster:
+        type: text
+      supported incident types:
+        type: text
+  On-Call Engineer:
+    meaning: An engineer designated to respond to incidents and issues during an on-call period.
+    aliases: []
+    properties:
+      availability status:
+        type: text
+        allowed:
+          - available
+          - busy
+          - unavailable
+          - on-leave
+  System Administrator:
+    meaning: "A specialist who maintains, configures, and troubleshoots systems that support IT services."
+    aliases: []
+    properties:
+      availability status:
+        type: text
+        allowed:
+          - available
+          - busy
+          - unavailable
+          - on-leave
+  Network Engineer:
+    meaning: "A specialist who investigates, designs, and resolves network-related issues and configurations."
+    aliases: []
+    properties:
+      availability status:
+        type: text
+        allowed:
+          - available
+          - busy
+          - unavailable
+          - on-leave
+  Application Developer:
+    meaning: "A specialist who designs, develops, and addresses issues related to applications and software systems."
+    aliases: []
+    properties:
+      availability status:
+        type: text
+        allowed:
+          - available
+          - busy
+          - unavailable
+          - on-leave
+  Service Oversight Contact:
+    meaning: "The designated contact who provides day-to-day oversight and management for an IT service, ensuring it meets operational requirements."
+    aliases: []
+    properties: {}
+  Business Analyst:
+    meaning: A participant who helps analyze and communicate an incident’s effects on business processes and operational objectives.
+    aliases: []
+    properties: {}
+  Customer Representative:
+    meaning: A participant who conveys customer concerns and the impact of the incident on customer-facing services during the response.
+    aliases: []
+    properties: {}
+  Compliance Officer:
+    meaning: A participant who ensures that communications and responses meet regulatory and compliance obligations.
+    aliases: []
+    properties: {}
+  Runbook:
+    meaning: Documented operational procedures and steps available for responding to incidents affecting an IT service.
+    aliases: []
+    properties:
+      validity status:
+        type: text
+        allowed:
+          - valid
+          - invalid
+          - under-review
+      dependencies:
+        type: text
+      effectiveness summary:
+        type: text
+  Workaround:
+    meaning: A documented temporary measure implemented to reduce an incident’s impact while a permanent resolution is pursued.
+    aliases: []
+    properties:
+      validity status:
+        type: text
+        allowed:
+          - valid
+          - invalid
+          - under-review
+      dependencies:
+        type: text
+      effectiveness summary:
+        type: text
+  Materiality Assessment:
+    meaning: An evaluation of an incident’s significance and implications for determining whether regulatory notification is required.
+    aliases: []
+    properties:
+      result:
+        type: text
+        allowed:
+          - not-reportable
+          - potentially-reportable
+          - reportable
+          - undetermined
+      assessed at:
+        type: date
+  Regulatory Notification:
+    meaning: A formal notice prepared for submission to a regulatory authority when an assessment finds an incident reportable.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      due at:
+        type: date
+  Evidence:
+    meaning: "Records, documents, or artifacts collected to support the analysis, accountability, and resolution of an incident."
+    aliases: []
+    properties:
+      integrity status:
+        type: text
+        allowed:
+          - collected
+          - hashed
+          - verified
+          - sealed
+          - compromised
+      collected at:
+        type: date
+      evidence type:
+        type: text
+        allowed:
+          - document
+          - log
+          - artifact
+          - screenshot
+          - witness statement
+          - email
+          - configuration-item record
+          - incident record
+          - service-level agreement (SLA) documentation
+  Stakeholder Communication:
+    meaning: "A message regarding an incident directed to relevant audiences, ensuring they are informed of its status and impact."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      sent at:
+        type: date
+      audience:
+        type: text
+        allowed:
+          - technical
+          - management
+          - business
+          - customer
+          - vendor
+          - regulator
+          - all-staff
+  Post-Incident Review:
+    meaning: "A structured examination of an incident that captures findings, assesses response effectiveness, and produces corrective actions for improvement."
+    aliases: []
+    properties:
+      held on:
+        type: date
+      findings:
+        type: text
+      scheduled on:
+        type: date
+  Corrective Action:
+    meaning: A tracked measure produced by a Post-Incident Review to address an identified weakness or improve processes and prevent recurrence of similar incidents.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - blocked
+          - implemented
+          - verified
+          - closed
+          - cancelled
+  Emergency Change:
+    meaning: An urgent change to an IT Service that is implemented to address immediate operational needs justified by an Incident.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - assessed
+          - approved
+          - scheduled
+          - implementing
+          - implemented
+          - failed
+          - rolled-back
+          - closed
+          - cancelled
+      implementation plan:
+        type: text
+      backout plan:
+        type: text
+relationships:
+  - name: impacts
+    from: Incident
+    to: IT Service
+    meaning: The incident affects the operation and availability of the linked IT service.
+    aliases: []
+  - name: dependsOn
+    from: Business Service
+    to: IT Service
+    meaning: The delivery of the business service is reliant on the functionality and performance of the linked IT service.
+    aliases: []
+  - name: isDeliveredThrough
+    from: Business Service
+    to: Customer Channel
+    meaning: Customers access and interact with that business service through the linked channel.
+    aliases: []
+  - name: runsOn
+    from: IT Service
+    to: Configuration Item
+    meaning: "The IT service operates on the linked managed component, which provides necessary resources or capabilities."
+    aliases: []
+  - name: dependsOn
+    from: IT Service
+    to: Third-Party Service
+    meaning: The IT service relies on capabilities or functionalities provided by the linked external service for its operation.
+    aliases: []
+  - name: isSupportedBy
+    from: IT Service
+    to: Resolver Group
+    meaning: The group is designated to provide operational support and handle incidents related to that service.
+    aliases: []
+  - name: includes
+    from: Resolver Group
+    to: On-Call Engineer
+    meaning: The engineer is part of the group and is available to respond during on-call periods.
+    aliases: []
+  - name: isAssignedTo
+    from: Incident
+    to: Resolver Group
+    meaning: The group is officially recorded as responsible for managing and resolving that incident.
+    aliases: []
+  - name: isHandledBy
+    from: Incident
+    to: On-Call Engineer
+    meaning: The engineer is assigned to respond to and work on that specific incident.
+    aliases: []
+  - name: isMemberOf
+    from: System Administrator
+    to: Resolver Group
+    meaning: The specialist belongs to the group and is eligible to be selected for incident resolution tasks.
+    aliases: []
+  - name: isMemberOf
+    from: Network Engineer
+    to: Resolver Group
+    meaning: The specialist belongs to the group and is eligible to respond to incidents related to network issues.
+    aliases: []
+  - name: isMemberOf
+    from: Application Developer
+    to: Resolver Group
+    meaning: The specialist belongs to the group and is eligible to respond to incidents related to application issues.
+    aliases: []
+  - name: isHandledBy
+    from: Incident
+    to: System Administrator
+    meaning: "The System Administrator is assigned to work on resolving the incident, addressing underlying system-related issues."
+    aliases: []
+  - name: isHandledBy
+    from: Incident
+    to: Network Engineer
+    meaning: "The Network Engineer is assigned to work on resolving the incident, focusing on network-related issues."
+    aliases: []
+  - name: isHandledBy
+    from: Incident
+    to: Application Developer
+    meaning: "The Application Developer is assigned to work on resolving the incident, addressing application-related problems."
+    aliases: []
+  - name: mayOpen
+    from: Alert
+    to: Incident
+    meaning: "An alert can lead to the creation of an incident, but not every alert results in an incident being opened."
+    aliases: []
+  - name: isCorrelatedFrom
+    from: Incident
+    to: Event
+    meaning: The event is associated with the incident to provide context for investigation and analysis.
+    aliases: []
+  - name: isCorrelatedWith
+    from: Alert
+    to: Incident
+    meaning: "The alert is associated with an existing incident, regardless of whether it opened the incident originally."
+    aliases: []
+  - name: isOwnedBy
+    from: IT Service
+    to: Service Owner
+    meaning: "The individual is accountable for the overall management, performance, and quality of the service throughout its lifecycle."
+    aliases: []
+  - name: isOverseenBy
+    from: IT Service
+    to: Service Oversight Contact
+    meaning: "The designated contact provides day-to-day operational oversight and management for the service, ensuring it meets performance requirements."
+    aliases: []
+  - name: exposes
+    from: IT Service
+    to: Runbook
+    meaning: The service has an associated operational procedure that can be referenced during incident response.
+    aliases: []
+  - name: has
+    from: IT Service
+    to: Workaround
+    meaning: A documented temporary measure is available for mitigating the effects of incidents impacting the service.
+    aliases: []
+  - name: isEvaluatedBy
+    from: Incident
+    to: Materiality Assessment
+    meaning: "The assessment examines the incident to determine its significance, potential impact, and reporting implications."
+    aliases: []
+  - name: triggers
+    from: Materiality Assessment
+    to: Regulatory Notification
+    meaning: A reportable assessment results in the initiation of a formal notification to regulatory authorities.
+    aliases: []
+  - name: isSupportedBy
+    from: Incident
+    to: Evidence
+    meaning: The linked evidence provides necessary information for the investigation and accountability concerning that incident.
+    aliases: []
+  - name: isCommunicatedThrough
+    from: Incident
+    to: Stakeholder Communication
+    meaning: "The linked message conveys information about the incident’s status, impact, and any necessary actions required by stakeholders."
+    aliases: []
+  - name: isAddressedTo
+    from: Stakeholder Communication
+    to: Business Analyst
+    meaning: The message targets that analyst to provide insights into the incident’s effects on business processes and operational objectives.
+    aliases: []
+  - name: isAddressedTo
+    from: Stakeholder Communication
+    to: Customer Representative
+    meaning: The message targets that representative to inform them of customer-facing impacts and any actions that may affect customers.
+    aliases: []
+  - name: isAddressedTo
+    from: Stakeholder Communication
+    to: Compliance Officer
+    meaning: The message targets that officer to ensure awareness of compliance-relevant information and regulatory implications related to the incident.
+    aliases: []
+  - name: isReviewedIn
+    from: IT Service
+    to: Post-Incident Review
+    meaning: The review examines the service’s involvement and performance in relation to the earlier incident.
+    aliases: []
+  - name: produces
+    from: Post-Incident Review
+    to: Corrective Action
+    meaning: The review identifies specific measures for improvement that are tracked and implemented.
+    aliases: []
+  - name: isLinkedTo
+    from: Post-Incident Review
+    to: Incident
+    meaning: "The review concerns and evaluates the incident that prompted it, assessing responses and outcomes."
+    aliases: []
+  - name: isJustifiedBy
+    from: Emergency Change
+    to: Incident
+    meaning: The incident provides the rationale for the urgent change needed to address immediate operational concerns.
+    aliases: []
+  - name: modifies
+    from: Emergency Change
+    to: IT Service
+    meaning: The change alters the linked service to implement necessary adjustments in response to the incident.
+    aliases: []
+rules:
+  canDeclareMajorIncident:
+    conditions:
+      - "Incident status is not resolved, closed, or cancelled."
+      - Incident severity is sev1-critical or sev2-high.
+      - Incident impact category is enterprise-wide or multiple-services.
+      - "At least one IT Service linked by Incident impacts IT Service has a verified criticality tier of Tier-1 Critical; if the tier is missing or unverified, hold the declaration."
+  canAssignIncident:
+    conditions:
+      - The Incident impacts an IT Service that is supported by the selected Resolver Group.
+      - "Compare Incident incident type with the selected Resolver Group supported incident types; if the recorded terms do not clearly match, obtain explicit confirmation of suitability from the Resolver Group before assignment."
+      - Current time is within the selected Resolver Group availability schedule.
+      - The selected On-Call Engineer is included in the selected Resolver Group on-call roster and has availability status available.
+      - "If a specialist is needed, confirm the Resolver Group decision from the Incident action log or obtain it directly from the group; the selected System Administrator, Network Engineer, or Application Developer is a member of that group and has availability status available."
+      - "Hold assignment if any required check is missing or cannot be verified, including an unclear incident-type match without Resolver Group confirmation."
+  canSubmitRegulatoryNotification:
+    conditions:
+      - The Regulatory Notification is triggered by a Materiality Assessment whose result is reportable and whose assessed at timestamp is present; hold if either cannot be verified.
+      - Regulatory Notification status is approved and due at is present; hold if approval cannot be verified.
+      - "If current time is past due at, do not hold submission; flag lateness in the action log of the Incident evaluated by that Materiality Assessment."
+  canUseResponseOption:
+    conditions:
+      - The Runbook or Workaround validity status is valid and its written dependencies are verified as satisfied.
+      - "Review Incident incident type, severity, and action log for context before using the option."
+      - "For each affected IT Service, health state healthy permits use after the preceding checks; recovering, degraded, or partially-unavailable requires a documented case-specific safety decision; unknown holds use pending investigation; unavailable always holds use."
+  canCloseIncident:
+    conditions:
+      - Incident status is resolved or monitoring.
+      - "For each type in Incident Required Evidence List, linked Evidence has matching evidence type, a collected at timestamp, and integrity status verified or sealed; no linked Evidence has integrity status compromised."
+      - "Determine required audiences from Incident severity, impacted IT Service and derived Business Service and Customer Channel impact, and Materiality Assessment result; if uncertain obtain Resolver Group confirmation. For every confirmed required audience, linked Stakeholder Communication has matching audience, status submitted, and sent at timestamp; dispatch does not establish receipt."
+      - A Post-Incident Review linked to the Incident has a reliable scheduled on or held on date.
+      - Hold closure if any required check is missing or uncertain.
+  canAcknowledgeAlert:
+    conditions:
+      - Alert status is new.
+      - Alert is correlated with an existing Incident through Alert isCorrelatedWith Incident; the possibility that an Alert may open an Incident is not sufficient.
+      - The correlated Incident status is not closed or cancelled; hold if the status or confirmed correlation cannot be verified.
+  canContainIncident:
+    conditions:
+      - "Incident status is not resolved, closed, or cancelled."
+      - "For containment using a Runbook or Workaround associated with an affected IT Service, canUseResponseOption must pass, including its unavailable absolute hold."
+      - "For an alternative measure, Incident action log records Resolver Group authorization and a case-specific safety assessment; recheck current Incident context and affected IT Service health state before acting. Degraded, partially-unavailable, unavailable, and unknown do not automatically block an authorized alternative."
+  canExecuteEmergencyChange:
+    conditions:
+      - "Emergency Change status is approved, or status is scheduled with a readiness-for-execution entry in the action log of its linked Incident."
+      - Emergency Change implementation plan and backout plan are present and verified complete.
+      - "Emergency Change is justified by an Incident whose status is not resolved, closed, or cancelled, and modifies an affected IT Service."
+      - IT Service health state healthy permits execution; recovering requires a context check; degraded or partially-unavailable requires a documented case-specific safety decision; unknown or unavailable holds execution.
+      - "Hold execution if approval or readiness, either plan, either link, or a required safety check is missing or cannot be verified."
+  canSendStakeholderCommunication:
+    conditions:
+      - "Stakeholder Communication is linked through Incident isCommunicatedThrough Stakeholder Communication to an Incident whose status is not resolved, closed, or cancelled."
+      - Stakeholder Communication status is approved.
+      - "Stakeholder Communication audience matches an audience required by Incident impact and Materiality Assessment context; if uncertain, obtain confirmation from the assigned Resolver Group."
+      - "Hold dispatch if the link, approval, or required audience cannot be verified."
+  canDocumentEvidence:
+    conditions:
+      - "Incident status is not resolved, closed, or cancelled."
+      - "Evidence collected at is present and evidence type is an approved Evidence evidence type listed in the Incident Required Evidence List; if relevant but not listed, evaluate and update the Incident Required Evidence List before linking."
+      - "Record Evidence integrity status, including compromised; compromised Evidence must still be linked and logged but cannot satisfy canCloseIncident."
+      - "Hold documentation if required timestamp, type, list, or integrity status cannot be verified."
+  canReviewPostIncident:
+    conditions:
+      - Post-Incident Review is linked to an Incident whose status is not cancelled.
+      - Post-Incident Review scheduled on date has arrived or passed.
+      - "Post-Incident Review held on is empty, so the same review is not conducted twice."
+      - "Hold if the linked Incident status, scheduled on date, or prior held on value cannot be verified."
+  isCorrelationComplete:
+    conditions:
+      - "Query Alerts with status new and query active Events using the event source's authoritative active filter; do not infer active Event status from an unapproved allowed-value list."
+      - "Review Alert summary, or Event event type and details, against Incident incident type, severity, impact category, and action log to decide candidate relevance."
+      - "Each relevant new Alert has an Alert isCorrelatedWith Incident link, and each relevant active Event has an Incident isCorrelatedFrom Event link."
+      - "For each reviewed candidate excluded as irrelevant, Incident action log identifies that Alert or Event and records the exclusion rationale."
+      - "If any candidate has neither a confirmed correlation link nor an identifiable exclusion rationale in Incident action log, the completeness answer is uncertain."
+actions:
+  acknowledgeAlert:
+    input: Alert
+    preconditions:
+      - canAcknowledgeAlert
+    effect: Set Alert status from new to acknowledged and append the acknowledgment to the action log of the Incident with which the Alert is correlated.
+    verification: Reread Alert status to confirm acknowledged and the correlated Incident action log to confirm the acknowledgment entry.
+  assignIncident:
+    input: Incident
+    preconditions:
+      - canAssignIncident
+    effect: "Record Incident isAssignedTo Resolver Group and Incident isHandledBy On-Call Engineer; when the Resolver Group confirms a specialist is needed, also record Incident isHandledBy the selected System Administrator, Network Engineer, or Application Developer. Append assignments and the specialist decision to Incident action log."
+    verification: "Reread Incident isAssignedTo and isHandledBy links and Incident action log; if a specialist was confirmed as needed, confirm that specialist's direct handling link, otherwise do not require one."
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - canDeclareMajorIncident
+    effect: Set Incident major incident classification to classified and append the declaration to Incident action log.
+    verification: Reread Incident major incident classification to confirm classified and Incident action log to confirm the declaration entry.
+  containIncident:
+    input: Incident
+    preconditions:
+      - canContainIncident
+    effect: "Carry out the permitted Runbook, Workaround, or Resolver Group-authorized alternative and record the measure and observed outcome in Incident action log. Set Incident status to contained only if containment succeeds; log unsuccessful attempts without declaring containment."
+    verification: "Reread Incident action log for the measure and observed outcome, Incident status for contained only when successful, and affected IT Service health state for observed stability or improvement."
+  executeEmergencyChange:
+    input: Emergency Change
+    preconditions:
+      - canExecuteEmergencyChange
+    effect: "Execute Emergency Change implementation plan, set Emergency Change status to implemented on success or failed on failure, and append the result to the action log of the Incident that justifies the change."
+    verification: "Reread Emergency Change status to confirm implemented or failed, the linked Incident action log for the recorded result, and the health state of the IT Service the change modifies to assess its observed impact."
+  sendStakeholderCommunication:
+    input: Incident
+    preconditions:
+      - canSendStakeholderCommunication
+    effect: "From the Incident, select its linked Stakeholder Communication through isCommunicatedThrough; dispatch it, set its status to submitted and sent at to dispatch time, and append the dispatch to Incident action log."
+    verification: "From the Incident reread the selected linked Stakeholder Communication status to confirm submitted and sent at for dispatch time; check Incident action log for the dispatch entry. This verifies dispatch, not receipt."
+  submitRegulatoryNotification:
+    input: Incident
+    preconditions:
+      - canSubmitRegulatoryNotification
+    effect: Follow Incident isEvaluatedBy Materiality Assessment and Materiality Assessment triggers Regulatory Notification; submit the notification and set its status to submitted; append submission and any lateness relative to its due at timestamp to Incident action log.
+    verification: Follow the same links and reread Regulatory Notification status for submitted; check Incident action log for the submission and any required late flag.
+  documentEvidence:
+    input: Incident
+    preconditions:
+      - canDocumentEvidence
+    effect: "Link checked Evidence through Incident isSupportedBy Evidence and append its evidence type and integrity status to Incident action log, including compromised items for accountability without treating them as closure-ready."
+    verification: "Reread the Incident isSupportedBy Evidence link, linked Evidence collected at, evidence type, and integrity status, and the Incident action log entry."
+  closeIncident:
+    input: Incident
+    preconditions:
+      - canCloseIncident
+    effect: Set Incident status to closed and append the closure decision to Incident action log.
+    verification: "Reread Incident status for closed and Incident action log for the closure entry, after the canCloseIncident evidence, communication, and linked review checks passed."
+  reviewPostIncident:
+    input: Post-Incident Review
+    preconditions:
+      - canReviewPostIncident
+    effect: "Set Post-Incident Review held on to the date conducted, record its findings, link any resulting Corrective Action through produces, and append the review occurrence to the action log of the Incident linked by Post-Incident Review isLinkedTo Incident."
+    verification: "Reread Post-Incident Review held on and findings, its produces links to any resulting Corrective Actions, and the linked Incident action log for the review entry."

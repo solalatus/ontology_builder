@@ -1,0 +1,22 @@
+2026-11-04T08:33:27.409Z START runs itops/run-01 (spent so far $0.00 of $20)
+2026-11-04T09:23:52.534Z   appearsFinished: the classifier model rejected temperature; continuing without it (itops/run-01: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-04T09:23:56.164Z itops/run-01: snapshot A at turn 202 ($5.69 so far)
+2026-11-04T09:23:56.175Z itops/run-01: [stages] {"type":"snapshot","label":"A","turn":202}
+2026-11-04T09:25:57.295Z itops/run-01: snapshot A composite(full)=0.267 (scoped)=0.340 semantic=0.287
+2026-11-04T09:25:57.411Z itops/run-01: done. 202 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.267 (scoped)=0.340
+2026-11-04T09:25:57.552Z END itops/run-01: exit=0 status=complete stopped=stages_complete cost=$5.97 turns=202
+2026-11-04T09:25:57.553Z START runs itops/run-02 (spent so far $5.97 of $20)
+2026-11-04T10:01:40.350Z   appearsFinished: the classifier model rejected temperature; continuing without it (itops/run-02: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-04T10:01:44.078Z itops/run-02: snapshot A at turn 144 ($3.67 so far)
+2026-11-04T10:01:44.093Z itops/run-02: [stages] {"type":"snapshot","label":"A","turn":144}
+2026-11-04T10:03:27.602Z itops/run-02: snapshot A composite(full)=0.346 (scoped)=0.447 semantic=0.346
+2026-11-04T10:03:27.658Z itops/run-02: done. 144 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.346 (scoped)=0.447
+2026-11-04T10:03:27.727Z END itops/run-02: exit=0 status=complete stopped=stages_complete cost=$3.90 turns=144
+2026-11-04T10:03:27.735Z START runs itops/run-03 (spent so far $9.87 of $20)
+2026-11-04T10:55:40.534Z   appearsFinished: the classifier model rejected temperature; continuing without it (itops/run-03: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-04T10:55:45.491Z itops/run-03: snapshot A at turn 198 ($6.65 so far)
+2026-11-04T10:55:45.500Z itops/run-03: [stages] {"type":"snapshot","label":"A","turn":198}
+2026-11-04T10:57:38.604Z itops/run-03: snapshot A composite(full)=0.271 (scoped)=0.341 semantic=0.299
+2026-11-04T10:57:38.678Z itops/run-03: done. 198 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.271 (scoped)=0.341
+2026-11-04T10:57:38.740Z END itops/run-03: exit=0 status=complete stopped=stages_complete cost=$6.95 turns=198
+2026-11-04T10:57:38.741Z BLOCK DONE runs: $16.82 spent under ontology_translation/results/persona-ablation/
