@@ -1,0 +1,56 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "recordedByServiceDesk (Incident → ServiceDesk)",
+    "field": "meaning",
+    "pattern": "SUPERSEDED",
+    "detail": "meaning contains editorial language (\"superseded\") that reads as a leftover note rather than a real definition: \"Superseded duplicate; do not use. Use ServiceDesk recordsIncident Incident instead.\"",
+    "relationship": {
+      "name": "recordedByServiceDesk",
+      "from": "Incident",
+      "to": "ServiceDesk",
+      "meaning": "Superseded duplicate; do not use. Use ServiceDesk recordsIncident Incident instead.",
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "monitoredBySecurityOperationsCentre (Event → SecurityOperationsCentre)",
+    "field": "meaning",
+    "pattern": "SUPERSEDED",
+    "detail": "meaning contains editorial language (\"superseded\") that reads as a leftover note rather than a real definition: \"Superseded duplicate; do not use. Use SecurityOperationsCentre monitorsSecurityEvent Event instead, only for security-related events.\"",
+    "relationship": {
+      "name": "monitoredBySecurityOperationsCentre",
+      "from": "Event",
+      "to": "SecurityOperationsCentre",
+      "meaning": "Superseded duplicate; do not use. Use SecurityOperationsCentre monitorsSecurityEvent Event instead, only for security-related events.",
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship-pair",
+    "identity": "recordedByServiceDesk (Incident → ServiceDesk) / recordsIncident (ServiceDesk → Incident)",
+    "field": "pair",
+    "pattern": "RECIPROCAL_PAIR",
+    "detail": "recordedByServiceDesk (Incident → ServiceDesk) and recordsIncident (ServiceDesk → Incident) connect the same two classes in opposite directions -- confirm these are two genuinely distinct facts, not the same fact stated twice"
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship-pair",
+    "identity": "monitoredBySecurityOperationsCentre (Event → SecurityOperationsCentre) / monitorsSecurityEvent (SecurityOperationsCentre → Event)",
+    "field": "pair",
+    "pattern": "RECIPROCAL_PAIR",
+    "detail": "monitoredBySecurityOperationsCentre (Event → SecurityOperationsCentre) and monitorsSecurityEvent (SecurityOperationsCentre → Event) connect the same two classes in opposite directions -- confirm these are two genuinely distinct facts, not the same fact stated twice"
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship-pair",
+    "identity": "resolvedByChange (Incident → Change) / justifiedByIncident (Change → Incident)",
+    "field": "pair",
+    "pattern": "RECIPROCAL_PAIR",
+    "detail": "resolvedByChange (Incident → Change) and justifiedByIncident (Change → Incident) connect the same two classes in opposite directions -- confirm these are two genuinely distinct facts, not the same fact stated twice"
+  }
+]
