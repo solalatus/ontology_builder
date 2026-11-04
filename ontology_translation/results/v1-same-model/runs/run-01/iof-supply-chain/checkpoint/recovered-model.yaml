@@ -1,0 +1,320 @@
+competency_questions: []
+classes:
+  Supplier:
+    meaning: A trading partner that supplies goods or services.
+    aliases: []
+    properties: {}
+  Customer:
+    meaning: A trading partner that receives the goods or services supplied.
+    aliases: []
+    properties: {}
+  Item:
+    meaning: "The material trade item, the tradable goods an order or shipment concerns rather than their engineering specification."
+    aliases:
+      - material trade item
+    properties: {}
+  SupplyArrangement:
+    meaning: "A supply relationship dependent on an identified supplier, customer, and material trade item, distinct from a purchase order or contract."
+    aliases:
+      - supply relationship
+    properties: {}
+  PurchaseOrder:
+    meaning: A request or agreement for supply that identifies the item concerned.
+    aliases:
+      - order
+    properties: {}
+  Shipment:
+    meaning: "A traceable goods unit prepared, dispatched, or received."
+    aliases: []
+    properties: {}
+  TransportProcess:
+    meaning: "The actual movement associated with a shipment, starting at one supply-chain node and ending at another."
+    aliases: []
+    properties: {}
+  ShipFromLocation:
+    meaning: The place a shipment is sent from.
+    aliases: []
+    properties: {}
+  ShipToLocation:
+    meaning: The place a shipment is sent to.
+    aliases: []
+    properties: {}
+  Facility:
+    meaning: "A physical site used for supply-chain work, such as preparing or receiving shipments."
+    aliases: []
+    properties: {}
+  StorageFacility:
+    meaning: A facility used to store goods or traceable units.
+    aliases: []
+    properties: {}
+  SupplyChainNode:
+    meaning: "An origin, destination, or operating point that a transport process can run between."
+    aliases: []
+    properties: {}
+  StorageProcess:
+    meaning: Planned work that stores goods or traceable units at a storage facility.
+    aliases: []
+    properties: {}
+  Carrier:
+    meaning: A supplier that carries or transports shipments.
+    aliases: []
+    properties: {}
+  FreightForwarder:
+    meaning: A party that arranges freight forwarding rather than necessarily carrying the shipment itself.
+    aliases: []
+    properties: {}
+  FreightForwardingService:
+    meaning: The commercial service that provides freight-forwarding capability and involves a freight forwarder.
+    aliases: []
+    properties: {}
+  Container:
+    meaning: A physical item used to hold or transport goods.
+    aliases: []
+    properties: {}
+  Cargo:
+    meaning: Goods carried as a load in transport or logistics work.
+    aliases: []
+    properties: {}
+  Lot:
+    meaning: A batch-level unit for tracking goods.
+    aliases: []
+    properties: {}
+  Sublot:
+    meaning: A subdivision of a lot used in tracking.
+    aliases: []
+    properties: {}
+  LogisticUnit:
+    meaning: A handling unit for tracking goods.
+    aliases: []
+    properties: {}
+  Load:
+    meaning: A unit prepared for handling or transport.
+    aliases: []
+    properties: {}
+  TrackingEvent:
+    meaning: A record of what happened to a tracked thing and when.
+    aliases: []
+    properties:
+      eventTime:
+        type: date
+      eventType:
+        type: text
+  ShipmentPreparationProcess:
+    meaning: Work that gets an identified shipment ready for dispatch at a facility.
+    aliases: []
+    properties: {}
+  ReceivingProcess:
+    meaning: The work of receiving an incoming shipment or goods at a facility.
+    aliases: []
+    properties: {}
+  LogisticsService:
+    meaning: A commercial service providing logistics capability for supply-chain work.
+    aliases: []
+    properties: {}
+  TransportationService:
+    meaning: The commercial service that provides transport capability for moving goods and involves a carrier.
+    aliases: []
+    properties: {}
+  PackagingService:
+    meaning: A commercial service providing packaging capability for goods.
+    aliases: []
+    properties: {}
+  StorageService:
+    meaning: A commercial service providing storage capability for goods.
+    aliases: []
+    properties: {}
+relationships:
+  - name: suppliesTo
+    from: Supplier
+    to: Customer
+    meaning: A supplier supplies goods to a customer.
+    aliases: []
+  - name: dependsOnSupplier
+    from: SupplyArrangement
+    to: Supplier
+    meaning: The supplier on which this supply relationship depends.
+    aliases: []
+  - name: dependsOnCustomer
+    from: SupplyArrangement
+    to: Customer
+    meaning: The customer on which this supply relationship depends.
+    aliases: []
+  - name: dependsOnItem
+    from: SupplyArrangement
+    to: Item
+    meaning: The material trade item on which this supply relationship depends.
+    aliases: []
+  - name: fulfills
+    from: Shipment
+    to: PurchaseOrder
+    meaning: The purchase order fulfilled by the shipment.
+    aliases: []
+  - name: concernsItem
+    from: PurchaseOrder
+    to: Item
+    meaning: The material trade item concerned by the purchase order.
+    aliases: []
+  - name: concernsItem
+    from: Shipment
+    to: Item
+    meaning: The material trade item moved in the shipment.
+    aliases: []
+  - name: shipsFrom
+    from: Shipment
+    to: ShipFromLocation
+    meaning: The ship-from location for the shipment.
+    aliases: []
+  - name: shipsTo
+    from: Shipment
+    to: ShipToLocation
+    meaning: The ship-to location for the shipment.
+    aliases: []
+  - name: occursAt
+    from: ShipmentPreparationProcess
+    to: Facility
+    meaning: The facility at which shipment preparation occurs.
+    aliases: []
+  - name: isForShipment
+    from: ShipmentPreparationProcess
+    to: Shipment
+    meaning: Identifies the shipment for which this preparation process is intended.
+    aliases: []
+  - name: startsAt
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: The supply-chain node where the transport process starts.
+    aliases: []
+  - name: endsAt
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: The supply-chain node where the transport process ends.
+    aliases: []
+  - name: checkedForReceiptAgainst
+    from: Shipment
+    to: TransportProcess
+    meaning: The transport process identified as arrival evidence when checking receipt of this shipment; not required for shipments at other stages.
+    aliases: []
+  - name: isForShipment
+    from: ReceivingProcess
+    to: Shipment
+    meaning: Identifies the shipment for which this receiving process is used.
+    aliases: []
+  - name: occursAt
+    from: ReceivingProcess
+    to: Facility
+    meaning: The facility where the receiving process occurs.
+    aliases: []
+  - name: receivedAt
+    from: Shipment
+    to: Facility
+    meaning: The destination facility where receipt of the shipment was recorded after completion.
+    aliases: []
+  - name: involvesCarrier
+    from: ShipmentPreparationProcess
+    to: Carrier
+    meaning: The carrier involved in this shipment preparation process.
+    aliases: []
+  - name: involvesForwarder
+    from: FreightForwardingService
+    to: FreightForwarder
+    meaning: The freight forwarder involved in the forwarding service.
+    aliases: []
+  - name: usesContainer
+    from: Shipment
+    to: Container
+    meaning: The container the shipment uses.
+    aliases: []
+  - name: containsCargo
+    from: Container
+    to: Cargo
+    meaning: The cargo contained in the container.
+    aliases:
+      - stores cargo
+      - carries cargo
+  - name: tracks
+    from: TrackingEvent
+    to: Shipment
+    meaning: The shipment followed by the tracking event.
+    aliases: []
+  - name: tracks
+    from: TrackingEvent
+    to: Lot
+    meaning: The lot followed by the tracking event.
+    aliases: []
+  - name: tracks
+    from: TrackingEvent
+    to: LogisticUnit
+    meaning: The logistic unit followed by the tracking event.
+    aliases: []
+  - name: tracks
+    from: TrackingEvent
+    to: Load
+    meaning: The load followed by the tracking event.
+    aliases: []
+  - name: occursAt
+    from: StorageProcess
+    to: StorageFacility
+    meaning: The storage facility where the storage process occurs.
+    aliases: []
+  - name: involvesCarrier
+    from: TransportationService
+    to: Carrier
+    meaning: The carrier involved in a transportation service.
+    aliases: []
+rules:
+  canPrepareShipment:
+    conditions:
+      - The particular shipment is identified.
+      - Its ship-from and ship-to locations are identified.
+      - A preparation process is identified for this shipment.
+      - "Either a carrier is identified for that preparation process, or freight forwarding is confirmed as arranged for this particular shipment; a forwarder's name or general service listing is not sufficient evidence."
+  canDispatchShipment:
+    conditions:
+      - The particular shipment to be dispatched is identified.
+  canReceiveShipment:
+    conditions:
+      - The particular shipment is identified and its ship-to location is known.
+      - A receiving process is identified for this shipment and occurred at a facility.
+      - "Confirm that this receiving facility is the destination facility for this shipment; the evidence for matching the facility to its ship-to location remains unestablished, so do not record receipt if the match cannot be confirmed."
+      - A transport process is identified specifically as arrival evidence for this receipt.
+      - That transport process is confirmed to have reached its destination node; its named end node alone does not prove arrival.
+  canRecordTrackingEvent:
+    conditions:
+      - "At least one identified target is a shipment, lot, logistic unit, or load."
+      - The event time is present as a usable date.
+      - The event type is present and known as text.
+  canReviewSupplyArrangement:
+    conditions:
+      - The particular Supply Arrangement (supply relationship) is identified.
+      - "It depends on the intended identified supplier, customer, and material trade item."
+actions:
+  prepareShipment:
+    input: Shipment
+    preconditions:
+      - canPrepareShipment
+    effect: "Document the shipment's ship-from and ship-to locations and its identified preparation process, together with the carrier involved in that process or the confirmed forwarding arrangement for this particular shipment; do not mark the preparation process complete."
+    verification: "Check both shipping locations, the preparation process identified for this shipment, and the recorded carrier or shipment-specific forwarding confirmation; if forwarding evidence cannot be retrieved, do not claim that route is verified."
+  dispatchShipment:
+    input: Shipment
+    preconditions:
+      - canDispatchShipment
+    effect: Dispatch the identified shipment for movement; the representation of the dispatch outcome has not yet been established.
+    verification: Confirm that the shipment selected for dispatch was the intended one; independent evidence that it was actually sent remains unestablished and must not be claimed.
+  receiveShipment:
+    input: Shipment
+    preconditions:
+      - canReceiveShipment
+    effect: "Record the identified shipment as received at the destination facility through its identified receiving process, adding the received-at-facility result."
+    verification: Confirm receipt of that shipment at that destination facility and completion of its identified receiving process; how completion and arrival are recorded or read back remains open.
+  recordTrackingEvent:
+    input: TrackingEvent
+    preconditions:
+      - canRecordTrackingEvent
+    effect: "Record the tracking event's event date and event type and its tracks connection to each identified eligible shipment, lot, logistic unit, or load target."
+    verification: "Read the recorded event and confirm its event date, event type, and identified tracked target or targets were retained."
+  reviewSupplyArrangement:
+    input: SupplyArrangement
+    preconditions:
+      - canReviewSupplyArrangement
+    effect: "Read and review the existing supply relationship's supplier, customer, and material trade item dependencies without changing them or creating a review record."
+    verification: "Confirm that the reviewed relationship retains links to the intended supplier, customer, and material trade item."

@@ -1,0 +1,242 @@
+competency_questions: []
+classes:
+  Asset:
+    meaning: The maintainable item whose condition is tracked.
+    aliases:
+      - maintainable item
+    properties: {}
+  FailureEvent:
+    meaning: An event that causes the item to lose its ability to perform a required function.
+    aliases:
+      - failure
+    properties: {}
+  RequiredFunction:
+    meaning: A function of the maintainable item needed to meet a process requirement.
+    aliases:
+      - primary function
+    properties: {}
+  FailedState:
+    meaning: A condition in which the item cannot perform its required function because of a failure event.
+    aliases: []
+    properties:
+      category:
+        type: text
+        allowed:
+          - failed
+  FunctioningProcess:
+    meaning: A process in which the item performs its function.
+    aliases: []
+    properties: {}
+  FailureProcess:
+    meaning: "A process that changes some quality of the item, causing it to become degraded or failed."
+    aliases:
+      - functional failure
+    properties: {}
+  FailureEffect:
+    meaning: "A consequence of failure that occurs as a process, within or beyond the failed item's boundary."
+    aliases: []
+    properties: {}
+  UndesirableDisposition:
+    meaning: A tendency of the item to undergo a process leading to an undesirable outcome; a tendency to fail and a tendency toward behavior unexpected in normal operation are distinct cases.
+    aliases:
+      - failure mode
+    properties: {}
+  DegradedState:
+    meaning: "A condition in which the item's ability to perform as required is reduced but still acceptable."
+    aliases: []
+    properties:
+      category:
+        type: text
+        allowed:
+          - degraded
+  FailureModeCode:
+    meaning: An identifier describing a known undesirable disposition.
+    aliases: []
+    properties: {}
+  OperatingState:
+    meaning: A condition in which the item can perform its required function.
+    aliases: []
+    properties:
+      category:
+        type: text
+        allowed:
+          - operating
+  MaintenanceWorkOrderRecord:
+    meaning: "A record describing a maintenance process, rather than the process itself."
+    aliases:
+      - work order
+      - MWO
+    properties:
+      taskDescription:
+        type: text
+      cost:
+        type: number
+      taskCode:
+        type: text
+  MaintenanceProcess:
+    meaning: "Work to retain or restore a maintainable item's function under a maintenance strategy."
+    aliases: []
+    properties: {}
+  MaintenanceStrategy:
+    meaning: An approach or method intended to help the asset achieve its desired objectives and governing its maintenance process.
+    aliases: []
+    properties: {}
+  MaintenanceActivity:
+    meaning: "A single task in the maintenance process to retain or restore the item's function."
+    aliases:
+      - maintenance task
+    properties: {}
+  SupportingMaintenanceActivity:
+    meaning: A single action that helps execute the maintenance process but is not one of its main maintenance tasks.
+    aliases: []
+    properties: {}
+  QualificationSpecification:
+    meaning: "A requirement for a person to have an assessed skill for a particular maintenance activity, not the person's skill itself."
+    aliases: []
+    properties: {}
+  QualifiedMaintenancePerson:
+    meaning: A person qualified to perform a particular maintenance activity.
+    aliases: []
+    properties: {}
+relationships:
+  - name: realizesDispositionToFail
+    from: FailureProcess
+    to: UndesirableDisposition
+    meaning: The failure process realizes an undesirable disposition confirmed to be a disposition to fail; an absent link does not classify the disposition.
+    aliases: []
+  - name: hasOperatingState
+    from: Asset
+    to: OperatingState
+    meaning: The operating state is a condition of this asset; the link alone does not show whether it is current.
+    aliases: []
+  - name: hasDegradedState
+    from: Asset
+    to: DegradedState
+    meaning: The degraded state is a condition of this asset; the link alone does not show whether it is current.
+    aliases: []
+  - name: hasFailedState
+    from: Asset
+    to: FailedState
+    meaning: The failed state is a condition of this asset; the link alone does not show whether it is current.
+    aliases: []
+  - name: initiatesFailedState
+    from: FailureEvent
+    to: FailedState
+    meaning: The failure event initiates the resulting failed state.
+    aliases: []
+  - name: realizesRequiredFunction
+    from: FunctioningProcess
+    to: RequiredFunction
+    meaning: The functioning process realizes this required function.
+    aliases: []
+  - name: resultsInDegradedState
+    from: FailureProcess
+    to: DegradedState
+    meaning: The failure process can result in this degraded state.
+    aliases: []
+  - name: resultsInFailedState
+    from: FailureProcess
+    to: FailedState
+    meaning: The failure process can result in this failed state.
+    aliases: []
+  - name: hasFollowingEffect
+    from: FailureEvent
+    to: FailureEffect
+    meaning: This failure effect follows from the failure event as a consequence.
+    aliases:
+      - has an effect
+  - name: describesDisposition
+    from: FailureModeCode
+    to: UndesirableDisposition
+    meaning: The failure mode code describes this known undesirable disposition without being the disposition itself.
+    aliases: []
+  - name: describesMaintenanceProcess
+    from: MaintenanceWorkOrderRecord
+    to: MaintenanceProcess
+    meaning: The work order record describes this maintenance process without being the process itself.
+    aliases: []
+  - name: governedByStrategy
+    from: MaintenanceProcess
+    to: MaintenanceStrategy
+    meaning: The maintenance strategy governs how this process is carried out.
+    aliases:
+      - prescribed by
+  - name: includesMaintenanceActivity
+    from: MaintenanceProcess
+    to: MaintenanceActivity
+    meaning: The maintenance process includes this main maintenance task.
+    aliases: []
+  - name: includesSupportingActivity
+    from: MaintenanceProcess
+    to: SupportingMaintenanceActivity
+    meaning: "The maintenance process includes this supporting action, not as a main task."
+    aliases: []
+  - name: requiresQualificationSpecification
+    from: MaintenanceActivity
+    to: QualificationSpecification
+    meaning: This maintenance activity requires the specified assessed skill from the person who performs it.
+    aliases:
+      - prescribed by
+  - name: qualifiedForActivity
+    from: QualifiedMaintenancePerson
+    to: MaintenanceActivity
+    meaning: This person is qualified to perform this particular activity; this does not establish an assignment.
+    aliases: []
+rules:
+  canRecordAssetAsFailed:
+    conditions:
+      - The given failure event is confirmed to have occurred; its evidence source is unresolved.
+      - A reliable assessment confirms the affected asset cannot perform its required function; its evidence source is unresolved.
+      - "If either confirmation is absent or unclear, do not record a failed state."
+  canCreateMaintenanceWorkOrder:
+    conditions:
+      - "A maintenance process has been identified as needed to retain or restore the item's function; no link to a specific required function is assumed."
+  canAssignQualifiedMaintenancePerson:
+    conditions:
+      - "The maintenance activity's qualification specification is known."
+      - The proposed person is confirmed to satisfy that specification and is qualified for this particular activity.
+      - "If either the requirement or the person's qualification is unestablished, do not assign the person."
+      - A way to record and retrieve the actual assignee is unresolved; being qualified for an activity does not establish assignment.
+  canStartMaintenanceProcess:
+    conditions:
+      - The maintenance process has a defined maintenance strategy governing it.
+      - A maintenance work order record describes this process.
+      - "If either condition is absent, do not start the process."
+      - These preconditions alone do not prove the subsequent work order is active or activities are assigned.
+  canCloseMaintenanceWorkOrder:
+    conditions:
+      - All main maintenance activities included in the process described by the work order are confirmed complete; how completion is evidenced remains unresolved.
+      - The work order record is confirmed updated with what was actually performed; the storage location is unresolved.
+      - Completion of supporting maintenance activities is not a separate closeout requirement.
+      - A populated numeric cost field alone does not establish that the cost is final.
+actions:
+  recordAssetAsFailed:
+    input: FailureEvent
+    preconditions:
+      - canRecordAssetAsFailed
+    effect: "Record a failed state for the affected asset, linked from the failure event as the state it initiates."
+    verification: "Confirm the failure event initiates the recorded failed state and the asset has that state; confirmation that it is the asset's current state remains unresolved."
+  createMaintenanceWorkOrder:
+    input: MaintenanceProcess
+    preconditions:
+      - canCreateMaintenanceWorkOrder
+    effect: Create a maintenance work order record that describes the identified maintenance process.
+    verification: Confirm the new work order record describes the intended maintenance process; do not assume a link to a specific required function.
+  assignQualifiedMaintenancePerson:
+    input: MaintenanceActivity
+    preconditions:
+      - canAssignQualifiedMaintenancePerson
+    effect: "Assign the proposed person, confirmed qualified for this maintenance activity, to the activity; the assignment's recording location remains unresolved."
+    verification: Retrieve who was actually assigned and confirm that person is qualified for the activity; assignee retrieval remains unresolved.
+  startMaintenanceProcess:
+    input: MaintenanceProcess
+    preconditions:
+      - canStartMaintenanceProcess
+    effect: Begin the maintenance process under its defined maintenance strategy.
+    verification: "Confirm the describing work order is active and the process's activities are assigned; methods to retrieve both facts remain unresolved, so verification cannot yet be marked passed."
+  closeMaintenanceWorkOrder:
+    input: MaintenanceWorkOrderRecord
+    preconditions:
+      - canCloseMaintenanceWorkOrder
+    effect: "Update the work order record to reflect completion after confirming completion of its described process's main maintenance activities and an update stating what was actually performed."
+    verification: Confirm the record contains completed task information and a verified final cost; the performed-work location and whether the numeric cost field holds the final figure remain unresolved. Do not assume a defined closed-status value.
