@@ -1,0 +1,200 @@
+competency_questions: []
+classes:
+  Asset:
+    meaning: A physical item maintained so it can keep doing the job it is needed for.
+    aliases:
+      - maintainable item
+    properties: {}
+  AssetState:
+    meaning: "A period during which an item's functions, capabilities, and level of performance remain unchanged."
+    aliases:
+      - maintenance state
+    properties:
+      category:
+        type: text
+        allowed:
+          - operating
+          - degraded
+          - failed
+  FailureEvent:
+    meaning: "An event that causes an item to lose its ability to perform a required function, distinct from the failed state that follows."
+    aliases:
+      - failure
+    properties: {}
+  RequiredFunction:
+    meaning: "The job an item needs to do to meet a process requirement, whether or not it can do it now."
+    aliases:
+      - primary function
+    properties: {}
+  MaintenanceJob:
+    meaning: "Work carried out under a maintenance strategy to retain or restore an asset's function."
+    aliases:
+      - maintenance process
+    properties: {}
+  WorkOrder:
+    meaning: "The record describing a maintenance job, not the work itself."
+    aliases:
+      - maintenance work order
+      - MWO
+    properties:
+      cost:
+        type: number
+      taskDescription:
+        type: text
+      taskCode:
+        type: text
+  MaintenanceStrategy:
+    meaning: The approach under which a maintenance job is carried out.
+    aliases: []
+    properties: {}
+  MaintenanceTask:
+    meaning: "A single activity within a maintenance job to retain or restore the asset's function."
+    aliases:
+      - maintenance activity
+    properties: {}
+  QualificationSpecification:
+    meaning: A requirement identifying the assessed skill a person needs for a particular maintenance task.
+    aliases: []
+    properties: {}
+  QualifiedMaintenancePerson:
+    meaning: "A person qualified to perform a specified maintenance task, whose qualification is checked for that task before assignment."
+    aliases: []
+    properties: {}
+  FailureModeCode:
+    meaning: "A recorded identifier describing an undesirable disposition, not the failure event itself."
+    aliases: []
+    properties: {}
+  FailureEffect:
+    meaning: "What happens as a consequence of a failure event within or beyond the failed asset's boundary."
+    aliases:
+      - failure consequence
+    properties: {}
+  UndesirableDisposition:
+    meaning: "An asset's tendency to undergo a process that leads to an undesirable outcome."
+    aliases:
+      - failure mode
+    properties: {}
+  FunctioningProcess:
+    meaning: "The process in which an asset actually performs its function, distinct from the function it is required to provide."
+    aliases: []
+    properties: {}
+relationships:
+  - name: hasCurrentMaintenanceState
+    from: Asset
+    to: AssetState
+    meaning: The state period applying to this asset now.
+    aliases: []
+  - name: initiatesFailedState
+    from: FailureEvent
+    to: AssetState
+    meaning: "The event begins this particular asset state, which must be categorized failed."
+    aliases: []
+  - name: realizesRequiredFunction
+    from: FunctioningProcess
+    to: RequiredFunction
+    meaning: "The asset performs its required function in this process, without implying that performance is acceptable."
+    aliases: []
+  - name: describesDisposition
+    from: FailureModeCode
+    to: UndesirableDisposition
+    meaning: "The failure mode code describes the disposition, not a failure event."
+    aliases: []
+  - name: hasFailureEffect
+    from: FailureEvent
+    to: FailureEffect
+    meaning: "Identifies a consequence of the failure event within or beyond the asset's boundary."
+    aliases: []
+  - name: describesJob
+    from: WorkOrder
+    to: MaintenanceJob
+    meaning: "The work order describes this maintenance job, rather than being the work itself."
+    aliases: []
+  - name: governsJob
+    from: MaintenanceStrategy
+    to: MaintenanceJob
+    meaning: The strategy governs how this maintenance job is carried out.
+    aliases: []
+  - name: includesTask
+    from: MaintenanceJob
+    to: MaintenanceTask
+    meaning: The maintenance task is an activity making up this job.
+    aliases: []
+  - name: governsJob
+    from: MaintenanceJob
+    to: MaintenanceStrategy
+    meaning: "The maintenance job is governed by this maintenance strategy; read as 'governed by', not as the job governing the strategy."
+    aliases:
+      - prescribed by
+  - name: requiresQualification
+    from: MaintenanceTask
+    to: QualificationSpecification
+    meaning: This task requires the specified assessed skill.
+    aliases:
+      - prescribed by
+  - name: qualifiedForTask
+    from: QualifiedMaintenancePerson
+    to: MaintenanceTask
+    meaning: This person is qualified for this particular maintenance task.
+    aliases: []
+rules:
+  classifyOperating:
+    conditions:
+      - "The asset's required function has been identified."
+      - The asset can perform that required function.
+      - "If evaluation also finds reduced but still acceptable performance, classify as degraded instead; absence of reduced performance is not a separate mandatory operating check."
+  classifyDegraded:
+    conditions:
+      - "The asset's required function has been identified."
+      - "The asset's performance is reduced but remains acceptable for that function."
+  classifyFailed:
+    conditions:
+      - "The affected asset is identified separately from the event, from the request or available case information; otherwise do not record a failed state."
+      - The input failure event is identified and confirmed to have occurred; otherwise do not record a failed state.
+      - "The identified asset's required function is identified; otherwise do not record a failed state."
+      - The identified asset is confirmed unable to perform that required function; otherwise do not record a failed state.
+  canCreateWorkOrder:
+    conditions:
+      - "A maintenance job needed to retain or restore an asset's function has been identified."
+  canAssignTask:
+    conditions:
+      - "The particular maintenance task's required qualification specification is identified."
+      - "The proposed person satisfies that specification and is qualified for that particular task; if either cannot be confirmed, do not assign."
+  canStartMaintenanceJob:
+    conditions:
+      - The maintenance job has a defined governing maintenance strategy.
+      - A work order describing that maintenance job exists.
+  canCloseWorkOrder:
+    conditions:
+      - The maintenance tasks of the job described by the work order are complete.
+      - The work-order record has been updated with what was performed.
+actions:
+  recordAssetAsFailed:
+    input: FailureEvent
+    preconditions:
+      - classifyFailed
+    effect: Record a failed-category state for the identified affected asset and link the input failure event as initiating that particular failed state.
+    verification: Confirm the identified asset is tracked as failed and the failure event initiates its particular failed-state record.
+  createMaintenanceWorkOrder:
+    input: MaintenanceJob
+    preconditions:
+      - canCreateWorkOrder
+    effect: Create a work-order record describing the input maintenance job.
+    verification: Check that the new work-order record describes the intended maintenance job.
+  assignQualifiedPersonToTask:
+    input: MaintenanceTask
+    preconditions:
+      - canAssignTask
+    effect: Assign the proposed qualified maintenance person to the input maintenance task in the work-order system.
+    verification: Check the actual assignment in the work-order system and confirm the assigned person is qualified for this particular task.
+  startMaintenanceJob:
+    input: MaintenanceJob
+    preconditions:
+      - canStartMaintenanceJob
+    effect: Start the maintenance job under its defined governing maintenance strategy.
+    verification: "Confirm in the work-order system that the job began under that strategy, its work order is active, and its maintenance tasks are actually assigned; if any check cannot be confirmed, do not report the start as verified."
+  closeWorkOrder:
+    input: WorkOrder
+    preconditions:
+      - canCloseWorkOrder
+    effect: Update the work-order record to reflect completion of the job it describes.
+    verification: "Confirm the work-order record contains completed-task information and final cost; if either cannot be confirmed, do not report closure as verified."

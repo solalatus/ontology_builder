@@ -1,0 +1,279 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_6",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_8",
+          "recoveredId": "e14",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_12",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_13",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_21",
+          "recoveredId": "e35",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e6",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e7",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_31",
+          "recoveredId": "e9",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_34",
+          "recoveredId": "e18",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_35",
+          "recoveredId": "e19",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "AirPlenum.airflowState",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OccupancySensor.occupied",
+          "matchedPropertyName": "occupancyStatus",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "Thermostat.mode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Thermostat.status",
+          "matchedPropertyName": "operatingState",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "TerminalUnit.status",
+          "matchedPropertyName": "operatingState",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "Filter.status",
+          "matchedPropertyName": "condition",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "Chiller.coolingCapacity",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Building.yearBuilt",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Floor.levelNumber",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Space.maxOccupancy",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Fan.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Boiler.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Chiller.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "PackagedHeatPump.mode",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "CondensingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "CoolingTower.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "HeatExchanger.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Humidifier.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Pump.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "SpaceHeater.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "DryCooler.status",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 7 -- Both identify the air temperature sensor as an AHU point.\n2: MATCH 8 -- Both identify the air temperature setpoint as an AHU point.\n3: NO MATCH -- Using a sensor does not establish it as a thermostat point.\n4: NO MATCH -- Using a setpoint does not establish it as a thermostat point.\n5: MATCH 11 -- Installation in the building expresses the sensor’s location.\n6: MATCH 1 -- A building containing a floor is a has-part relationship.\n7: MATCH 2 -- A floor containing a space is a has-part relationship.\n8: MATCH 3 -- A building including a zone is a has-part relationship.\n9: MATCH 4 -- Maintaining a zone expresses the thermostat’s service relationship.\n10: MATCH 9 -- Both identify the outside air CO2 sensor as an AHU point.\n11: MATCH 10 -- Both identify the return air CO2 sensor as an AHU point.",
+      "properties": "1: MATCH \"occupancyStatus\" -- Both indicate whether the space is occupied.\n2: NO MATCH -- Thermostat mode is a selected setting, not its current operating state.\n3: MATCH \"operatingState\" -- Both describe the thermostat’s current operational status.\n4: MATCH \"operatingState\" -- Both describe the terminal unit’s current operational status.\n5: MATCH \"condition\" -- Filter status commonly indicates its condition.",
+      "valueFidelity": "1: 100 -- Identical distinctions.\n2: 100 -- Identical distinctions.\n3: 100 -- Identical distinctions.\n4: 100 -- Identical distinctions.\n5: 100 -- Identical distinctions.\n6: 100 -- Identical distinctions.\n7: 100 -- Identical distinctions.\n8: 100 -- Identical distinctions.\n9: 100 -- Identical distinctions.\n10: 100 -- Identical distinctions.\n11: 100 -- Identical distinctions.\n12: 100 -- Identical distinctions.\n13: 100 -- Identical distinctions.\n14: 100 -- Identical distinctions."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_12",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_13",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e6",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e7",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_31",
+          "recoveredId": "e9",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OccupancySensor.occupied",
+          "matchedPropertyName": "occupancyStatus",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "Thermostat.mode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Thermostat.status",
+          "matchedPropertyName": "operatingState",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "TerminalUnit.status",
+          "matchedPropertyName": "operatingState",
+          "verdict": "MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Boiler.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Chiller.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Pump.status",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "relationships": "1: NO MATCH -- Using a sensor is not the same as having it as a point.\n2: NO MATCH -- Using a setpoint is not the same as having it as a point.\n3: MATCH 1 -- A building containing a floor expresses the same part relationship.\n4: MATCH 2 -- A floor containing a space expresses the same part relationship.\n5: MATCH 3 -- A building including a zone expresses the same part relationship.\n6: MATCH 4 -- A thermostat assigned to maintain a zone serves that zone.",
+      "properties": "1: MATCH \"occupancyStatus\" -- Both indicate whether the space is occupied.\n2: NO MATCH -- Thermostat mode is a selected setting, not its operating state.\n3: MATCH \"operatingState\" -- Both describe the thermostat’s current operational status.\n4: MATCH \"operatingState\" -- Both describe the terminal unit’s current operational status.",
+      "valueFidelity": "1: 100 -- Identical values and distinctions.\n2: 100 -- Identical values and distinctions.\n3: 100 -- Identical values and distinctions.\n4: 100 -- Identical values and distinctions.\n5: 100 -- Identical values and distinctions.\n6: 100 -- Identical values and distinctions."
+    }
+  }
+}

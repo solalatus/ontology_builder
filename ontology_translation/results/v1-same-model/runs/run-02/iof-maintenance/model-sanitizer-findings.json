@@ -1,0 +1,10 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship-pair",
+    "identity": "governsJob (MaintenanceStrategy → MaintenanceJob) / governsJob (MaintenanceJob → MaintenanceStrategy)",
+    "field": "pair",
+    "pattern": "RECIPROCAL_PAIR",
+    "detail": "governsJob (MaintenanceStrategy → MaintenanceJob) and governsJob (MaintenanceJob → MaintenanceStrategy) connect the same two classes in opposite directions -- confirm these are two genuinely distinct facts, not the same fact stated twice"
+  }
+]

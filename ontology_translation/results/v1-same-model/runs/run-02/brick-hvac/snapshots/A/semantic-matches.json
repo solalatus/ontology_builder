@@ -1,0 +1,172 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_6",
+        "recoveredId": "e13"
+      },
+      {
+        "goldId": "rel_8",
+        "recoveredId": "e14"
+      },
+      {
+        "goldId": "rel_21",
+        "recoveredId": "e35"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e6"
+      },
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "rel_31",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "rel_34",
+        "recoveredId": "e18"
+      },
+      {
+        "goldId": "rel_35",
+        "recoveredId": "e19"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "OccupancySensor.occupied",
+        "matchedPropertyName": "occupancyStatus"
+      },
+      {
+        "goldId": "Thermostat.status",
+        "matchedPropertyName": "operatingState"
+      },
+      {
+        "goldId": "TerminalUnit.status",
+        "matchedPropertyName": "operatingState"
+      },
+      {
+        "goldId": "Filter.status",
+        "matchedPropertyName": "condition"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Fan.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "PackagedHeatPump.mode",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "CondensingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "CoolingTower.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "HeatExchanger.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Humidifier.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "SpaceHeater.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "DryCooler.status",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e6"
+      },
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "rel_31",
+        "recoveredId": "e9"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "OccupancySensor.occupied",
+        "matchedPropertyName": "occupancyStatus"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

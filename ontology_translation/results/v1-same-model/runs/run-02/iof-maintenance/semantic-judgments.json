@@ -1,0 +1,112 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailureProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToFail",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToExhibitUndesirableBehavior",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupportingMaintenanceActivity",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e7",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "MaintenanceWorkOrderRecord.workOrderDate",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "MaintenanceState.stateCategory",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- An asset is an item, not an operating state.\n2: NO MATCH -- An asset is an item, not a degraded state.\n3: NO MATCH -- An asset is an item, not a failed state.\n4: NO MATCH -- An asset is an item, not a failure process.\n5: NO MATCH -- An asset may have a disposition to fail, but is not that disposition.\n6: NO MATCH -- An asset may have this disposition, but is not the disposition.\n7: NO MATCH -- An asset may receive maintenance, but is not a maintenance activity.",
+      "relationships": "1: MATCH 2 -- A strategy governing a maintenance process is the reciprocal of the reference relationship.\n2: MATCH 3 -- Including a maintenance activity is the same connection as having that activity.",
+      "valueFidelity": "1: 100 -- Identical states and distinctions."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e7",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- An operating state is not a physical asset or a failure consequence.\n2: NO MATCH -- A degraded state is not a physical asset or a failure consequence.\n3: NO MATCH -- A failed state is not the consequence of a failure.",
+      "relationships": "1: MATCH 2 -- A strategy governing a process is the reciprocal of a process being governed by a strategy.\n2: MATCH 3 -- Including a maintenance task expresses the process having a maintenance activity."
+    }
+  }
+}
