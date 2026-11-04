@@ -59,3 +59,11 @@ These are set beside the first paper's rescored runs and the final itops runs (`
 - relationship precision no higher.
 
 Otherwise it is called *not supported*. With 3 runs per arm this is descriptive. The article reports the numbers either way.
+
+### Amendment 1a: phase window for check 3
+
+**When:** written 2026-11-04 at about 11:15 Berlin time, during run-03, still before any ablation artefact was opened.
+
+`conversation-log.md` carries no per-turn phase markers, so the "class and relationship phases" of check 3 are defined operationally from `tool-calls.md`. The window runs from the first turn whose `apply_ontology_yaml` call has a top-level `classes:` key, up to and including the last turn whose call has a top-level `relationships:` key. The persona turns of check 3 are those with a turn index inside this window.
+
+This definition was derived from the logs of the final itops run-01 only (classes start at turn 10, relationships end at turn 39). Nothing else in Amendment 1 changes.
