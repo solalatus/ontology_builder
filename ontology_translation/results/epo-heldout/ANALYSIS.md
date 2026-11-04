@@ -44,3 +44,27 @@ Interactive − B3:
 - The interactive composite was looked at after the interactive block ended and before B3 finished. No analysis choice was changed after that. The post-hoc persona check was added at that point and is labelled as such.
 
 Bootstrap seeds: `tests/evals/run-intervals.mjs` repeats the two ePO differences with its own seed offset. It gives relationship F1 [4.8, 26.2] instead of [4.8, 26.8], and the composite interval is identical. The article quotes this report (`epo-heldout-report.mjs`).
+
+## Weak expert (revision 1, E2; `WEAK-EXPERT-DESIGN.md`)
+
+Three runs with the interviewer frozen and the persona on `gpt-4o-mini` (deployment `gpt-4o-mini`, model 2024-07-18), all ending `stages_complete` (86, 147 and 184 turns). Numbers from `REPORT.md`, heuristic, full domain.
+
+| | Interactive (gpt-6-sol expert) | Weak expert (gpt-4o-mini) |
+|---|---|---|
+| Composite | 96.8 [93.6–100.0] | 25.8 [18.9–31.2] |
+| Relationship F1 | 98.6 [98.0–100.0] | 14.5 [5.0–20.4] |
+| Class recall | 97.3 | 38.7 |
+| Interviewer-first identifiers per 100 gold elements | 0.0 | 0.0 |
+| Persona said first, of 14 multi-word gold class names absent from its briefing (post hoc) | 12, 10, 13 | 4, 2, 6 |
+
+Welch t-intervals (95 %, percentage points):
+- ePO drop (interactive − weak), composite: +71.0 [+58.0, +84.0];
+- itops drop (final − persona ablation), composite: +28.2 [+7.4, +49.1];
+- difference of drops: +42.8 [+23.4, +62.2]. Relationship F1 (descriptive): ePO drop +84.1, itops drop +39.9, difference +44.2 [+23.0, +65.4].
+
+**Reading fixed in advance (case 1):** the ePO drop is at least as large as the itops drop, so the ePO headline depends on the simulated expert at least as much as the itops result does. With the weak expert the frozen interviewer keeps 26.6 % of the interactive composite on ePO (itops: 51.1 %). The interviewer still introduces none of the gold identifiers first; the vocabulary the strong expert supplied is largely absent when the expert is weak (2–6 of 14 names beyond the briefing instead of 10–13). The 96.8 % therefore shows that the pipeline holds on a new domain with a knowledgeable expert; it does not show elicitation from a naive expert.
+
+**Disclosures.**
+- The design note says it was committed "about 20:30 Berlin time"; the commit (`585129e`) was made at about 20:18, before the smoke run and the first block call (20:18:42). The design text is otherwise as committed.
+- Duration: run-01 15 min, run-02 30 min, run-03 42 min; block 1 h 27 min (20:18–21:45 Berlin time). No interruption, no resume, no rerun.
+- Cost (harness figure, every call at the gpt-6-sol rate, so an upper bound for the gpt-4o-mini persona calls): 1.88 + 4.19 + 5.74 = 11.81 USD, plus the 2-turn smoke run (0.05 USD).

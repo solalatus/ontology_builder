@@ -1,0 +1,775 @@
+{
+  "domain": "epo-ordering",
+  "runId": "run-03",
+  "runUuid": "b63414c8-c52b-4902-87b5-a01d6c794051",
+  "metrics": {
+    "classes": {
+      "recall": 0.48,
+      "precision": 0.6,
+      "f1": 0.5333333333333332,
+      "matched": 12,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 20
+    },
+    "relationships": {
+      "recall": 0.2,
+      "precision": 0.20833333333333334,
+      "f1": 0.20408163265306126,
+      "matched": 5,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 24
+    },
+    "properties": {
+      "recall": 0.2631578947368421,
+      "precision": 0.16129032258064516,
+      "f1": 0.19999999999999998,
+      "matched": 10,
+      "groundTruthTotal": 38,
+      "recoveredTotal": 62
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.3124716553287981,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.5882352941176471,
+      "precision": 0.5,
+      "f1": 0.5405405405405405,
+      "matched": 10,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 20
+    },
+    "relationships": {
+      "recall": 0.29411764705882354,
+      "precision": 0.20833333333333334,
+      "f1": 0.24390243902439027,
+      "matched": 5,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 24
+    },
+    "properties": {
+      "recall": 0.5,
+      "precision": 0.08064516129032258,
+      "f1": 0.13888888888888887,
+      "matched": 5,
+      "groundTruthTotal": 10,
+      "recoveredTotal": 62
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.30777728948460653,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": {
+    "classes": {
+      "recall": 0.52,
+      "precision": 0.65,
+      "f1": 0.5777777777777778,
+      "matched": 13,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 20
+    },
+    "relationships": {
+      "recall": 0.4,
+      "precision": 0.4166666666666667,
+      "f1": 0.4081632653061225,
+      "matched": 10,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 24
+    },
+    "properties": {
+      "recall": 0.2631578947368421,
+      "precision": 0.16129032258064516,
+      "f1": 0.19999999999999998,
+      "matched": 10,
+      "groundTruthTotal": 38,
+      "recoveredTotal": 62
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.39531368102796677,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 3,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "AllowanceInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ContractInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Invoicee",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderAgreementLine",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderCancellation",
+          "recoveredId": "n10",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "OrderCancellationRejection",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderChangeRejection",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderResponseInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Originator",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OriginatorInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TaxInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e19",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_18",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e4",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e12",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "AllowanceChargeInformation.vatExemptionReasonDescription",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AllowanceChargeInformation.percentage",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.accessURL",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.deliveryEmail",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.downloadURL",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.shippingMark",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.deliveryPeriod",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.placeOfDelivery",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.paymentTerm",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.sellerOrderID",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.amountDueForPayment",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.prepaidAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.roundingAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.totalAllowanceAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.totalChargeAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.totalLineAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.totalTaxExclusiveAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.totalTaxInclusiveAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.validityPeriod",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderLine.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [
+        {
+          "goldId": "OrderCancellation",
+          "recoveredId": "n10"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e19"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e8"
+        },
+        {
+          "goldId": "rel_18",
+          "recoveredId": "e13"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e4"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e12"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.48,
+        "precision": 0.6,
+        "f1": 0.5333333333333332,
+        "matched": 12,
+        "groundTruthTotal": 25,
+        "recoveredTotal": 20
+      },
+      "relationships": {
+        "recall": 0.2,
+        "precision": 0.20833333333333334,
+        "f1": 0.20408163265306126,
+        "matched": 5,
+        "groundTruthTotal": 25,
+        "recoveredTotal": 24
+      },
+      "properties": {
+        "recall": 0.2631578947368421,
+        "precision": 0.16129032258064516,
+        "f1": 0.19999999999999998,
+        "matched": 10,
+        "groundTruthTotal": 38,
+        "recoveredTotal": 62
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.3124716553287981,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- No candidate represents allowance information.\n2: NO MATCH -- No candidate represents contract information.\n3: NO MATCH -- A delivery location is not a delivery agreement.\n4: NO MATCH -- No candidate represents the party invoiced.\n5: NO MATCH -- No candidate represents an order agreement.\n6: NO MATCH -- No candidate represents a line of an order agreement.\n7: MATCH 4 -- Both represent a formal request to cancel an order.\n8: NO MATCH -- A cancellation request is not its rejection.\n9: NO MATCH -- No candidate represents rejection of an order change.\n10: NO MATCH -- A reply to an order response is not order response information.\n11: NO MATCH -- A supplier contact is not the originator.\n12: NO MATCH -- Supplier contact details are not originator information.\n13: NO MATCH -- No candidate represents tax information.",
+      "relationships": "1: MATCH 7 -- Specifies the order change line belonging to the order change.\n2: MATCH 2 -- Includes the order response line.\n3: MATCH 5 -- Receiving a confirmation is the reciprocal of the confirmation responding to the change.\n4: MATCH 1 -- An order having its supplier response is the reciprocal of that response being submitted for the order.\n5: MATCH 4 -- An order having a change request is the reciprocal of that change being submitted for the order.",
+      "properties": "1: NO MATCH -- An exemption reason is not an amount.\n2: NO MATCH -- A percentage is not an amount.\n3: NO MATCH -- Neither candidate is an access URL.\n4: NO MATCH -- Neither candidate is a delivery email address.\n5: NO MATCH -- Neither candidate is a download URL.\n6: NO MATCH -- Delivery instructions and status are not a shipping mark.\n7: NO MATCH -- Neither candidate specifies a delivery period.\n8: NO MATCH -- Neither candidate identifies the place of delivery.\n9: NO MATCH -- Neither candidate states payment terms.\n10: NO MATCH -- Neither candidate states accounting cost.\n11: NO MATCH -- An order number is not specifically the seller's order ID.\n12: NO MATCH -- Neither candidate is an amount due.\n13: NO MATCH -- Neither candidate is a prepaid amount.\n14: NO MATCH -- Neither candidate is a rounding amount.\n15: NO MATCH -- Neither candidate is a total allowance amount.\n16: NO MATCH -- Neither candidate is a total charge amount.\n17: NO MATCH -- Neither candidate is a total line amount.\n18: NO MATCH -- Neither candidate is a tax-exclusive total.\n19: NO MATCH -- Neither candidate is a tax-inclusive total.\n20: NO MATCH -- Neither candidate specifies a validity period.\n21: NO MATCH -- An item description is not an accounting cost."
+    }
+  },
+  "semanticScopedMetrics": {
+    "classes": {
+      "recall": 0.5882352941176471,
+      "precision": 0.5,
+      "f1": 0.5405405405405405,
+      "matched": 10,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 20
+    },
+    "relationships": {
+      "recall": 0.5294117647058824,
+      "precision": 0.375,
+      "f1": 0.4390243902439025,
+      "matched": 9,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 24
+    },
+    "properties": {
+      "recall": 0.5,
+      "precision": 0.08064516129032258,
+      "f1": 0.13888888888888887,
+      "matched": 5,
+      "groundTruthTotal": 10,
+      "recoveredTotal": 62
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.3728179398911106,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 3,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "DeliveryAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Invoicee",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderCancellation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderCancellationRejection",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderChangeRejection",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Originator",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OriginatorInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_18",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e4",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e12",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "DeliveryInformation.deliveryPeriod",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.totalAllowanceAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.totalChargeAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.totalLineAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e8"
+        },
+        {
+          "goldId": "rel_18",
+          "recoveredId": "e13"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e4"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e12"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.5882352941176471,
+        "precision": 0.5,
+        "f1": 0.5405405405405405,
+        "matched": 10,
+        "groundTruthTotal": 17,
+        "recoveredTotal": 20
+      },
+      "relationships": {
+        "recall": 0.29411764705882354,
+        "precision": 0.20833333333333334,
+        "f1": 0.24390243902439027,
+        "matched": 5,
+        "groundTruthTotal": 17,
+        "recoveredTotal": 24
+      },
+      "properties": {
+        "recall": 0.5,
+        "precision": 0.08064516129032258,
+        "f1": 0.13888888888888887,
+        "matched": 5,
+        "groundTruthTotal": 10,
+        "recoveredTotal": 62
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.30777728948460653,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- A delivery location is not a delivery agreement.\n2: NO MATCH -- No candidate identifies the party invoiced.\n3: NO MATCH -- A request that can also cancel a change request is broader than an order cancellation.\n4: NO MATCH -- No candidate represents rejection of an order cancellation.\n5: NO MATCH -- No candidate represents rejection of an order change.\n6: NO MATCH -- A supplier contact is not the originator.\n7: NO MATCH -- No candidate represents originator information.",
+      "relationships": "1: MATCH 2 -- An order response line is a line included in the order response.\n2: MATCH 4 -- The confirmation received for an order change responds to that change.\n3: MATCH 1 -- An order’s supplier response is a response submitted for that order.\n4: MATCH 3 -- An order change request is submitted for the order that has it.",
+      "properties": "1: NO MATCH -- No candidate represents the delivery period.\n2: NO MATCH -- No candidate represents the total allowance amount.\n3: NO MATCH -- No candidate represents the total charge amount.\n4: NO MATCH -- No candidate represents the total line amount."
+    }
+  },
+  "ruleMetrics": {
+    "recall": 0,
+    "precision": 0,
+    "f1": 0,
+    "matched": 0,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 15
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 0.5714285714285714,
+      "precision": 0.5,
+      "f1": 0.5333333333333333,
+      "matched": 4,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 8
+    },
+    "inputClassAccuracy": 0,
+    "inputClassChecked": 4,
+    "preconditionRecovery": 0.09826546003016592,
+    "effectRecovery": 0.11456472902829715,
+    "verificationRecovery": 0.10379055655442955
+  },
+  "semanticRuleActionMetrics": {
+    "rules": {
+      "recall": 0,
+      "precision": 0,
+      "f1": 0,
+      "matched": 0,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 15
+    },
+    "actions": {
+      "recall": 0.5714285714285714,
+      "precision": 0.5,
+      "f1": 0.5333333333333333,
+      "matched": 4,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 8,
+      "components": {
+        "identification": {
+          "recall": 0.5714285714285714,
+          "precision": 0.5,
+          "f1": 0.5333333333333333,
+          "matched": 4,
+          "groundTruthTotal": 7,
+          "recoveredTotal": 8
+        },
+        "inputClassAccuracy": 0,
+        "inputClassChecked": 4,
+        "preconditionRecovery": 0.09826546003016592,
+        "effectRecovery": 0.11456472902829715,
+        "verificationRecovery": 0.10379055655442955
+      }
+    },
+    "judgeCallCount": 2,
+    "judgments": {
+      "rules": [
+        {
+          "goldId": "orderRequiresSeller",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "orderLineRequiresQuantity",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "orderResponseMustReferenceOrder",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "orderChangeMustReferenceOrder",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "cancellationMustReferenceOrder",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "deliveryInformationShouldIdentifyConsignee",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "responseLineMustMatchOrderLine",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "actions": [
+        {
+          "goldId": "submitOrderCancellation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rejectOrderChange",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rejectOrderCancellation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ]
+    },
+    "resolvedMatches": {
+      "rules": [],
+      "actions": []
+    },
+    "heuristic": {
+      "rules": {
+        "recall": 0,
+        "precision": 0,
+        "f1": 0,
+        "matched": 0,
+        "groundTruthTotal": 7,
+        "recoveredTotal": 15
+      },
+      "actions": {
+        "identification": {
+          "recall": 0.5714285714285714,
+          "precision": 0.5,
+          "f1": 0.5333333333333333,
+          "matched": 4,
+          "groundTruthTotal": 7,
+          "recoveredTotal": 8
+        },
+        "inputClassAccuracy": 0,
+        "inputClassChecked": 4,
+        "preconditionRecovery": 0.09826546003016592,
+        "effectRecovery": 0.11456472902829715,
+        "verificationRecovery": 0.10379055655442955
+      }
+    },
+    "rawResponses": {
+      "rules": "1: NO MATCH -- No candidate requires an order to specify a seller.\n2: NO MATCH -- Candidates check quantities for other purposes, not whether an order line quantity is recorded.\n3: NO MATCH -- A response-to-order link appears only within rules with different triggering conditions.\n4: NO MATCH -- The order change candidate adds status and change-detail requirements.\n5: NO MATCH -- The cancellation candidate adds order-status and pending-request requirements.\n6: NO MATCH -- No candidate requires delivery information to identify a consignee.\n7: NO MATCH -- Matching quantities is not the same as requiring a response line to reference its order line.",
+      "actions": "1: NO MATCH -- Sending a linked cancellation request is different from submitting an order cancellation to establish its link to the order.\n2: NO MATCH -- No candidate rejects an order change.\n3: NO MATCH -- No candidate rejects an order cancellation."
+    }
+  },
+  "operationalStats": {
+    "appAgentApiCalls": 286,
+    "applyToolCalls": 86,
+    "getGraphStateCalls": 13,
+    "removeToolCalls": 1,
+    "renameToolCalls": 0,
+    "toolApplied": 86,
+    "toolSkipped": 2,
+    "toolNothing": 1,
+    "toolError": 0,
+    "errorCounts": {},
+    "totalErrorTurns": 0,
+    "compactionEvents": 0,
+    "leakEventsCount": 0,
+    "unresolvedLeakEvents": 0,
+    "maxConsecutiveTurnsWithNoToolActivity": 16,
+    "degraded": false,
+    "totalTokens": 20971349,
+    "promptTokens": 20879522,
+    "completionTokens": 91827,
+    "cachedTokens": 20661960,
+    "cachedShare": 0.9895801254454005,
+    "reasoningTokens": 28843,
+    "tokenCallCount": 470,
+    "conversationCostUsd": 5.485786,
+    "appCost": {
+      "calls": 285,
+      "promptTokens": 15282622,
+      "cachedTokens": 15152200,
+      "completionTokens": 60840,
+      "reasoningTokens": 28823,
+      "cachedShare": 0.9914659932045692,
+      "costUsd": 3.899684
+    },
+    "appCostByKind": {
+      "interview": {
+        "calls": 284,
+        "promptTokens": 15277209,
+        "cachedTokens": 15152200,
+        "completionTokens": 57026,
+        "reasoningTokens": 25147,
+        "cachedShare": 0.9918172880923473,
+        "costUsd": 3.850718
+      },
+      "consistency_llm": {
+        "calls": 1,
+        "promptTokens": 5413,
+        "cachedTokens": 0,
+        "completionTokens": 3814,
+        "reasoningTokens": 3676,
+        "cachedShare": 0,
+        "costUsd": 0.048966
+      }
+    },
+    "harnessCost": {
+      "calls": 185,
+      "promptTokens": 5596900,
+      "cachedTokens": 5509760,
+      "completionTokens": 30987,
+      "reasoningTokens": 20,
+      "cachedShare": 0.984430666976362,
+      "costUsd": 1.586102
+    }
+  },
+  "snapshots": [
+    {
+      "label": "A",
+      "turn": 184,
+      "counts": {
+        "classes": 20,
+        "relationships": 24,
+        "properties": 62,
+        "allowedValueLists": 14,
+        "rules": 15,
+        "actions": 8,
+        "droppedEdges": 0
+      },
+      "offlineRescoreAgrees": true,
+      "composite": 0.3124716553287981,
+      "scopedComposite": 0.30777728948460653,
+      "semanticComposite": 0.39531368102796677
+    }
+  ]
+}

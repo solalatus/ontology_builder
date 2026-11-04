@@ -1,0 +1,143 @@
+{
+  "classes": [
+    {
+      "goldId": "Consignee",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "DeliveryInformation",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "Order",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderChangeLine",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderLine",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderResponseLine",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "Seller",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "AllowanceChargeInformation",
+      "recoveredId": "n13",
+      "weight": 0.75
+    },
+    {
+      "goldId": "OrderCancellationConfirmation",
+      "recoveredId": "n16",
+      "weight": 0.75
+    },
+    {
+      "goldId": "OrderChange",
+      "recoveredId": "n9",
+      "weight": 0.6666666666666666
+    },
+    {
+      "goldId": "OrderChangeConfirmation",
+      "recoveredId": "n15",
+      "weight": 0.75
+    },
+    {
+      "goldId": "OrderResponse",
+      "recoveredId": "n7",
+      "weight": 0.6666666666666666
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_9",
+      "edgeId": "e5",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_10",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_0",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_4",
+      "edgeId": "e1",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_25",
+      "edgeId": "e9",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "DeliveryInformation.actualDeliveryDate",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "actualDeliveryDate"
+    },
+    {
+      "goldId": "DeliveryInformation.deliveryDeadline",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "deliveryDeadline"
+    },
+    {
+      "goldId": "DeliveryInformation.requestedDeliveryPeriod",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "requestedDeliveryPeriods"
+    },
+    {
+      "goldId": "AllowanceChargeInformation.allowanceChargeReasonDescription",
+      "hostNodeId": "n13",
+      "matchedPropertyName": "allowanceOrChargeType"
+    },
+    {
+      "goldId": "AllowanceChargeInformation.vatExemptionReason",
+      "hostNodeId": "n13",
+      "matchedPropertyName": "reason"
+    },
+    {
+      "goldId": "DeliveryInformation.trackingID",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "trackingInformation"
+    },
+    {
+      "goldId": "OrderLine.quantity",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "orderedQuantity"
+    },
+    {
+      "goldId": "OrderLine.price",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "pricePerItem"
+    },
+    {
+      "goldId": "OrderResponse.responseDescription",
+      "hostNodeId": "n7",
+      "matchedPropertyName": "responseStatus"
+    },
+    {
+      "goldId": "OrderResponseLine.backorderQuantity",
+      "hostNodeId": "n14",
+      "matchedPropertyName": "proposedQuantity"
+    }
+  ]
+}

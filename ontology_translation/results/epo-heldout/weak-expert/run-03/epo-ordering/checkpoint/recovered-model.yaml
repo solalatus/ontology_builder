@@ -1,0 +1,565 @@
+competency_questions:
+  - id: cq1
+    text: Which supplier is an order placed with?
+  - id: cq2
+    text: What supplier details are needed to place or follow up that order?
+  - id: cq3
+    text: Which items and quantities does an order include?
+  - id: cq4
+    text: What price applies to each ordered item?
+  - id: cq5
+    text: What is the latest acceptable delivery date for an order?
+  - id: cq6
+    text: Who is the consignee that will receive the delivery?
+  - id: cq7
+    text: "Has delivery been completed, and what was the actual delivery date?"
+  - id: cq8
+    text: What delivery periods were requested for an order?
+  - id: cq9
+    text: What special delivery instructions or terms apply to an order?
+  - id: cq10
+    text: Has the supplier responded to an order?
+  - id: cq11
+    text: What did the supplier say about its ability to fulfil an order?
+  - id: cq12
+    text: Which quantities are backordered with a commitment to deliver later?
+  - id: cq13
+    text: Which quantities are unavailable with no commitment to deliver later?
+  - id: cq14
+    text: "Did the supplier accept, reject, or propose changes to an order?"
+  - id: cq15
+    text: What allowances or charges did the supplier mention in its response?
+  - id: cq16
+    text: "What changes to an order's items or quantities have been requested?"
+  - id: cq17
+    text: "Has the supplier acknowledged a requested order change, and how did it respond?"
+  - id: cq18
+    text: What cancellations of an order or a previously requested change have been requested?
+  - id: cq19
+    text: Has the supplier confirmed or rejected a requested cancellation?
+classes:
+  Order:
+    meaning: "The record of what the desk asks a supplier to provide, which is tracked through delivery and fulfillment."
+    aliases:
+      - Purchase Order
+      - PO
+    properties:
+      orderNumber:
+        type: text
+      currentOrderStatus:
+        type: text
+        allowed:
+          - Pending
+          - In Progress
+          - Shipped
+          - Delivered
+          - Cancelled
+  Supplier:
+    meaning: The party from whom the order is placed.
+    aliases:
+      - seller
+    properties:
+      supplierName:
+        type: text
+      supplierAddress:
+        type: text
+      supplierPhoneNumber:
+        type: text
+      supplierEmailAddress:
+        type: text
+  DesignatedSupplierContact:
+    meaning: The person at the supplier whom the desk uses for order-related communications.
+    aliases: []
+    properties:
+      contactName:
+        type: text
+      contactPhoneNumber:
+        type: text
+      contactEmailAddress:
+        type: text
+  OrderLine:
+    meaning: "The current effective item or service, quantity, and price requested on an order, updated when an accepted change modifies those details."
+    aliases:
+      - ordered item
+      - ordered line
+    properties:
+      itemOrServiceDescription:
+        type: text
+      orderedQuantity:
+        type: number
+      pricePerItem:
+        type: number
+  PlaceOfDelivery:
+    meaning: The receiving organization and address to which delivery is directed.
+    aliases:
+      - delivery address
+    properties:
+      receivingOrganizationName:
+        type: text
+      deliveryAddress:
+        type: text
+  Consignee:
+    meaning: The person designated to accept delivery at that place.
+    aliases:
+      - receiving individual
+    properties:
+      consigneeName:
+        type: text
+      consigneeContactNumber:
+        type: text
+  SupplierOrderResponse:
+    meaning: "The supplier's recorded answer regarding whether and how it can fulfill an order."
+    aliases:
+      - Supplier Response
+    properties:
+      responseStatus:
+        type: text
+        allowed:
+          - Accepted
+          - Rejected
+          - Proposing Changes
+      proposedChanges:
+        type: text
+  OrderConfirmationResponse:
+    meaning: "The desk's official reply to a Supplier Order Response, either accepting its terms or proposing adjustments."
+    aliases:
+      - "desk's official response"
+      - Desk Response
+      - Confirmation Reply
+    properties:
+      confirmationStatus:
+        type: text
+        allowed:
+          - Accepted
+          - Proposed Adjustments
+      proposedAdjustments:
+        type: text
+      sentStatus:
+        type: text
+        allowed:
+          - Pending
+          - Successfully Sent
+          - Failed
+      sentDate:
+        type: date
+  OrderChangeRequest:
+    meaning: "The desk's formal request to modify an order."
+    aliases: []
+    properties:
+      requestStatus:
+        type: text
+        allowed:
+          - Pending
+          - Accepted
+          - Rejected
+      sentStatus:
+        type: text
+        allowed:
+          - Pending
+          - Successfully Sent
+          - Failed
+      sentDate:
+        type: date
+      acceptanceSequenceNumber:
+        type: number
+  CancellationRequest:
+    meaning: "The desk's formal request to cancel either an entire order or a previously submitted change request."
+    aliases: []
+    properties:
+      requestStatus:
+        type: text
+        allowed:
+          - Pending
+          - Accepted
+          - Rejected
+      sentStatus:
+        type: text
+        allowed:
+          - Pending
+          - Successfully Sent
+          - Failed
+      sentDate:
+        type: date
+  DeliveryInformation:
+    meaning: "The record of requested delivery timing, instructions, and the actual progress of delivery for an order."
+    aliases: []
+    properties:
+      deliveryDeadline:
+        type: date
+      requestedDeliveryPeriods:
+        type: text
+      specialDeliveryInstructions:
+        type: text
+      currentDeliveryStatus:
+        type: text
+        allowed:
+          - Pending
+          - In Transit
+          - Delivered
+          - Delayed
+          - Cancelled
+      actualDeliveryDate:
+        type: date
+      trackingInformation:
+        type: text
+  BackorderInformation:
+    meaning: "The record of quantities that the supplier still intends to deliver later, along with the expected timing for those deliveries."
+    aliases: []
+    properties:
+      backorderedQuantity:
+        type: number
+      expectedDeliveryDateOrPeriod:
+        type: text
+      currentBackorderStatus:
+        type: text
+        allowed:
+          - Pending Fulfillment
+          - Partially Fulfilled
+          - Fulfilled
+          - Cancelled
+  AllowanceAndChargeInformation:
+    meaning: An allowance or charge mentioned in a supplier response that is associated with the order.
+    aliases: []
+    properties:
+      allowanceOrChargeType:
+        type: text
+        allowed:
+          - Allowance (Discount)
+          - Charge (Additional Fee)
+      amount:
+        type: number
+      reason:
+        type: text
+  OrderResponseLine:
+    meaning: "One entry in the supplier response, matched to an Order Line, recording line-specific fulfillment details or proposed changes."
+    aliases:
+      - Response Line
+      - Line Item in Response
+    properties:
+      quantitySupplierCanFulfil:
+        type: number
+      quantityUnavailableWithNoFutureCommitment:
+        type: number
+      proposedQuantity:
+        type: number
+      proposedPrice:
+        type: number
+      responseDescription:
+        type: text
+  SupplierOrderChangeConfirmation:
+    meaning: "The supplier's recorded reply to a change request, which may include acceptance, rejection, or a counteroffer."
+    aliases: []
+    properties:
+      changeConfirmationStatus:
+        type: text
+        allowed:
+          - Accepted
+          - Rejected
+          - Countered
+      counterofferDetails:
+        type: text
+  SupplierOrderCancellationConfirmation:
+    meaning: "The supplier's recorded reply confirming or rejecting a cancellation request."
+    aliases: []
+    properties:
+      cancellationConfirmationStatus:
+        type: text
+        allowed:
+          - Accepted
+          - Rejected
+  OrderChangeLine:
+    meaning: One requested modification that refers to the specific Order Line it would affect.
+    aliases: []
+    properties:
+      requestedItemChange:
+        type: text
+      requestedQuantityChange:
+        type: number
+      requestedPriceChange:
+        type: number
+      previousItemDescription:
+        type: text
+      previousOrderedQuantity:
+        type: number
+      previousPricePerItem:
+        type: number
+  DeliveryEvidence:
+    meaning: A signed receipt or electronic confirmation used to verify that ordered items were received.
+    aliases: []
+    properties:
+      receiptDate:
+        type: date
+  DeliveryEvidenceLine:
+    meaning: "One received item-and-quantity entry within Delivery Evidence, matched to the Order Line it confirms."
+    aliases: []
+    properties:
+      receivedQuantity:
+        type: number
+      itemDescription:
+        type: text
+  BackorderUpdateCommunication:
+    meaning: A separate record of an update about a particular backorder communicated to stakeholders.
+    aliases: []
+    properties:
+      messageContent:
+        type: text
+      recipient:
+        type: text
+      sentStatus:
+        type: text
+        allowed:
+          - Pending
+          - Successfully Sent
+          - Failed
+      sentDate:
+        type: date
+relationships:
+  - name: specifiesSupplier
+    from: Order
+    to: Supplier
+    meaning: Identifies the supplier with whom the order is placed.
+    aliases:
+      - placed with
+  - name: hasDesignatedSupplierContact
+    from: Supplier
+    to: DesignatedSupplierContact
+    meaning: Identifies the person used for order-related communication with that supplier.
+    aliases: []
+  - name: hasOrderLine
+    from: Order
+    to: OrderLine
+    meaning: Identifies a specific requested item or service within the order.
+    aliases: []
+  - name: hasSupplierOrderResponse
+    from: Order
+    to: SupplierOrderResponse
+    meaning: Identifies the supplier reply to that order.
+    aliases: []
+  - name: specifiesDeliveryInformation
+    from: Order
+    to: DeliveryInformation
+    meaning: "Identifies the record of the order's delivery timing, instructions, and progress."
+    aliases: []
+  - name: concernsPlaceOfDelivery
+    from: DeliveryInformation
+    to: PlaceOfDelivery
+    meaning: Identifies the receiving organization and address for the delivery.
+    aliases: []
+  - name: concernsConsignee
+    from: DeliveryInformation
+    to: Consignee
+    meaning: Identifies the person designated to accept the delivery.
+    aliases: []
+  - name: includesOrderResponseLine
+    from: SupplierOrderResponse
+    to: OrderResponseLine
+    meaning: "Identifies a line-specific entry in the supplier's reply."
+    aliases: []
+  - name: correspondsToOrderLine
+    from: OrderResponseLine
+    to: OrderLine
+    meaning: "Identifies the ordered line that the supplier's response line answers."
+    aliases: []
+  - name: hasBackorderInformation
+    from: OrderResponseLine
+    to: BackorderInformation
+    meaning: Identifies the quantities on that response line that the supplier intends to deliver later.
+    aliases: []
+  - name: specifiesAllowanceAndChargeInformation
+    from: Order
+    to: AllowanceAndChargeInformation
+    meaning: Identifies an allowance or charge associated with the order.
+    aliases: []
+  - name: hasOrderChangeRequest
+    from: Order
+    to: OrderChangeRequest
+    meaning: Identifies a formal change that the desk requested for the order.
+    aliases: []
+  - name: receivesSupplierOrderChangeConfirmation
+    from: OrderChangeRequest
+    to: SupplierOrderChangeConfirmation
+    meaning: "Identifies the supplier's reply to that change request."
+    aliases: []
+  - name: hasCancellationRequest
+    from: Order
+    to: CancellationRequest
+    meaning: Identifies a request to cancel the order or one of its earlier change requests.
+    aliases: []
+  - name: pointsToOrderChangeRequest
+    from: CancellationRequest
+    to: OrderChangeRequest
+    meaning: "Identifies the earlier change request that the desk wants to cancel, when applicable."
+    aliases: []
+  - name: receivesSupplierOrderCancellationConfirmation
+    from: CancellationRequest
+    to: SupplierOrderCancellationConfirmation
+    meaning: "Identifies the supplier's confirmation or rejection of the cancellation request."
+    aliases: []
+  - name: mentionsAllowanceAndChargeInformation
+    from: SupplierOrderResponse
+    to: AllowanceAndChargeInformation
+    meaning: Identifies an allowance or charge that the supplier included in that response.
+    aliases: []
+  - name: refersToSupplierOrderResponse
+    from: OrderConfirmationResponse
+    to: SupplierOrderResponse
+    meaning: "Identifies the supplier reply that the desk's official response answers."
+    aliases: []
+  - name: specifiesOrderChangeLine
+    from: OrderChangeRequest
+    to: OrderChangeLine
+    meaning: Identifies a particular modification requested within the change request.
+    aliases: []
+  - name: refersToOrderLine
+    from: OrderChangeLine
+    to: OrderLine
+    meaning: Identifies the original ordered line that the requested modification would affect.
+    aliases: []
+  - name: hasDeliveryEvidence
+    from: DeliveryInformation
+    to: DeliveryEvidence
+    meaning: Identifies signed or electronic evidence the desk consults to verify receipt for the delivery information.
+    aliases: []
+  - name: hasDeliveryEvidenceLine
+    from: DeliveryEvidence
+    to: DeliveryEvidenceLine
+    meaning: Identifies an item-and-quantity entry within the delivery evidence.
+    aliases: []
+  - name: correspondsToOrderLine
+    from: DeliveryEvidenceLine
+    to: OrderLine
+    meaning: Identifies the ordered line whose receipt this evidence line confirms.
+    aliases: []
+  - name: hasBackorderUpdateCommunication
+    from: BackorderInformation
+    to: BackorderUpdateCommunication
+    meaning: Identifies a stakeholder update recorded for that particular backorder.
+    aliases: []
+rules:
+  canSendAcceptanceResponse:
+    conditions:
+      - The Order Confirmation Response refers to a Supplier Order Response whose Response Status is Accepted.
+      - "For every relevant Order Response Line in that Supplier Order Response, Quantity the Supplier Can Fulfil matches Ordered Quantity on the corresponding Order Line."
+      - The Order Confirmation Response Confirmation Status is Accepted.
+  canSendAdjustmentResponse:
+    conditions:
+      - The Order Confirmation Response refers to a Supplier Order Response whose Response Status is Accepted or Proposing Changes.
+      - The Order Confirmation Response Confirmation Status is Proposed Adjustments.
+      - "The Order Confirmation Response Proposed Adjustments states the desk's proposed changes without altering the supplier's Order Response Lines."
+  canSendOrderChangeRequest:
+    conditions:
+      - "The linked Order Current Order Status is Pending, In Progress, or Shipped."
+      - "Each Order Change Line specified by the Order Change Request refers to an Order Line and has at least one of Requested Item Change, Requested Quantity Change, or Requested Price Change populated."
+      - No other Order Change Request linked to the same Order has Request Status Pending.
+      - The Order Change Request Sent Status is Pending or Failed.
+  canSendWholeOrderCancellation:
+    conditions:
+      - The Cancellation Request is linked to an Order and does not point to an Order Change Request.
+      - "The linked Order Current Order Status is Pending, In Progress, or Shipped."
+      - No other Cancellation Request linked to the same Order without a linked Order Change Request has Request Status Pending.
+  canSendChangeRequestCancellation:
+    conditions:
+      - "The Cancellation Request points to the specific Order Change Request it seeks to cancel, linked to the same Order."
+      - The targeted Order Change Request Request Status is Pending or Accepted.
+  canRecordChangeConfirmation:
+    conditions:
+      - The selected confirmation identifies the Order Change Request it answers through receivesSupplierOrderChangeConfirmation.
+      - "Its Change Confirmation Status is Accepted, Rejected, or Countered."
+      - "If Change Confirmation Status is Countered, Counteroffer Details states the proposed terms in that confirmation; if Accepted or Rejected, Counteroffer Details may be absent."
+      - "If Change Confirmation Status is Accepted, an unused Acceptance Sequence Number is available for the linked Order Change Request, and each affected Order Line's current value can be read for every aspect to be changed; the action saves these previous values on its Order Change Lines before updating the Order Lines."
+  updateChangeRequestFromConfirmation:
+    conditions:
+      - "If Change Confirmation Status is Accepted, set the linked Order Change Request Request Status to Accepted and apply each of its Order Change Lines to the Order Line it refers to; Requested Item Change replaces Item or Service Description, Requested Quantity Change is added to current Ordered Quantity, and Requested Price Change is added to current Price per Item."
+      - "If Change Confirmation Status is Rejected, set the linked Order Change Request Request Status to Rejected and do not modify its Order Lines."
+      - "If Change Confirmation Status is Countered, keep the linked Order Change Request Request Status Pending and do not modify its Order Lines."
+  canRecordCancellationConfirmation:
+    conditions:
+      - The Supplier Order Cancellation Confirmation is linked to the Cancellation Request it answers.
+      - Its Cancellation Confirmation Status is Accepted or Rejected.
+  updateCancellationFromConfirmation:
+    conditions:
+      - "If Cancellation Confirmation Status is Accepted, set the linked Cancellation Request Request Status to Accepted."
+      - "If an Accepted cancellation does not point to an Order Change Request, set the linked Order Current Order Status to Cancelled."
+      - "If an Accepted cancellation points to a Pending Order Change Request, set that change request Request Status to Rejected without changing its Order Lines, and leave the linked Order Current Order Status unchanged."
+      - "If an Accepted cancellation points to an Accepted Order Change Request, retain that change request Request Status as Accepted for history and leave the linked Order Current Order Status unchanged."
+      - "For an Accepted cancellation targeting an Accepted Order Change Request, recalculate each affected Order Line aspect separately; start with the relevant Previous Item Description, Previous Ordered Quantity, or Previous Price per Item stored on the earliest accepted Order Change Line changing that aspect, then replay all accepted changes to that aspect in Acceptance Sequence Number order, including the earliest if still effective, skipping any change targeted by an Accepted Cancellation Request."
+      - "If Cancellation Confirmation Status is Rejected, set the linked Cancellation Request Request Status to Rejected and leave the linked Order Current Order Status unchanged."
+  canMarkOrderDelivered:
+    conditions:
+      - "Every Delivery Evidence used for completion is linked through the Order's Delivery Information and has a Receipt Date."
+      - "Each Delivery Evidence Line used for completion corresponds to an Order Line and has a Received Quantity; if its Item Description is present, it matches the Order Line Item or Service Description."
+      - "For each Order Line, the total Received Quantity across its corresponding Delivery Evidence Lines matches its current effective Ordered Quantity, including accepted changes."
+      - No linked Backorder Information has a Backordered Quantity still outstanding; its Current Backorder Status is Fulfilled or Cancelled.
+      - Set Delivery Information Actual Delivery Date to the latest Receipt Date among the Delivery Evidence records that together confirm full receipt.
+  canRecordAllowanceOrCharge:
+    conditions:
+      - The selected Supplier Order Response is linked to the input Order through hasSupplierOrderResponse.
+      - "The supplier response document contains a distinct allowance or charge entry from which Allowance or Charge Type, Amount, and Reason can be read; Allowance or Charge Type is Allowance (Discount) or Charge (Additional Fee)."
+      - "When updating an existing Allowance and Charge Information record, identify the record for that entry through mentionsAllowanceAndChargeInformation and confirm it is associated with the input Order through specifiesAllowanceAndChargeInformation."
+  canCommunicateBackorderUpdate:
+    conditions:
+      - "For Backorder Information with Current Backorder Status Pending Fulfillment or Partially Fulfilled, communicate its Expected Delivery Date or Period if recorded; otherwise state that timing is unknown."
+      - "For Backorder Information with Current Backorder Status Fulfilled, report that backorder as fulfilled; do not supply the whole Order's Actual Delivery Date as the individual backorder's receipt date."
+      - "For Backorder Information with Current Backorder Status Cancelled, state that the backorder was cancelled rather than quoting its expected date as an outstanding delivery."
+  canSendOrderConfirmationResponse:
+    conditions:
+      - Either canSendAcceptanceResponse or canSendAdjustmentResponse holds for the Order Confirmation Response.
+      - The Order Confirmation Response Sent Status is Pending or Failed.
+  canSendCancellationRequest:
+    conditions:
+      - Either canSendWholeOrderCancellation or canSendChangeRequestCancellation holds for the selected Cancellation Request linked to the Order.
+      - The selected Cancellation Request Sent Status is Pending or Failed.
+  canSendBackorderUpdate:
+    conditions:
+      - The Backorder Update Communication is linked through hasBackorderUpdateCommunication to the Backorder Information whose update it conveys.
+      - Its Message Content and Recipient are recorded; Message Content reflects the linked Backorder Information Current Backorder Status and applies canCommunicateBackorderUpdate to its Expected Delivery Date or Period or unknown timing.
+      - Its Sent Status is Pending or Failed.
+actions:
+  sendOrderConfirmationResponse:
+    input: OrderConfirmationResponse
+    preconditions:
+      - canSendOrderConfirmationResponse
+    effect: "Dispatch the prepared Order Confirmation Response; on confirmed dispatch set its Sent Status to Successfully Sent and record its Sent Date, otherwise set Sent Status to Failed."
+    verification: "Re-read the input response and confirm its Sent Status is Successfully Sent and its Sent Date is recorded as proof of dispatch, not receipt."
+  sendOrderChangeRequest:
+    input: Order
+    preconditions:
+      - canSendOrderChangeRequest
+    effect: "Dispatch the selected Order Change Request linked to the input Order; on confirmed dispatch set that request's Sent Status to Successfully Sent and record its Sent Date, otherwise set its Sent Status to Failed."
+    verification: "Re-read the selected Order Change Request linked to the input Order and confirm its Sent Status is Successfully Sent and its Sent Date is recorded as proof of dispatch, not supplier receipt."
+  sendCancellationRequest:
+    input: Order
+    preconditions:
+      - canSendCancellationRequest
+    effect: "Dispatch the selected Cancellation Request linked to the input Order; on confirmed dispatch set that request's Sent Status to Successfully Sent and record its Sent Date, otherwise set its Sent Status to Failed."
+    verification: "Re-read the selected Cancellation Request linked to the input Order and confirm its Sent Status is Successfully Sent and its Sent Date is recorded as proof of dispatch, not supplier acceptance."
+  recordSupplierOrderChangeConfirmation:
+    input: OrderChangeRequest
+    preconditions:
+      - canRecordChangeConfirmation
+    effect: "Record the linked confirmation's Change Confirmation Status and, if Countered, Counteroffer Details; if Accepted, set the input Acceptance Sequence Number, save each affected Order Line's previous values on its Order Change Line, then apply replacement item descriptions and signed quantity and price adjustments to those Order Lines; set the input Request Status to Accepted for Accepted, Rejected for Rejected, or Pending for Countered."
+    verification: "Re-read the confirmation and input request and check the confirmation status and any counteroffer details against the reply and the Request Status against the outcome; if Accepted, verify a nonduplicated Acceptance Sequence Number and the saved previous and updated effective values for every affected Order Line; otherwise confirm the Order Lines did not change."
+  recordSupplierOrderCancellationConfirmation:
+    input: Order
+    preconditions:
+      - canRecordCancellationConfirmation
+    effect: Record the selected linked supplier cancellation confirmation status and set the linked Cancellation Request Request Status to Accepted or Rejected; for an Accepted whole-order cancellation set the input Current Order Status to Cancelled; for an Accepted cancellation of a Pending change set that change Request Status to Rejected without changing Order Lines or Order Status; for an Accepted cancellation of an Accepted change replay uncancelled accepted changes to recalculate affected Order Line aspects and retain the original change Request Status Accepted.
+    verification: Re-read the linked supplier confirmation and Cancellation Request and compare their statuses; for Accepted whole-order cancellation verify the input Order Status is Cancelled; for Accepted cancellation of a Pending change verify its Request Status is Rejected and Order Line values and Order Status have not changed; for Accepted cancellation of an Accepted change verify its Request Status remains Accepted and affected effective Order Line values match replay of uncancelled changes; for a rejected cancellation compare Order Status to its pre-action value.
+  updateFullOrderDelivery:
+    input: Order
+    preconditions:
+      - canMarkOrderDelivered
+    effect: Set the linked Delivery Information Current Delivery Status to Delivered and Actual Delivery Date to the latest Receipt Date of the Delivery Evidence confirming complete receipt; set the input Order Current Order Status to Delivered.
+    verification: "Re-read the input Order and its linked Delivery Information and Delivery Evidence; confirm Current Order Status Delivered, Current Delivery Status Delivered, and Actual Delivery Date equals the latest relevant Receipt Date."
+  recordSupplierAllowanceOrCharge:
+    input: Order
+    preconditions:
+      - canRecordAllowanceOrCharge
+    effect: "Read the selected distinct allowance or charge entry from the selected Supplier Order Response document linked to the input Order; create or update its Allowance and Charge Information with the entry's Allowance or Charge Type, Amount, and Reason and establish or retain both mentionsAllowanceAndChargeInformation and specifiesAllowanceAndChargeInformation links."
+    verification: "Re-read the selected supplier response document entry and the resulting Allowance and Charge Information; compare its Allowance or Charge Type, Amount, and Reason with that entry and confirm the supplier response mentions the record and the input Order specifies that same record."
+  sendBackorderUpdate:
+    input: Order
+    preconditions:
+      - canSendBackorderUpdate
+    effect: "Dispatch the selected Backorder Update Communication for Backorder Information reached from the input Order via Supplier Order Response and Order Response Line; on confirmed dispatch set the communication Sent Status to Successfully Sent and record its Sent Date, otherwise set Sent Status to Failed."
+    verification: "Re-read the selected linked Backorder Update Communication; check its Message Content and Recipient against the intended update and confirm its Sent Status Successfully Sent and a recorded Sent Date as evidence of dispatch, not receipt."

@@ -335,6 +335,170 @@
         "interviewerFirstPer100": 0,
         "personaFirstRaw": 0
       }
+    ],
+    "weak": [
+      {
+        "run": "run-01",
+        "turns": 86,
+        "costUsd": 1.8807808000000001,
+        "stopped": "stages_complete",
+        "full": {
+          "composite": 0.27118758434547907,
+          "classes": {
+            "f1": 0.5789473684210525,
+            "precision": 0.8461538461538461,
+            "recall": 0.44
+          },
+          "relationships": {
+            "f1": 0.05,
+            "precision": 0.06666666666666667,
+            "recall": 0.04
+          },
+          "properties": {
+            "f1": 0.18461538461538463,
+            "precision": 0.2222222222222222,
+            "recall": 0.15789473684210525
+          },
+          "rulesF1": 0,
+          "actionsF1": 0.8235294117647058
+        },
+        "practical": {
+          "composite": 0.3331456456456457,
+          "classes": {
+            "f1": 0.6666666666666667,
+            "precision": 0.7692307692307693,
+            "recall": 0.5882352941176471
+          },
+          "relationships": {
+            "f1": 0.0625,
+            "precision": 0.06666666666666667,
+            "recall": 0.058823529411764705
+          },
+          "properties": {
+            "f1": 0.2702702702702703,
+            "precision": 0.18518518518518517,
+            "recall": 0.5
+          },
+          "rulesF1": 0,
+          "actionsF1": 0.8235294117647058
+        },
+        "endpoint": {
+          "ratio": 0.09090909090909091,
+          "conditionalRate": 0.1111111111111111,
+          "classRecall": 0.44,
+          "relRecall": 0.04
+        },
+        "interviewerFirstPer100": 0,
+        "personaFirstRaw": 0
+      },
+      {
+        "run": "run-02",
+        "turns": 147,
+        "costUsd": 4.1949028,
+        "stopped": "stages_complete",
+        "full": {
+          "composite": 0.18922698922698922,
+          "classes": {
+            "f1": 0.32432432432432434,
+            "precision": 0.5,
+            "recall": 0.24
+          },
+          "relationships": {
+            "f1": 0.1818181818181818,
+            "precision": 0.21052631578947367,
+            "recall": 0.16
+          },
+          "properties": {
+            "f1": 0.06153846153846154,
+            "precision": 0.07407407407407407,
+            "recall": 0.05263157894736842
+          },
+          "rulesF1": 0,
+          "actionsF1": 0.5555555555555556
+        },
+        "practical": {
+          "composite": 0.18801560180870527,
+          "classes": {
+            "f1": 0.3448275862068966,
+            "precision": 0.4166666666666667,
+            "recall": 0.29411764705882354
+          },
+          "relationships": {
+            "f1": 0.1111111111111111,
+            "precision": 0.10526315789473684,
+            "recall": 0.11764705882352941
+          },
+          "properties": {
+            "f1": 0.10810810810810811,
+            "precision": 0.07407407407407407,
+            "recall": 0.2
+          },
+          "rulesF1": 0,
+          "actionsF1": 0.5555555555555556
+        },
+        "endpoint": {
+          "ratio": 0.6666666666666667,
+          "conditionalRate": 0.6666666666666666,
+          "classRecall": 0.24,
+          "relRecall": 0.16
+        },
+        "interviewerFirstPer100": 0,
+        "personaFirstRaw": 0
+      },
+      {
+        "run": "run-03",
+        "turns": 184,
+        "costUsd": 5.736392800000001,
+        "stopped": "stages_complete",
+        "full": {
+          "composite": 0.3124716553287981,
+          "classes": {
+            "f1": 0.5333333333333332,
+            "precision": 0.6,
+            "recall": 0.48
+          },
+          "relationships": {
+            "f1": 0.20408163265306126,
+            "precision": 0.20833333333333334,
+            "recall": 0.2
+          },
+          "properties": {
+            "f1": 0.19999999999999998,
+            "precision": 0.16129032258064516,
+            "recall": 0.2631578947368421
+          },
+          "rulesF1": 0,
+          "actionsF1": 0.5333333333333333
+        },
+        "practical": {
+          "composite": 0.30777728948460653,
+          "classes": {
+            "f1": 0.5405405405405405,
+            "precision": 0.5,
+            "recall": 0.5882352941176471
+          },
+          "relationships": {
+            "f1": 0.24390243902439027,
+            "precision": 0.20833333333333334,
+            "recall": 0.29411764705882354
+          },
+          "properties": {
+            "f1": 0.13888888888888887,
+            "precision": 0.08064516129032258,
+            "recall": 0.5
+          },
+          "rulesF1": 0,
+          "actionsF1": 0.5333333333333333
+        },
+        "endpoint": {
+          "ratio": 0.4166666666666667,
+          "conditionalRate": 0.5,
+          "classRecall": 0.48,
+          "relRecall": 0.2
+        },
+        "interviewerFirstPer100": 0,
+        "personaFirstRaw": 0
+      }
     ]
   },
   "means": {
@@ -471,6 +635,73 @@
         "min": 0,
         "max": 0
       }
+    },
+    "weak": {
+      "composite": {
+        "mean": 0.25762874296708876,
+        "min": 0.18922698922698922,
+        "max": 0.3124716553287981
+      },
+      "classF1": {
+        "mean": 0.4788683420262367,
+        "min": 0.32432432432432434,
+        "max": 0.5789473684210525
+      },
+      "relF1": {
+        "mean": 0.145299938157081,
+        "min": 0.05,
+        "max": 0.20408163265306126
+      },
+      "propF1": {
+        "mean": 0.14871794871794872,
+        "min": 0.06153846153846154,
+        "max": 0.19999999999999998
+      },
+      "relP": {
+        "mean": 0.1618421052631579,
+        "min": 0.06666666666666667,
+        "max": 0.21052631578947367
+      },
+      "relR": {
+        "mean": 0.13333333333333333,
+        "min": 0.04,
+        "max": 0.2
+      },
+      "classR": {
+        "mean": 0.38666666666666666,
+        "min": 0.24,
+        "max": 0.48
+      },
+      "rulesF1": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      },
+      "actionsF1": {
+        "mean": 0.6374727668845316,
+        "min": 0.5333333333333333,
+        "max": 0.8235294117647058
+      },
+      "practicalComposite": {
+        "mean": 0.27631284564631914,
+        "min": 0.18801560180870527,
+        "max": 0.3331456456456457
+      },
+      "endpointRatio": {
+        "mean": 0.39141414141414144,
+        "min": 0.09090909090909091,
+        "max": 0.6666666666666667
+      },
+      "conditionalRate": {
+        "mean": 0.4259259259259259,
+        "min": 0.1111111111111111,
+        "max": 0.6666666666666666
+      },
+      "interviewerFirstPer100": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      }
     }
   },
   "differences": {
@@ -534,7 +765,95 @@
           "absentFromBriefing": 14,
           "personaSaidFirst": 9
         }
+      ],
+      "weak": [
+        {
+          "multiWordClasses": 20,
+          "absentFromBriefing": 14,
+          "personaSaidFirst": 4
+        },
+        {
+          "multiWordClasses": 20,
+          "absentFromBriefing": 14,
+          "personaSaidFirst": 2
+        },
+        {
+          "multiWordClasses": 20,
+          "absentFromBriefing": 14,
+          "personaSaidFirst": 6
+        }
       ]
     }
+  },
+  "weakExpert": {
+    "stoppedReasons": [
+      "stages_complete",
+      "stages_complete",
+      "stages_complete"
+    ],
+    "metrics": {
+      "composite": {
+        "epoDrop": {
+          "estimate": 0.7102931059071409,
+          "lo": 0.580307605083047,
+          "hi": 0.8402786067312348,
+          "se": 0.04067240652312502,
+          "df": 2.9777949790384577,
+          "t": 3.1959136902850425,
+          "k": 1
+        },
+        "itopsDrop": {
+          "estimate": 0.28224332386538414,
+          "lo": 0.0736095084964434,
+          "hi": 0.49087713923432486,
+          "se": 0.06278111524069162,
+          "df": 2.7888527994542724,
+          "t": 3.3231938389287263,
+          "k": 1
+        },
+        "differenceOfDrops": {
+          "estimate": 0.42804978204175675,
+          "lo": 0.23364291658589936,
+          "hi": 0.6224566474976141,
+          "se": 0.07480449908426193,
+          "df": 4.825077789029154,
+          "t": 2.5988659483819543
+        },
+        "epoRetainedShare": 0.26616688451317794,
+        "itopsRetainedShare": 0.510575194428617
+      },
+      "relF1": {
+        "epoDrop": {
+          "estimate": 0.8410946196660483,
+          "lo": 0.6396749972936012,
+          "hi": 1.0425142420384954,
+          "se": 0.04856028903314588,
+          "df": 2.0800380396214497,
+          "t": 4.147825854886566,
+          "k": 1
+        },
+        "itopsDrop": {
+          "estimate": 0.3991401929185332,
+          "lo": 0.17833947121541902,
+          "hi": 0.6199409146216474,
+          "se": 0.06412430864660168,
+          "df": 2.639181181985327,
+          "t": 3.4433232320675584,
+          "k": 1
+        },
+        "differenceOfDrops": {
+          "estimate": 0.44195442674751506,
+          "lo": 0.22981744478648197,
+          "hi": 0.6540914087085481,
+          "se": 0.08043648817786182,
+          "df": 4.610349043307927,
+          "t": 2.637322771873805
+        },
+        "epoRetainedShare": 0.14730407523510972,
+        "itopsRetainedShare": 0.3236732469820794
+      }
+    },
+    "reading": "the ePO headline depends on the simulated expert at least as much as the itops result does",
+    "readingCase": 1
   }
 }
