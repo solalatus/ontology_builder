@@ -54,3 +54,7 @@ For each arm, per run and as mean [min–max]:
    - Anything in between is reported as it is, without a label.
 2. **Overfitting check:** if B3 is level with or ahead of interactive here as on itops (bootstrap interval of interactive − B3 including 0 or negative), the itops pattern is not specific to itops. Otherwise it is.
 3. **Gap:** the relationship/class recall ratio and the conditional rate are read as in `../endpoint-conditioned/DESIGN.md`, amendment 1.
+
+## Follow-up block (separate design note)
+
+The weak-expert cell (gpt-4o-mini persona, interviewer frozen) has its own design note, committed before its runs: [`WEAK-EXPERT-DESIGN.md`](WEAK-EXPERT-DESIGN.md). Nothing above changes.

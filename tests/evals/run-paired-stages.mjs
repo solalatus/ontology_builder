@@ -90,6 +90,15 @@ BLOCKS["epo-b3"] = {
   runs: ["run-01", "run-02", "run-03"].map((r) => `epo-ordering:${r}`),
 };
 
+// Revision 1, E2 (results/epo-heldout/WEAK-EXPERT-DESIGN.md): the
+// epo-interactive configuration with the first paper's persona model as the
+// one change, as the persona ablation did on itops.
+BLOCKS["epo-4omini"] = {
+  root: path.join(ROOT, "ontology_translation", "results", "epo-heldout"), dir: "weak-expert", effort: null,
+  env: { ...FINAL_ENV, ONTOLOGY_EVAL_PERSONA_MODEL: "gpt-4o-mini" },
+  runs: ["run-01", "run-02", "run-03"].map((r) => `epo-ordering:${r}`),
+};
+
 /** The command, directory and clean end of one baseline item. */
 export function baselineCommand({ condition, domain, runId }, root) {
   const dir = path.join(root, condition);
