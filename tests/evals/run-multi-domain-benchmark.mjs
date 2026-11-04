@@ -68,6 +68,10 @@ import { runCost, pricesFromEnv } from "./lib/runCost.mjs";
 import { scoreSnapshot } from "./lib/snapshotScoring.mjs";
 import { CONDITIONS, GENERIC_SYSTEM_PROMPT, extractModelFromTranscript, sha256 as promptSha256 } from "./lib/baselineConditions.mjs";
 import { toolCallNamesOf } from "./lib/reportGenerator.mjs";
+import {
+  GENERATIONS, V1_SYSTEM_PROMPT, V1_TOOL_NAMES, V1_SOURCE_SHA, rewriteRequestBodyForV1, systemPromptOf, toolNamesOf,
+  sha256 as generationSha256,
+} from "./lib/interviewerGeneration.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_RESULTS_ROOT = path.resolve(__dirname, "..", "..", "ontology_translation", "results", "multi-domain");
@@ -153,6 +157,11 @@ const CONDITION = ENV.ONTOLOGY_EVAL_CONDITION || null;
 // the shipped interviewer's default, so the comparison is not between two
 // efforts.
 const EXTRACTION_EFFORT = ENV.EVAL_BASELINE_EXTRACTION_EFFORT || "high";
+// Revision 1, E1 (results/v1-same-model/DESIGN.md; lib/interviewerGeneration.mjs):
+// "v1" runs the first-generation interviewer -- its prompt, its two tools, no
+// repair loop -- inside the current app, harness, persona and scorer. Unset,
+// the shipped interviewer runs, exactly as before.
+const INTERVIEWER_GENERATION = ENV.ONTOLOGY_EVAL_INTERVIEWER_GENERATION || null;
 const PRICES = pricesFromEnv(ENV);
 
 async function main() {
@@ -179,6 +188,18 @@ async function main() {
   }
   if (CONDITION && !CONDITIONS.includes(CONDITION)) {
     console.error(`Unknown ONTOLOGY_EVAL_CONDITION "${CONDITION}" (known: ${CONDITIONS.join(", ")})`);
+    process.exit(1);
+  }
+  if (INTERVIEWER_GENERATION && !GENERATIONS.includes(INTERVIEWER_GENERATION)) {
+    console.error(`Unknown ONTOLOGY_EVAL_INTERVIEWER_GENERATION "${INTERVIEWER_GENERATION}" (known: ${GENERATIONS.join(", ")})`);
+    process.exit(1);
+  }
+  if (INTERVIEWER_GENERATION && CONDITION) {
+    console.error("ONTOLOGY_EVAL_INTERVIEWER_GENERATION and ONTOLOGY_EVAL_CONDITION cannot be combined.");
+    process.exit(1);
+  }
+  if (INTERVIEWER_GENERATION && LLM.provider !== "azure") {
+    console.error("The v1 interviewer condition swaps the tool list in the Azure relay; it runs on Azure only.");
     process.exit(1);
   }
   if (CONDITION && (!SNAPSHOT_AT_WRAPUP || COVERAGE_SWEEP || NAMING_PASS)) {
@@ -315,6 +336,15 @@ async function main() {
       const sent = await page.evaluate(() => window.buildAgentSystemPrompt());
       if (!sent.includes("ROLE")) throw new Error("B3: the staged prompt must be unchanged");
     }
+    if (INTERVIEWER_GENERATION === "v1") {
+      await page.evaluate((prompt) => {
+        window.__kg.agent.state.systemPromptOverride = prompt;
+        window.__kg.agent.setSelfCorrectionDisabled(true);
+      }, V1_SYSTEM_PROMPT);
+      const sent = await page.evaluate(() => window.buildAgentSystemPrompt());
+      if (!sent.startsWith(V1_SYSTEM_PROMPT)) throw new Error("v1: the v1.0 prompt is not what the app sends");
+      if (!(await page.evaluate(() => window.__kg.agent.state.selfCorrectionDisabled))) throw new Error("v1: the repair loop is still on");
+    }
 
     // Issue #133/E8: the app's own real system prompt, fetched from the live
     // page rather than re-derived statically -- buildAgentSystemPrompt() is
@@ -323,6 +353,29 @@ async function main() {
     // drift out of sync with what index.html's prompt-building code changes
     // to later.
     const interviewerPromptText = await page.evaluate(() => window.buildAgentSystemPrompt());
+    // v1: every tool-carrying app request gets v1.0's tool list (and v1.0's
+    // wording for the one tool result that names a tool v1 lacks). Each
+    // rewritten request is checked here, so a run in which the app sent
+    // anything but the v1 prompt and the v1 tools fails instead of scoring.
+    const v1Audit = { requests: 0, toolRequests: 0, skipNotesRewritten: 0, shapes: {}, violations: [] };
+    const v1Relay = {
+      transformRequestBody: rewriteRequestBodyForV1,
+      onTransformed: ({ rewrote }, sentBody) => {
+        v1Audit.requests++;
+        let b = null;
+        try { b = JSON.parse(sentBody); } catch { return; }
+        const names = toolNamesOf(b);
+        if (names.length) {
+          v1Audit.toolRequests++;
+          const shape = rewrote.find((r) => r.startsWith("tools(")) || "none";
+          v1Audit.shapes[shape] = (v1Audit.shapes[shape] || 0) + 1;
+          if (names.join(",") !== V1_TOOL_NAMES.join(",")) v1Audit.violations.push(`tools ${names.join(",")}`);
+          const sys = systemPromptOf(b);
+          if (!sys || !sys.startsWith(V1_SYSTEM_PROMPT)) v1Audit.violations.push("system prompt is not the v1.0 prompt");
+        }
+        v1Audit.skipNotesRewritten += rewrote.filter((r) => r === "skip-note").length;
+      },
+    };
 
     const openingLine = deriveOpeningLine(fs.readFileSync(personaPath, "utf8"));
     const groundTruthText = fs.readFileSync(domainYamlPath, "utf8");
@@ -357,7 +410,7 @@ async function main() {
     const orchestratorResult = await runOntologyRecoveryConversation({
       page, apiKey, personaModel: PERSONA_MODEL, classifierModel: CLASSIFIER_MODEL,
       maxTurns: MAX_TURNS, wallClockMs: WALLCLOCK_MINUTES * 60 * 1000,
-      installRelay: (p) => forwardChatToRealProvider(p, LLM),
+      installRelay: (p) => forwardChatToRealProvider(p, LLM, INTERVIEWER_GENERATION === "v1" ? v1Relay : {}),
       chat,
       personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml", groundTruthFormat: "domain-yaml", openingLine,
       appTurnTimeoutMs: APP_TURN_TIMEOUT_MS,
@@ -385,6 +438,13 @@ async function main() {
 
     if (orchestratorResult.turnsUsed < 1) throw new Error("expected at least one real turn to happen");
     if (orchestratorResult.chatResponses.length < 1) throw new Error("expected at least one real app-agent API call");
+    if (INTERVIEWER_GENERATION === "v1") {
+      if (v1Audit.violations.length) throw new Error(`v1: ${v1Audit.violations.length} request(s) not in the v1 shape: ${[...new Set(v1Audit.violations)].join("; ")}`);
+      if (v1Audit.toolRequests < 1) throw new Error("v1: no tool-carrying request was seen by the relay");
+      const offTools = orchestratorResult.chatResponses.flatMap((r) => toolCallNamesOf(r.body)).filter((n) => !V1_TOOL_NAMES.includes(n));
+      if (offTools.length) console.log(`${domain}/${runId}: v1: the model called tool(s) it was not offered: ${[...new Set(offTools)].join(", ")}`);
+      v1Audit.callsToToolsNotOffered = offTools.length;
+    }
 
     // B3: nothing could be committed, so the canvas is empty. Check that no
     // tool call happened at all, then extract the model from this run's own
@@ -561,6 +621,11 @@ async function main() {
       coverageSweep: COVERAGE_SWEEP, namingPass: NAMING_PASS,
       // The baseline condition, if any, and what makes it verifiable.
       condition: CONDITION,
+      interviewerGeneration: INTERVIEWER_GENERATION,
+      ...(INTERVIEWER_GENERATION === "v1" ? { v1Interviewer: {
+        sourceSha: V1_SOURCE_SHA, systemPromptSha256: generationSha256(V1_SYSTEM_PROMPT), tools: V1_TOOL_NAMES,
+        selfCorrectionDisabled: true, relayAudit: v1Audit,
+      } } : {}),
       ...(CONDITION === "b2-generic-interviewer" ? { conditionPromptSha256: promptSha256(GENERIC_SYSTEM_PROMPT) } : {}),
       ...(CONDITION === "b3-no-commit" ? { toolsDisabled: true, extraction } : {}),
       ...(STAGES ? { sweepMaxRounds: SWEEP_MAX_ROUNDS, stageTurnCaps: STAGE_TURN_CAPS } : {}),

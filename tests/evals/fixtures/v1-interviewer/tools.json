@@ -1,0 +1,33 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "apply_ontology_yaml",
+      "description": "Apply new or changed classes, relationships, rules, or actions to the live ontology the expert is looking at. Only include entries that are new or have changed — this merges against the existing model, it does not need to restate everything. At most one call to this tool is processed per message.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "yaml": {
+            "type": "string",
+            "description": "Domain-model YAML using the classes/relationships/rules/actions block-style shape."
+          }
+        },
+        "required": [
+          "yaml"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_graph_state",
+      "description": "Returns the ontology's current live state (classes, relationships, rules, actions) exactly as it is on the canvas right now, in the same YAML shape apply_ontology_yaml accepts. Takes no arguments. Call this whenever you're not certain your own memory of what's already defined is still accurate — the expert can edit the canvas directly at any time, independent of this conversation.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  }
+]

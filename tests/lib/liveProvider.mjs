@@ -74,8 +74,9 @@ export function forwardToRealBedrock(page, urlPattern) {
 }
 
 /** Relays the app's chat calls to the real provider; returns the responses seen. */
-export function forwardChatToRealProvider(page, config) {
-  if (config.provider === "azure") return forwardToRealAzure(page, liveChatUrlPattern(config));
+export function forwardChatToRealProvider(page, config, relayOptions = {}) {
+  if (config.provider === "azure") return forwardToRealAzure(page, liveChatUrlPattern(config), relayOptions);
+  if (relayOptions.transformRequestBody) throw new Error("a request-body transform is implemented for the Azure relay only");
   if (config.provider === "bedrock") return forwardToRealBedrock(page, liveChatUrlPattern(config));
   return forwardToRealOpenAi(page, RESPONSES_URL, forwardToRealOpenAi(page, CHAT_URL));
 }

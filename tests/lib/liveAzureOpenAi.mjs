@@ -33,11 +33,23 @@ export { RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuo
 // (issue #133/E4) now at least counts rather than silently misreading as
 // the app agent going quiet, but "count the failure" is a worse outcome
 // than "survive the transient window," which this fix makes possible.
-export function forwardToRealAzure(page, urlPattern) {
+//
+// `transformRequestBody` (optional, revision 1 E1): a function from the
+// request's JSON text to { body, rewrote }, applied before forwarding; used
+// only by the first-generation interviewer condition
+// (tests/evals/lib/interviewerGeneration.mjs). Unset, the request is
+// forwarded byte for byte as before.
+export function forwardToRealAzure(page, urlPattern, { transformRequestBody = null, onTransformed = null } = {}) {
   const responses = [];
   page.route(urlPattern, async (route) => {
     const req = route.request();
     let res, text;
+    let sentBody = req.postData();
+    if (transformRequestBody && sentBody) {
+      const t = transformRequestBody(sentBody);
+      sentBody = t.body;
+      if (onTransformed) onTransformed(t, sentBody);
+    }
     const maxAttempts = Math.max(RATE_LIMIT_MAX_ATTEMPTS, TPM_MAX_ATTEMPTS);
     let retries = 0;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -49,7 +61,7 @@ export function forwardToRealAzure(page, urlPattern) {
           // itself sent (not re-deriving it) is what proves the app's own
           // header-selection code is what's under test here, not this relay.
           headers: { "api-key": req.headers()["api-key"], "Content-Type": "application/json" },
-          body: req.postData(),
+          body: sentBody,
         });
         text = await res.text();
       } catch (err) {

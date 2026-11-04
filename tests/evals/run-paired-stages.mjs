@@ -99,6 +99,26 @@ BLOCKS["epo-4omini"] = {
   runs: ["run-01", "run-02", "run-03"].map((r) => `epo-ordering:${r}`),
 };
 
+// Revision 1, E1 (results/v1-same-model/DESIGN.md): the first-generation
+// interviewer (v1.0 prompt and tools, no repair loop) in the final-scores
+// configuration, gpt-6-sol in every role. 5 runs on the four development
+// domains and 3 on itops, interleaved by run index. A run that ends on its own
+// behaviour or a cap is a result of the arm (DESIGN.md, "Interruptions and
+// run ends"), so the block goes on after one; an infrastructure failure still
+// stops it.
+export const ARM_STOPS = ["stages_complete", "max_turns_reached", "wallclock_timeout", "cost_cap_reached",
+  "wasted_turns_no_tool_activity", "interview_ended_incomplete", "pleasantry_loop_detected", "app_agent_produced_no_text_repeatedly"];
+const DEV_DOMAINS = ["brick-hvac", "iof-maintenance", "iof-supply-chain", "fibo-loans"];
+BLOCKS["v1-same-model"] = {
+  root: path.join(ROOT, "ontology_translation", "results", "v1-same-model"), dir: "runs", effort: null,
+  env: { ...FINAL_ENV, ONTOLOGY_EVAL_INTERVIEWER_GENERATION: "v1" },
+  runs: ["run-01", "run-02", "run-03", "run-04", "run-05"].flatMap((r, i) => [...DEV_DOMAINS, ...(i < 3 ? ["itops"] : [])].map((d) => `${d}:${r}`)),
+  acceptStops: ARM_STOPS,
+};
+// E1's top-up of the final arm to 5 runs: `--block=final` unchanged, with
+// `--runs=` naming run-04/05 and `--acceptStops=arm` (the same run-end rule).
+export const FINAL_TOPUP_RUNS = ["run-04", "run-05"].flatMap((r) => DEV_DOMAINS.map((d) => `${d}:${r}`));
+
 /** The command, directory and clean end of one baseline item. */
 export function baselineCommand({ condition, domain, runId }, root) {
   const dir = path.join(root, condition);
@@ -181,6 +201,8 @@ async function main() {
   if (!block) { console.error("Usage: node tests/evals/run-paired-stages.mjs --block=1|2|187|final|baselines [--runs=domain:run-id,...] [--only=condition:domain:run-id,...] [--skip=...] [--budget=USD]"); process.exit(1); }
   const runs = arg("runs", (block.runs || DEFAULT_RUNS).join(",")).split(",").map((s) => s.split(":"));
   const budget = Number(arg("budget", "200"));
+  const acceptArg = arg("acceptStops", null);
+  const acceptStops = acceptArg === "arm" ? ARM_STOPS : acceptArg ? acceptArg.split(",") : (block.acceptStops || ["stages_complete"]);
   const resultsRoot = block.root || RESULTS_ROOT;
   const blockDir = block.items ? resultsRoot : path.join(resultsRoot, block.dir);
   fs.mkdirSync(blockDir, { recursive: true });
@@ -222,7 +244,7 @@ async function main() {
     log(`START ${block.dir} ${domain}/${runId} (spent so far $${spent.toFixed(2)} of $${budget})`);
     const code = await runOne({ domain, runId, blockDir, env, log });
     const prov = (() => { try { return JSON.parse(fs.readFileSync(path.join(blockDir, runId, domain, "provenance.json"), "utf8")); } catch { return null; } })();
-    const clean = code === 0 && prov && prov.status === "complete" && prov.stoppedReason === "stages_complete";
+    const clean = code === 0 && prov && prov.status === "complete" && acceptStops.includes(prov.stoppedReason);
     log(`END ${domain}/${runId}: exit=${code} status=${prov && prov.status} stopped=${prov && prov.stoppedReason} `
       + `cost=$${prov && typeof prov.totalCostUsd === "number" ? prov.totalCostUsd.toFixed(2) : "?"} turns=${prov && prov.turnsUsed}`);
     if (!clean) { log(`STOP: ${domain}/${runId} did not end cleanly; not starting another run`); process.exitCode = 5; return; }
