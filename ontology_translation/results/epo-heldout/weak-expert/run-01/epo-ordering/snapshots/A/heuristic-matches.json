@@ -1,0 +1,98 @@
+{
+  "classes": [
+    {
+      "goldId": "Consignee",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "Invoicee",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "Order",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderCancellation",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderChange",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderChangeLine",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderLine",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderResponse",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderResponseLine",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "Originator",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "Seller",
+      "recoveredId": "n3",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_4",
+      "edgeId": "e1",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "Order.totalAllowanceAmount",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "totalAllowanceAmount"
+    },
+    {
+      "goldId": "Order.totalChargeAmount",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "totalChargeAmount"
+    },
+    {
+      "goldId": "OrderResponseLine.backorderQuantity",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "backorderQuantity"
+    },
+    {
+      "goldId": "OrderLine.quantity",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "requestedQuantity"
+    },
+    {
+      "goldId": "OrderLine.price",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "requestedPrice"
+    },
+    {
+      "goldId": "OrderResponse.responseDescription",
+      "hostNodeId": "n7",
+      "matchedPropertyName": "responseOutcome"
+    }
+  ]
+}

@@ -1,0 +1,274 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "AllowanceChargeInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AllowanceInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ContractInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderAgreementLine",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderCancellationConfirmation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderCancellationRejection",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderChangeConfirmation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderChangeRejection",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderResponseInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OriginatorInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TaxInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": "e2",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e14",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e7",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_5",
+          "recoveredId": "e3",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e6",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_25",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "Order.paymentTerm",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.sellerOrderID",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.amountDueForPayment",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.prepaidAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.roundingAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.totalLineAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.totalTaxExclusiveAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.totalTaxInclusiveAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.validityPeriod",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderLine.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- No candidate represents allowance charge information.\n2: NO MATCH -- No candidate represents allowance information.\n3: NO MATCH -- No candidate represents contract information.\n4: NO MATCH -- No candidate represents a delivery agreement.\n5: NO MATCH -- No candidate represents delivery information.\n6: NO MATCH -- No candidate represents an order agreement.\n7: NO MATCH -- No candidate represents an order agreement line.\n8: NO MATCH -- A cancellation response can be either a confirmation or a rejection.\n9: NO MATCH -- A cancellation response can be either a rejection or a confirmation.\n10: NO MATCH -- A change response can be either a confirmation or a rejection.\n11: NO MATCH -- A change response can be either a rejection or a confirmation.\n12: NO MATCH -- Neither candidate represents general order response information.\n13: NO MATCH -- No candidate represents originator information.\n14: NO MATCH -- No candidate represents tax information.",
+      "relationships": "1: MATCH 1 -- Including an order line is the same as having it.\n2: MATCH 11 -- Including a change line is the same as having it.\n3: MATCH 6 -- Including a response line is the same as having it.\n4: MATCH 2 -- Identifying the invoicee specifies who the invoicee is.\n5: MATCH 5 -- An order receiving a response is the reciprocal of a response submitted for that order.\n6: NO MATCH -- Having an order change does not specifically mean it was submitted for the order.\n7: NO MATCH -- Having a cancellation does not specifically mean it was submitted for the order.\n8: MATCH 7 -- A response line responds to the order line it was submitted for.",
+      "properties": "1: NO MATCH -- No candidate specifies payment terms.\n2: NO MATCH -- Charges and allowances are not accounting costs.\n3: NO MATCH -- A tracking ID is not a seller order ID.\n4: NO MATCH -- Neither charges nor allowances state the amount due.\n5: NO MATCH -- No candidate specifies a prepaid amount.\n6: NO MATCH -- No candidate specifies a rounding amount.\n7: NO MATCH -- Charges and allowances are not the total line amount.\n8: NO MATCH -- No candidate specifies the tax-exclusive total.\n9: NO MATCH -- No candidate specifies the tax-inclusive total.\n10: NO MATCH -- A requested delivery period is not an order validity period.\n11: NO MATCH -- An allowance or charge is not an accounting cost."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "DeliveryAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderCancellationConfirmation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderCancellationRejection",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderChangeConfirmation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderChangeRejection",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OriginatorInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": "e2",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e7",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_5",
+          "recoveredId": "e3",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_25",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "Order.totalLineAmount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- No candidate represents a delivery agreement.\n2: NO MATCH -- No candidate represents delivery information.\n3: NO MATCH -- A cancellation response may confirm or reject; it is not specifically a confirmation.\n4: NO MATCH -- A cancellation response may confirm or reject; it is not specifically a rejection.\n5: NO MATCH -- An order change response may confirm or reject; it is not specifically a confirmation.\n6: NO MATCH -- An order change response may confirm or reject; it is not specifically a rejection.\n7: NO MATCH -- No candidate represents originator information.",
+      "relationships": "1: MATCH 1 -- An order includes its order lines.\n2: MATCH 6 -- An order response includes its response lines.\n3: MATCH 2 -- Identifying the invoicee specifies who the invoicee is.\n4: NO MATCH -- Receiving a response differs from the response being submitted for an order.\n5: NO MATCH -- Having a change does not specify that it was submitted for the order.\n6: NO MATCH -- Having a cancellation does not specify that it was submitted for the order.\n7: MATCH 7 -- A response line responds to the order line it was submitted for.",
+      "properties": "1: NO MATCH -- None of the candidates represents the total amount of the order lines."
+    }
+  }
+}

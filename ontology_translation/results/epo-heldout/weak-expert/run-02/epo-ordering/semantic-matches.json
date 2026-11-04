@@ -1,0 +1,47 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "OrderResponse",
+        "recoveredId": "n5"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e9"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "Order.amountDueForPayment",
+        "matchedPropertyName": "verifiedPayableAmount"
+      }
+    ],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "OrderResponse",
+        "recoveredId": "n5"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e9"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

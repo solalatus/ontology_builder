@@ -1,0 +1,68 @@
+{
+  "classes": [
+    {
+      "goldId": "Order",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "OrderLine",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "Seller",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "AllowanceInformation",
+      "recoveredId": "n11",
+      "weight": 0.6666666666666666
+    },
+    {
+      "goldId": "OrderCancellation",
+      "recoveredId": "n8",
+      "weight": 0.6666666666666666
+    },
+    {
+      "goldId": "OrderChange",
+      "recoveredId": "n7",
+      "weight": 0.6666666666666666
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_0",
+      "edgeId": "e4",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_4",
+      "edgeId": "e19",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_14",
+      "edgeId": "e14",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_15",
+      "edgeId": "e15",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "OrderLine.price",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "price"
+    },
+    {
+      "goldId": "OrderLine.quantity",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "requestedQuantity"
+    }
+  ]
+}

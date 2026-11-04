@@ -1,0 +1,404 @@
+competency_questions:
+  - id: cq1
+    text: Which seller should receive an order?
+  - id: cq2
+    text: Which items are included in an order?
+  - id: cq3
+    text: What quantity is needed for each ordered item?
+  - id: cq4
+    text: What is the order’s delivery deadline?
+  - id: cq5
+    text: Where should the order be delivered?
+  - id: cq6
+    text: Are any ordered items on backorder?
+  - id: cq7
+    text: How many of each ordered item are on backorder?
+  - id: cq8
+    text: Which discounts or allowances apply to an order?
+  - id: cq9
+    text: How does each discount or allowance break down by item?
+  - id: cq10
+    text: What responses have we received from the seller about an order?
+  - id: cq11
+    text: What changes to an order need processing?
+  - id: cq12
+    text: Does an order need to be canceled?
+  - id: cq13
+    text: Which awarded contract is the order based on?
+  - id: cq14
+    text: Has the seller accepted a requested order change?
+  - id: cq15
+    text: What delivery information has changed for an order?
+  - id: cq16
+    text: What amount is payable for units already supplied but not yet paid for?
+classes:
+  Order:
+    meaning: "A formal request from the buyer to the seller specifying the goods, services, or works that need to be delivered."
+    aliases: []
+    properties:
+      deliveryDeadline:
+        type: date
+      currentStatus:
+        type: text
+        allowed:
+          - Pending
+          - In Progress
+          - Completed
+          - Canceled
+      orderNumber:
+        type: text
+      verifiedPayableAmount:
+        type: number
+  AwardedContract:
+    meaning: A legally binding agreement between the buyer and seller outlining the terms and conditions of the purchase after the procurement process is complete.
+    aliases: []
+    properties: {}
+  Seller:
+    meaning: "The party that provides the goods, services, or works requested in the order and is legally obligated to fulfill the terms of the agreement."
+    aliases:
+      - supplier
+    properties: {}
+  OrderLine:
+    meaning: "A detailed entry within an order that specifies a particular item or service being requested, along with its quantity and price."
+    aliases: []
+    properties:
+      itemDescription:
+        type: text
+      requestedQuantity:
+        type: number
+      price:
+        type: number
+      quantitySupplied:
+        type: number
+      quantityPaid:
+        type: number
+  SellerResponse:
+    meaning: "A formal reply from the seller to the buyer indicating their ability to fulfill the order and providing details about any changes, confirmations, or rejections related to the order."
+    aliases: []
+    properties:
+      responseOutcome:
+        type: text
+        allowed:
+          - Accepted
+          - Rejected
+          - Counteroffer
+      responseDetails:
+        type: text
+  Backorder:
+    meaning: A portion of an ordered item that the seller cannot supply immediately but intends to fulfill at a later date.
+    aliases: []
+    properties:
+      backorderedQuantity:
+        type: number
+      currentStatus:
+        type: text
+        allowed:
+          - Outstanding
+          - Fulfilled
+          - Partially Fulfilled
+  OrderChangeRequest:
+    meaning: "A formal request from the buyer to modify the details of an existing order, such as changing quantities, items, or delivery instructions."
+    aliases: []
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - Pending
+          - Accepted
+          - Rejected
+      requestedModificationDetails:
+        type: text
+      submissionStatus:
+        type: text
+        allowed:
+          - Pending
+          - Submitted
+          - Acknowledged
+  OrderCancellationRequest:
+    meaning: A formal request from the buyer to cancel a previously submitted order before it has been fulfilled.
+    aliases: []
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - Pending
+          - Accepted
+          - Rejected
+      cancellationReasonOrInstruction:
+        type: text
+      submissionStatus:
+        type: text
+        allowed:
+          - Pending
+          - Submitted
+          - Acknowledged
+  DeliveryAddress:
+    meaning: "The specific location where the ordered goods, services, or works should be delivered."
+    aliases: []
+    properties:
+      addressDetails:
+        type: text
+  DeliveryChangeNotice:
+    meaning: "A notification indicating that there has been a change to the original delivery details, such as a change in the delivery address or deadline."
+    aliases: []
+    properties:
+      previousDeliveryDeadline:
+        type: date
+      newDeliveryDeadline:
+        type: date
+      currentStatus:
+        type: text
+        allowed:
+          - Pending
+          - Confirmed
+          - Processed
+  DiscountAllowanceInformation:
+    meaning: "Details regarding discounts or allowances applied to an order, specifying the nature of the adjustment and its overall impact on the order’s cost."
+    aliases: []
+    properties:
+      adjustmentKind:
+        type: text
+        allowed:
+          - Discount
+          - Allowance
+      adjustmentAmount:
+        type: number
+  AllocationEntry:
+    meaning: A specific entry within the discount allowance information that indicates the amount of the discount or allowance allocated to a particular order line.
+    aliases: []
+    properties:
+      allocatedAmount:
+        type: number
+      appliedAmount:
+        type: number
+relationships:
+  - name: specifiesSeller
+    from: AwardedContract
+    to: Seller
+    meaning: Identifies the seller selected in the procurement process through the contract.
+    aliases: []
+  - name: createdFrom
+    from: Order
+    to: AwardedContract
+    meaning: Identifies the awarded contract that serves as the basis for creating the order.
+    aliases: []
+  - name: submittedTo
+    from: Order
+    to: Seller
+    meaning: Records the seller to whom the order was formally sent.
+    aliases: []
+  - name: hasOrderLines
+    from: Order
+    to: OrderLine
+    meaning: Identifies the individual entries detailing the specific items or services requested.
+    aliases: []
+  - name: designatesBackorder
+    from: OrderLine
+    to: Backorder
+    meaning: Identifies the quantity of that line that the seller cannot currently supply.
+    aliases: []
+  - name: hasSellerResponses
+    from: Order
+    to: SellerResponse
+    meaning: Identifies the formal replies received regarding the order.
+    aliases: []
+  - name: hasRequestedOrderChange
+    from: Order
+    to: OrderChangeRequest
+    meaning: Identifies a proposed modification to the details of that order.
+    aliases: []
+  - name: refersToRequestedOrderChange
+    from: SellerResponse
+    to: OrderChangeRequest
+    meaning: Identifies the specific change request that the reply addresses.
+    aliases: []
+  - name: hasOrderCancellationRequest
+    from: Order
+    to: OrderCancellationRequest
+    meaning: Identifies a formal request to cancel that specific order.
+    aliases: []
+  - name: refersToOrderCancellationRequest
+    from: SellerResponse
+    to: OrderCancellationRequest
+    meaning: Identifies the specific cancellation request that the reply addresses.
+    aliases: []
+  - name: specifiesDeliveryAddress
+    from: Order
+    to: DeliveryAddress
+    meaning: Identifies the delivery location indicated on the order.
+    aliases: []
+  - name: hasDeliveryChangeNotices
+    from: Order
+    to: DeliveryChangeNotice
+    meaning: Identifies the notices that modify the delivery details associated with that order.
+    aliases: []
+  - name: specifiesNewDeliveryAddress
+    from: DeliveryChangeNotice
+    to: DeliveryAddress
+    meaning: Identifies the new address when the notice changes the delivery location.
+    aliases: []
+  - name: specifiesDiscountAllowanceInformation
+    from: Order
+    to: DiscountAllowanceInformation
+    meaning: Identifies the adjustments that apply to the order.
+    aliases: []
+  - name: appliesToOrderLines
+    from: DiscountAllowanceInformation
+    to: OrderLine
+    meaning: "Identifies which order lines are affected by the overall adjustment, apart from its allocation entries."
+    aliases: []
+  - name: refersToAffectedOrderLine
+    from: SellerResponse
+    to: OrderLine
+    meaning: Identifies the specific order line that the information in the reply addresses.
+    aliases: []
+  - name: hasAllocationEntries
+    from: DiscountAllowanceInformation
+    to: AllocationEntry
+    meaning: Identifies the entries that distribute the overall adjustment among the associated order lines.
+    aliases: []
+  - name: refersToOrderLine
+    from: AllocationEntry
+    to: OrderLine
+    meaning: Identifies the specific order line that receives the allocated amount from that entry.
+    aliases: []
+  - name: specifiesProposedSeller
+    from: Order
+    to: Seller
+    meaning: Identifies the seller recorded on the order as its intended recipient before submission.
+    aliases: []
+rules:
+  calculatePayableForSuppliedUnpaidUnits:
+    conditions:
+      - "Stop and flag the order line for correction if its requested quantity is zero or missing, or its quantity paid exceeds its quantity supplied."
+      - "For each order line, the supplied-but-unpaid quantity is quantity supplied minus quantity paid."
+      - "For each allocation entry referring to that order line, the adjustment per unit is allocated amount divided by the line's requested quantity."
+      - "For the supplied-but-unpaid units, apply no more than the remaining allocation, calculated as allocated amount minus applied amount, across those units; do not apply the same amount twice."
+      - "Sum each order line's supplied-but-unpaid quantity times its per-unit price, then subtract the applicable allocation amounts for those units to obtain the amount payable for the order."
+  canCreateOrder:
+    conditions:
+      - The awarded contract specifies the seller selected to receive orders under it.
+      - "The order has order lines, and each line has an item description, a requested quantity, and a per-unit price."
+      - The order has a delivery deadline and specifies a delivery address with address details.
+  canSubmitOrder:
+    conditions:
+      - The order is created from an awarded contract that specifies a seller.
+      - "The order has order lines with item description, requested quantity, and per-unit price on each line; it has a delivery deadline and specifies a delivery address with address details."
+      - "The order specifies a proposed seller, and that seller matches the one specified by its awarded contract; if not, stop submission and flag the discrepancy for correction."
+  canSubmitOrderChangeRequest:
+    conditions:
+      - "The order has the order change request with requested modification details and a submission status of Pending; if submission status is missing or incorrect, stop for correction rather than assume the request was sent."
+      - The order is created from an awarded contract and specifies a proposed seller matching the seller specified by that contract; otherwise stop and correct the recipient.
+  canDecideOrderChangeRequest:
+    conditions:
+      - "The order has a seller response referring to the specific order change request, with response details and a response outcome."
+      - "If response outcome is Counteroffer and the terms can be accommodated, keep the request current status Pending; record the agreed revised terms in its requested modification details and leave the order unchanged while awaiting a new seller response."
+      - "Mark the request Accepted only when a new seller response referring to that request has outcome Accepted and its response details confirm the request's current requested modification details in full; a Counteroffer or changing the request status alone is not proof of seller acceptance."
+      - Mark the request Rejected only if the response outcome is Rejected or a Counteroffer cannot be accommodated after reviewing response details against requested modification details.
+  canSubmitOrderCancellationRequest:
+    conditions:
+      - "The order cancellation request has current status Pending, submission status Pending, and a cancellation reason or instruction; if submission status is missing or wrong, stop for correction rather than assume it was sent."
+      - "The order's current status is Pending or In Progress; if it is Completed or Canceled, do not submit the cancellation request."
+      - "The order is created from an awarded contract; its proposed seller matches the seller specified by that contract, otherwise stop and correct the recipient."
+      - "Check quantity supplied on every order line; if any quantity has been supplied, pause submission for a feasibility review of whether cancellation can proceed, rather than assuming full cancellation is permitted."
+      - "If no order line has quantity supplied, the cancellation request may be submitted."
+  canProcessDeliveryChangeNotice:
+    conditions:
+      - The delivery change notice has current status Confirmed; a Processed notice must be checked against the order instead of applied again.
+      - "For a deadline change, review the notice's previous delivery deadline against the order's delivery deadline and ensure its new delivery deadline is present."
+      - "For an address change, the notice specifies a new delivery address with address details."
+  canUpdateBackorderFromSellerResponse:
+    conditions:
+      - "The seller response refers to the affected order line, and its response details state the new outstanding quantity for that line."
+      - "Check that the new outstanding quantity is not negative and does not exceed the order line's requested quantity; if the quantity or affected line is unclear, stop for clarification."
+      - "Compare the new outstanding quantity to the backorder's backordered quantity before updating it; zero means current status Fulfilled, a decrease to a positive value means Partially Fulfilled, and an unchanged or increased positive value retains Partially Fulfilled if already Partially Fulfilled, otherwise Outstanding."
+      - Treat a higher positive outstanding quantity within the requested quantity as a correction rather than stopping for review.
+  canRecordDiscountAllowanceInformation:
+    conditions:
+      - The discount allowance information has adjustment kind Discount or Allowance and a positive adjustment amount.
+      - Each allocation entry has an allocated amount and refers to an order line affected by that discount allowance information.
+      - "The sum of the allocated amounts of its allocation entries equals its adjustment amount; if not, stop and correct the breakdown."
+  canReviewSellerResponse:
+    conditions:
+      - "The order has the seller response, with response details and a response outcome of Accepted, Rejected, or Counteroffer."
+      - "If the response addresses an order change request, it refers to the specific order change request on that order."
+      - "If the response addresses an order cancellation request, it refers to the specific order cancellation request on that order."
+  canAttachSellerResponse:
+    conditions:
+      - "The received seller response has response details containing an order reference and a response outcome of Accepted, Rejected, or Counteroffer."
+      - "The order reference in the response details matches the intended order's order number; if the order number is missing or mismatched, stop rather than attach it to an uncertain order."
+      - "If the response addresses a change or cancellation request, it identifies the specific request on that order before the desk relies on it."
+  canDecideOrderCancellationRequest:
+    conditions:
+      - The order has the specific order cancellation request with current status Pending and submission status Submitted or Acknowledged.
+      - The order has a reviewed seller response that refers to that cancellation request and has response details and a response outcome.
+      - "If response outcome is Accepted, set request current status Accepted and order current status Canceled; if Rejected, set request current status Rejected and leave the order active."
+      - "If response outcome is Counteroffer, leave request current status Pending and order current status unchanged pending review; do not treat it as a rejection."
+actions:
+  createOrder:
+    input: Order
+    preconditions:
+      - canCreateOrder
+    effect: "Link the order to its awarded contract using createdFrom and set its current status to Pending, retaining its order lines, delivery deadline, and specified delivery address."
+    verification: "Read the order again; confirm createdFrom points to the correct awarded contract, current status is Pending, and its order lines, delivery deadline, and delivery address are present."
+  submitOrder:
+    input: Order
+    preconditions:
+      - canSubmitOrder
+    effect: Record the seller actually sent the order via submittedTo and set order currentStatus to In Progress.
+    verification: "Read the order again and confirm submittedTo matches its proposed seller and the seller specified by its awarded contract, and currentStatus is In Progress."
+  receiveAndReviewSellerResponse:
+    input: Order
+    preconditions:
+      - canAttachSellerResponse
+    effect: "Attach the seller response to the matching order via hasSellerResponses, retaining response details and response outcome and any reference to the specific order change or cancellation request; then review the attachment against canReviewSellerResponse."
+    verification: "Read the order and attached seller response again; confirm the order reference in response details matches the order number, its response details and response outcome are present, the specific request is referenced where applicable, and canReviewSellerResponse passes."
+  processOrderChangeRequest:
+    input: Order
+    preconditions:
+      - canSubmitOrderChangeRequest
+    effect: "Link the order change request to the order via hasRequestedOrderChange, retain its requested modification details, submit the request to the order's proposed seller, set its current status to Pending and its submission status to Submitted."
+    verification: "Read the order and its order change request again; confirm the requested modification details are present, current status is Pending, submission status is Submitted, and the order's proposed seller matches the seller specified by its awarded contract. Submission status confirms dispatch, not seller receipt; only Acknowledged confirms receipt."
+  decideOrderChangeRequest:
+    input: Order
+    preconditions:
+      - canDecideOrderChangeRequest
+    effect: "For an accommodatable Counteroffer, leave the request current status Pending, record the agreed revised terms in its requested modification details and leave order details unchanged while awaiting a new seller response. Once a new seller response referring to the request has outcome Accepted and confirms those details, set request current status Accepted and apply only the agreed order-line requested quantity or item description, order delivery deadline, or specified delivery address changes; for rejection, set request current status Rejected and leave order details unchanged."
+    verification: "Read the request's requested modification details, current status and seller responses referring to it; while Pending after a Counteroffer, confirm the order details are unchanged; if Accepted, confirm a new Accepted response supports the revised details and compare the affected order-line requested quantity or item description, order delivery deadline, and specified delivery address against them; if Rejected, confirm those order details were not changed by this decision."
+  submitOrderCancellationRequest:
+    input: Order
+    preconditions:
+      - canSubmitOrderCancellationRequest
+    effect: "Associate the cancellation request with the order via hasOrderCancellationRequest, send it to the order's proposed seller, set its submission status to Submitted, and leave its current status Pending and the order's current status unchanged."
+    verification: "Read the order and its cancellation request again; confirm the request belongs to the order, its cancellation reason or instruction is present, its submission status is Submitted and its current status is Pending; compare the proposed seller with the seller specified by the awarded contract and confirm the order's current status has not changed. Submitted confirms dispatch, not seller receipt."
+  decideOrderCancellationRequest:
+    input: Order
+    preconditions:
+      - canDecideOrderCancellationRequest
+    effect: "For the seller response referring to the specific cancellation request, set the request's current status to Accepted and order current status to Canceled if response outcome is Accepted; if Rejected, set request current status Rejected and leave order current status unchanged; if Counteroffer, keep request current status Pending and order current status unchanged for review."
+    verification: "Read the order, the specific cancellation request, and the seller response referring to it; confirm request current status and order current status reflect the response outcome, and that a Counteroffer left the request Pending rather than canceling the order."
+  updateDeliveryInformation:
+    input: Order
+    preconditions:
+      - canProcessDeliveryChangeNotice
+    effect: "For the confirmed delivery change notice on the order, update the order delivery deadline to its new delivery deadline where the deadline changes, update the order's specifiesDeliveryAddress connection to the notice's new delivery address where the address changes, and set notice current status to Processed."
+    verification: "Read the order and its notice again; where the deadline changed, compare order delivery deadline with notice new delivery deadline; where the address changed, compare the order's specified delivery address with the address specified as new on the notice; confirm notice current status is Processed."
+  updateBackorderInformation:
+    input: Order
+    preconditions:
+      - canReviewSellerResponse
+      - canUpdateBackorderFromSellerResponse
+    effect: "Using the seller response's reference to the affected order line, update that line's linked backorder backordered quantity to the new outstanding quantity in response details and set its current status according to the prior quantity and status; leave order-line quantity supplied unchanged unless a separate fulfillment update is confirmed."
+    verification: "Read the seller response, affected order line, and its designated backorder again; confirm the backordered quantity matches the reported outstanding quantity and current status is Outstanding, Partially Fulfilled, or Fulfilled as required by the prior quantity and status. Confirm this action did not change the line's quantity supplied."
+  recordDiscountAllowanceInformation:
+    input: Order
+    preconditions:
+      - canRecordDiscountAllowanceInformation
+    effect: "Link the discount allowance information to the order via specifiesDiscountAllowanceInformation, retaining its adjustment kind and adjustment amount, its allocation entries via hasAllocationEntries, and each entry's allocated amount and refersToOrderLine connection; do not copy those amounts onto the order."
+    verification: "Read the order's linked discount allowance information and its allocation entries again; confirm adjustment kind and amount, each entry's allocated amount and referenced order line, and that the entry amounts sum to the adjustment amount."
+  verifyPayableAmount:
+    input: Order
+    preconditions:
+      - calculatePayableForSuppliedUnpaidUnits
+    effect: "Recalculate and record the order's verified payable amount for its supplied-but-unpaid units using per-unit price and the applicable allocation entry amounts; do not change quantity paid or allocation entry applied amount, which change only after a separately confirmed payment."
+    verification: "Read the order's verified payable amount again and recalculate from its order lines' quantity supplied, quantity paid, requested quantity, and price and the linked allocation entries' allocated and applied amounts; confirm the figures agree. Recalculate if those inputs change."

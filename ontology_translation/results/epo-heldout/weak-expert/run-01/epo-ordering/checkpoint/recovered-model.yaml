@@ -1,0 +1,361 @@
+competency_questions:
+  - id: cq1
+    text: Which seller is specified for an order?
+  - id: cq2
+    text: Who are the invoicee and originator for an order?
+  - id: cq3
+    text: Which lines are included in an order?
+  - id: cq4
+    text: What quantity and price are requested on each order line?
+  - id: cq5
+    text: What delivery deadline or requested delivery period applies to an order?
+  - id: cq6
+    text: Who is the consignee for an order?
+  - id: cq7
+    text: Which order response was submitted for an order?
+  - id: cq8
+    text: "Does that response accept, reject, or counter the original order?"
+  - id: cq9
+    text: Which response line corresponds to each order line?
+  - id: cq10
+    text: What backorder quantity does each response line report?
+  - id: cq11
+    text: Which order change was submitted for an order?
+  - id: cq12
+    text: Which order lines does that change affect?
+  - id: cq13
+    text: Was an order change confirmed or rejected in the response received?
+  - id: cq14
+    text: Which order cancellation was submitted for an order?
+  - id: cq15
+    text: Was the cancellation confirmed or rejected in the response received?
+classes:
+  Order:
+    meaning: "A purchase request placed with a seller for goods, services, or works."
+    aliases: []
+    properties:
+      deliveryDeadline:
+        type: date
+      requestedDeliveryPeriod:
+        type: text
+      orderStatus:
+        type: text
+        allowed:
+          - Pending
+          - Confirmed
+          - Completed
+          - Cancelled
+      totalAllowanceAmount:
+        type: number
+      totalChargeAmount:
+        type: number
+      actualDeliveryDate:
+        type: date
+      deliveryStatus:
+        type: text
+        allowed:
+          - Pending
+          - In Transit
+          - Delivered
+          - Delayed
+          - Cancelled
+      trackingId:
+        type: text
+      shippingMark:
+        type: text
+      wholeOrderAllowanceAmount:
+        type: number
+      wholeOrderChargeAmount:
+        type: number
+  Order Line:
+    meaning: "An individual requested item or service within an order, including its requested quantity and price."
+    aliases: []
+    properties:
+      requestedQuantity:
+        type: number
+      requestedPrice:
+        type: number
+      allowanceChargeAmount:
+        type: number
+      allowanceChargeType:
+        type: text
+        allowed:
+          - Allowance
+          - Charge
+  Seller:
+    meaning: "The entity specified to provide the goods, services, or works in an order."
+    aliases:
+      - supplier
+    properties: {}
+  Invoicee:
+    meaning: The entity responsible for receiving and processing invoices for an order.
+    aliases: []
+    properties: {}
+  Originator:
+    meaning: The individual or unit that identifies the need and initiates an order.
+    aliases:
+      - requester
+      - procurement officer
+    properties: {}
+  Consignee:
+    meaning: The party that physically receives delivery for an order.
+    aliases: []
+    properties: {}
+  Order Response:
+    meaning: "The seller's overall reply indicating whether an order is accepted, rejected, or countered."
+    aliases: []
+    properties:
+      responseOutcome:
+        type: text
+        allowed:
+          - Accepted
+          - Rejected
+          - Countered
+  Order Response Line:
+    meaning: "A specific line in the seller's order response corresponding to a requested order line."
+    aliases: []
+    properties:
+      backorderQuantity:
+        type: number
+      backorderStatus:
+        type: text
+        allowed:
+          - Pending
+          - Fulfilled
+          - Partially Fulfilled
+          - Canceled
+  Order Change:
+    meaning: A formal request from the buying organisation to modify an existing order.
+    aliases:
+      - Change Order
+    properties:
+      changeStatus:
+        type: text
+        allowed:
+          - Pending
+          - Confirmed
+          - Rejected
+      modificationDescription:
+        type: text
+  Order Change Response:
+    meaning: "The seller's reply confirming or rejecting a proposed order change."
+    aliases:
+      - Change Acknowledgment
+    properties:
+      responseOutcome:
+        type: text
+        allowed:
+          - Confirmed
+          - Rejected
+  Order Cancellation:
+    meaning: A formal request from the buying organisation to cancel an existing order.
+    aliases: []
+    properties:
+      cancellationStatus:
+        type: text
+        allowed:
+          - Pending
+          - Confirmed
+          - Rejected
+  Order Cancellation Response:
+    meaning: "The seller's reply confirming or rejecting an order cancellation request."
+    aliases: []
+    properties:
+      responseOutcome:
+        type: text
+        allowed:
+          - Confirmed
+          - Rejected
+  Order Change Line:
+    meaning: A line-level proposed modification in an order change for a particular order line.
+    aliases: []
+    properties:
+      newQuantity:
+        type: number
+      newPrice:
+        type: number
+      noPriceChange:
+        type: boolean
+      noQuantityChange:
+        type: boolean
+relationships:
+  - name: specifies
+    from: Order
+    to: Seller
+    meaning: The order specifies the seller responsible for fulfilling it.
+    aliases: []
+  - name: includes
+    from: Order
+    to: Order Line
+    meaning: The order includes the individual lines requested.
+    aliases: []
+  - name: identifies
+    from: Order
+    to: Invoicee
+    meaning: The order identifies the entity responsible for receiving and processing invoices.
+    aliases: []
+  - name: identifies
+    from: Order
+    to: Originator
+    meaning: The order identifies the individual or unit that initiated it.
+    aliases: []
+  - name: identifies
+    from: Order
+    to: Consignee
+    meaning: The order identifies the party who receives its delivery.
+    aliases: []
+  - name: receives
+    from: Order
+    to: Order Response
+    meaning: "The order receives the seller's response about fulfilment."
+    aliases: []
+  - name: includes
+    from: Order Response
+    to: Order Response Line
+    meaning: "The seller's overall response includes its line-level replies."
+    aliases: []
+  - name: respondsTo
+    from: Order Response Line
+    to: Order Line
+    meaning: A response line responds to the corresponding requested order line.
+    aliases: []
+  - name: has
+    from: Order
+    to: Order Change
+    meaning: An order has a submitted request to modify it.
+    aliases: []
+  - name: affects
+    from: Order Change
+    to: Order Line
+    meaning: An order change affects the lines it proposes to modify.
+    aliases: []
+  - name: receives
+    from: Order Change
+    to: Order Change Response
+    meaning: "The order change receives the seller's confirmation or rejection."
+    aliases: []
+  - name: has
+    from: Order
+    to: Order Cancellation
+    meaning: An order has a submitted request to cancel it.
+    aliases: []
+  - name: receives
+    from: Order Cancellation
+    to: Order Cancellation Response
+    meaning: "A cancellation request receives the seller's confirmation or rejection."
+    aliases: []
+  - name: includes
+    from: Order Change
+    to: Order Change Line
+    meaning: An order change includes line-level details of its proposed modifications.
+    aliases: []
+  - name: proposesModificationTo
+    from: Order Change Line
+    to: Order Line
+    meaning: A change line proposes a modification to the corresponding original order line.
+    aliases: []
+rules:
+  canSubmitOrderChange:
+    conditions:
+      - Order Change is linked from an Order whose Order Status is Pending or Confirmed.
+      - Order Change has a Modification Description.
+      - Every Order Change Line included in the Order Change proposes a modification to an Order Line affected by that Order Change.
+      - Each included Order Change Line has a New Quantity or No Quantity Change is true.
+      - Each included Order Change Line has a New Price or No Price Change is true.
+  canSubmitOrderCancellation:
+    conditions:
+      - Order Cancellation is linked from an Order whose Order Status is Pending or Confirmed.
+  canRecordOrderResponse:
+    conditions:
+      - Order Response is received by an existing Order whose Order Status is Pending or Confirmed.
+      - "Order Response has a Response Outcome of Accepted, Rejected, or Countered."
+  canRecordOrderChangeResponse:
+    conditions:
+      - Order Change Response is received by an existing Order Change whose Change Status is Pending or Confirmed.
+      - Order Change Response has a Response Outcome of Confirmed or Rejected.
+  canRecordOrderCancellationResponse:
+    conditions:
+      - Order Cancellation Response is received by an existing Order Cancellation whose Cancellation Status is Pending or Confirmed.
+      - Order Cancellation Response has a Response Outcome of Confirmed or Rejected.
+  canUpdateDeliveryInformation:
+    conditions:
+      - Order Status is Pending or Confirmed.
+      - "Delivery Status is one of Pending, In Transit, Delivered, Delayed, or Cancelled."
+      - "If Delivery Status is Delivered, Actual Delivery Date is provided."
+      - "If the shipment is tracked, Tracking ID is provided."
+      - "If Shipping Mark is relevant for identification, Shipping Mark is provided."
+  canRecordAllowanceOrCharge:
+    conditions:
+      - Order Status is Pending or Confirmed.
+      - "If recording an adjustment on an Order Line, that line is included in the Order and the proposed adjustment has an Allowance/Charge Amount and an Allowance/Charge Type of Allowance or Charge."
+      - "An Order Line has at most one Allowance/Charge Type, Allowance or Charge."
+      - "Before saving, calculate the proposed Order Total Allowance Amount as proposed Whole-Order Allowance Amount plus the proposed Allowance/Charge Amount on included Order Lines whose Allowance/Charge Type is Allowance."
+      - "Before saving, calculate the proposed Order Total Charge Amount as proposed Whole-Order Charge Amount plus the proposed Allowance/Charge Amount on included Order Lines whose Allowance/Charge Type is Charge."
+      - An absent whole-order adjustment amount or an absent Order Line adjustment is counted as zero in the corresponding proposed total.
+  canDocumentBackorder:
+    conditions:
+      - Order Response Line responds to an Order Line included in an Order whose Order Status is Pending or Confirmed.
+      - Backorder Quantity on the Order Response Line is explicitly reported by the seller; a missing quantity is not a backorder to document.
+      - "Backorder Status on the Order Response Line is Pending, Fulfilled, Partially Fulfilled, or Canceled according to the latest seller report."
+      - "If a previous backorder is recorded on the same Order Response Line, update its Backorder Quantity and Backorder Status to the latest seller-reported values."
+actions:
+  recordOrderResponse:
+    input: Order
+    preconditions:
+      - canRecordOrderResponse
+    effect: Record the Order Response as received by the Order; set Order Status to Confirmed when Response Outcome is Accepted and to Pending when Response Outcome is Rejected or Countered.
+    verification: "Reread the Order, confirm it receives the recorded Order Response with its Response Outcome, and confirm Order Status matches that outcome."
+  recordOrderChangeConfirmation:
+    input: Order
+    preconditions:
+      - canRecordOrderChangeResponse
+    effect: Record an Order Change Response with Response Outcome Confirmed on an Order Change belonging to the Order and set Change Status to Confirmed; leave Order Status unchanged.
+    verification: "Reread the Order Change linked from the Order and confirm it receives the Order Change Response with Response Outcome Confirmed, Change Status is Confirmed, and Order Status is unchanged."
+  recordOrderChangeRejection:
+    input: Order
+    preconditions:
+      - canRecordOrderChangeResponse
+    effect: Record an Order Change Response with Response Outcome Rejected on an Order Change belonging to the Order and set Change Status to Rejected; leave Order Status unchanged.
+    verification: "Reread the Order Change linked from the Order and confirm it receives the Order Change Response with Response Outcome Rejected, Change Status is Rejected, and Order Status is unchanged."
+  recordOrderCancellationConfirmation:
+    input: Order
+    preconditions:
+      - canRecordOrderCancellationResponse
+    effect: "Record an Order Cancellation Response with Response Outcome Confirmed on an Order Cancellation belonging to the Order, set Cancellation Status to Confirmed, and set Order Status to Cancelled."
+    verification: "Reread the Order and confirm its Order Cancellation receives an Order Cancellation Response with Response Outcome Confirmed, Cancellation Status is Confirmed, and Order Status is Cancelled."
+  recordOrderCancellationRejection:
+    input: Order
+    preconditions:
+      - canRecordOrderCancellationResponse
+    effect: "Record an Order Cancellation Response with Response Outcome Rejected on an Order Cancellation belonging to the Order, set Cancellation Status to Rejected, and leave Order Status unchanged."
+    verification: "Reread the Order and confirm its Order Cancellation receives an Order Cancellation Response with Response Outcome Rejected, Cancellation Status is Rejected, and Order Status is unchanged."
+  submitOrderChange:
+    input: Order
+    preconditions:
+      - canSubmitOrderChange
+    effect: "Submit the Order Change linked from the Order, including its Modification Description and Order Change Lines, and set Change Status to Pending."
+    verification: "Reread the Order, confirm it has the submitted Order Change with its included Order Change Lines, and confirm Change Status is Pending."
+  submitOrderCancellation:
+    input: Order
+    preconditions:
+      - canSubmitOrderCancellation
+    effect: Submit the Order Cancellation linked from the Order and set Cancellation Status to Pending.
+    verification: "Reread the Order, confirm it has the submitted Order Cancellation, and confirm Cancellation Status is Pending."
+  updateDeliveryInformation:
+    input: Order
+    preconditions:
+      - canUpdateDeliveryInformation
+    effect: "Update Delivery Status and the applicable Actual Delivery Date, Tracking ID, and Shipping Mark on the Order; when Delivery Status becomes Delivered, set Order Status to Completed, otherwise leave Order Status unchanged."
+    verification: "Reread the Order to confirm the updated Delivery Status and applicable Actual Delivery Date, Tracking ID, and Shipping Mark; confirm Order Status is Completed if Delivered, otherwise unchanged."
+  recordAllowanceOrCharge:
+    input: Order
+    preconditions:
+      - canRecordAllowanceOrCharge
+    effect: "Update the applicable Whole-Order Allowance Amount or Whole-Order Charge Amount, or an included Order Line's Allowance/Charge Amount and Allowance/Charge Type; recalculate the Order's Total Allowance Amount and Total Charge Amount."
+    verification: "Reread the Order and confirm the applicable whole-order amount if a whole-order adjustment was made; if a line adjustment was made, reread the affected included Order Line and confirm its Allowance/Charge Amount and Allowance/Charge Type; in either case, confirm both Order totals equal their whole-order amounts plus matching included line amounts, counting absent adjustments as zero."
+  documentBackorder:
+    input: Order
+    preconditions:
+      - canDocumentBackorder
+    effect: Update Backorder Quantity and Backorder Status on the Order Response Line included in the Order Response received by the Order to the latest seller-reported values.
+    verification: "Reread the Order's received Order Response and its Order Response Line; confirm Backorder Quantity and Backorder Status match the latest seller report and that the response line still responds to the corresponding Order Line."
