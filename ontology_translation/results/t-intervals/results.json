@@ -1855,6 +1855,55 @@
           ]
         }
       }
+    },
+    "epo-weak-expert": {
+      "epo-ordering": {
+        "n": 3,
+        "composite": {
+          "n": 3,
+          "mean": 0.25762874296708876,
+          "min": 0.18922698922698922,
+          "max": 0.3124716553287981,
+          "values": [
+            0.27118758434547907,
+            0.18922698922698922,
+            0.3124716553287981
+          ]
+        },
+        "classF1": {
+          "n": 3,
+          "mean": 0.4788683420262367,
+          "min": 0.32432432432432434,
+          "max": 0.5789473684210525,
+          "values": [
+            0.5789473684210525,
+            0.32432432432432434,
+            0.5333333333333332
+          ]
+        },
+        "relF1": {
+          "n": 3,
+          "mean": 0.145299938157081,
+          "min": 0.05,
+          "max": 0.20408163265306126,
+          "values": [
+            0.05,
+            0.1818181818181818,
+            0.20408163265306126
+          ]
+        },
+        "propF1": {
+          "n": 3,
+          "mean": 0.14871794871794872,
+          "min": 0.06153846153846154,
+          "max": 0.19999999999999998,
+          "values": [
+            0.18461538461538463,
+            0.06153846153846154,
+            0.19999999999999998
+          ]
+        }
+      }
     }
   },
   "differences": {
@@ -2236,6 +2285,34 @@
       "k": 1,
       "clearOfZero": false
     },
+    "epo composite: interactive - weak expert": {
+      "a": "epo-interactive",
+      "b": "epo-weak-expert",
+      "metric": "composite",
+      "domains": [
+        "epo-ordering"
+      ],
+      "kind": "Welch",
+      "estimate": 0.7102931059071409,
+      "lo": 0.580307605083047,
+      "hi": 0.8402786067312348,
+      "se": 0.04067240652312502,
+      "df": 2.9777949790384577,
+      "t": 3.1959136902850425,
+      "k": 1,
+      "clearOfZero": true
+    },
+    "composite: ePO drop - itops drop": {
+      "kind": "Welch, difference of differences",
+      "metric": "composite",
+      "estimate": 0.42804978204175675,
+      "lo": 0.23364291658589936,
+      "hi": 0.6224566474976141,
+      "se": 0.07480449908426193,
+      "df": 4.825077789029154,
+      "t": 2.5988659483819543,
+      "clearOfZero": true
+    },
     "epo relF1: interactive - B3": {
       "a": "epo-interactive",
       "b": "epo-b3",
@@ -2252,6 +2329,34 @@
       "t": 4.21501142341306,
       "k": 1,
       "clearOfZero": false
+    },
+    "epo relF1: interactive - weak expert": {
+      "a": "epo-interactive",
+      "b": "epo-weak-expert",
+      "metric": "relF1",
+      "domains": [
+        "epo-ordering"
+      ],
+      "kind": "Welch",
+      "estimate": 0.8410946196660483,
+      "lo": 0.6396749972936012,
+      "hi": 1.0425142420384954,
+      "se": 0.04856028903314588,
+      "df": 2.0800380396214497,
+      "t": 4.147825854886566,
+      "k": 1,
+      "clearOfZero": true
+    },
+    "relF1: ePO drop - itops drop": {
+      "kind": "Welch, difference of differences",
+      "metric": "relF1",
+      "estimate": 0.44195442674751506,
+      "lo": 0.22981744478648197,
+      "hi": 0.6540914087085481,
+      "se": 0.08043648817786182,
+      "df": 4.610349043307927,
+      "t": 2.637322771873805,
+      "clearOfZero": true
     }
   },
   "macro": {
