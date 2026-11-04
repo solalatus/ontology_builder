@@ -42,6 +42,11 @@ const CELLS = [
   },
   // B3 keeps its scored (post-interview extraction) model in snapshots/A.
   { generation: "final-b3", domains: Object.fromEntries([...PUBLISHED, "itops"].map((d) => [d, at("baselines-gpt6/b3-no-commit")(d).map((x) => path.join(x, "snapshots", "A"))])) },
+  // Added 2026-11-04 after the paid runs: the persona ablation (final interviewer, gpt-4o-mini persona)
+  // and the held-out ePO domain (interactive, and B3 from its snapshot A).
+  { generation: "persona-ablation", domains: { itops: at("persona-ablation/runs")("itops") } },
+  { generation: "epo-interactive", domains: { "epo-ordering": at("epo-heldout/interactive")("epo-ordering") } },
+  { generation: "epo-b3", domains: { "epo-ordering": at("epo-heldout/b3-no-commit")("epo-ordering").map((x) => path.join(x, "snapshots", "A")) } },
 ];
 
 function goldFor(domain, scope) {
@@ -108,7 +113,7 @@ export function densityOf(domain) {
 
 export function runAll() {
   const out = { density: {}, readings: {} };
-  for (const d of [...PUBLISHED, "itops"]) out.density[d] = densityOf(d);
+  for (const d of [...PUBLISHED, "itops", "epo-ordering"]) out.density[d] = densityOf(d);
   for (const scope of ["full", "practical"]) {
     for (const policy of ["heuristic", "semantic"]) {
       const key = `${policy}/${scope}`;

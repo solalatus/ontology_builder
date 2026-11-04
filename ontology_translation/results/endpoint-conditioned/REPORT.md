@@ -19,6 +19,7 @@ Column definitions:
 | iof-supply-chain | 53 | 30 | 0.57 | 100.0 |
 | fibo-loans | 57 | 31 | 0.54 | 100.0 |
 | itops | 68 | 108 | 1.59 | 100.0 |
+| epo-ordering | 25 | 25 | 1.00 | 100.0 |
 
 ## Reading: heuristic/full (primary)
 
@@ -49,6 +50,9 @@ Column definitions:
 | final-b3 | fibo-loans | 1.32 | 92.5 [81.5–100.0] | 57.9 | 76.3 | 82.8 | 0/0/0 |
 | final-b3 | itops | 0.79 | 78.3 [68.7–89.4] | 67.2 | 53.1 | 67.0 | 0/0/0 |
 | final-b3 | **macro, 4 published** | **1.03** | **80.5** | 60.8 | 58.7 | 73.8 | |
+| persona-ablation | itops | 0.38 | 44.3 [40.0–48.1] | 33.8 | 13.0 | 29.3 | 0/0/0 |
+| epo-interactive | epo-ordering | 1.00 | 100.0 [100.0–100.0] | 97.3 | 97.3 | 97.3 | 0/0/0 |
+| epo-b3 | epo-ordering | 0.97 | 100.0 [100.0–100.0] | 77.3 | 74.7 | 74.7 | 0/0/0 |
 
 ## Reading: semantic/full
 
@@ -79,6 +83,9 @@ Column definitions:
 | final-b3 | fibo-loans | 1.41 | 98.8 [96.3–100.0] | 57.9 | 81.7 | 82.8 | 0/0/0 |
 | final-b3 | itops | 0.81 | 80.6 [70.1–91.8] | 67.2 | 54.6 | 67.0 | 0/0/0 |
 | final-b3 | **macro, 4 published** | **1.17** | **94.3** | 61.0 | 69.6 | 73.8 | |
+| persona-ablation | itops | 0.43 | 50.5 [44.7–53.6] | 34.8 | 15.1 | 30.2 | 0/0/0 |
+| epo-interactive | epo-ordering | 1.00 | 100.0 [100.0–100.0] | 97.3 | 97.3 | 97.3 | 0/0/0 |
+| epo-b3 | epo-ordering | 0.97 | 100.0 [100.0–100.0] | 77.3 | 74.7 | 74.7 | 0/0/0 |
 
 ## Reading: heuristic/practical
 
@@ -109,6 +116,9 @@ Column definitions:
 | final-b3 | fibo-loans | 1.00 | 93.8 [87.5–100.0] | 86.1 | 86.3 | 92.2 | 0/0/0 |
 | final-b3 | itops | 0.84 | 84.3 [76.0–96.9] | 86.1 | 72.2 | 85.2 | 0/0/0 |
 | final-b3 | **macro, 4 published** | **0.89** | **82.6** | 82.7 | 72.0 | 86.9 | |
+| persona-ablation | itops | 0.35 | 40.8 [31.8–47.1] | 65.3 | 23.1 | 57.4 | 0/0/0 |
+| epo-interactive | epo-ordering | 1.00 | 100.0 [100.0–100.0] | 100.0 | 100.0 | 100.0 | 0/0/0 |
+| epo-b3 | epo-ordering | 1.00 | 100.0 [100.0–100.0] | 90.2 | 90.2 | 90.2 | 0/0/0 |
 
 ## Reading: semantic/practical
 
@@ -139,3 +149,6 @@ Column definitions:
 | final-b3 | fibo-loans | 1.07 | 100.0 [100.0–100.0] | 86.1 | 92.2 | 92.2 | 0/0/0 |
 | final-b3 | itops | 0.86 | 86.6 [80.0–96.9] | 86.1 | 74.1 | 85.2 | 0/0/0 |
 | final-b3 | **macro, 4 published** | **0.99** | **93.5** | 82.7 | 81.4 | 86.9 | |
+| persona-ablation | itops | 0.40 | 44.8 [38.5–50.0] | 69.4 | 27.8 | 63.0 | 0/0/0 |
+| epo-interactive | epo-ordering | 1.00 | 100.0 [100.0–100.0] | 100.0 | 100.0 | 100.0 | 0/0/0 |
+| epo-b3 | epo-ordering | 0.98 | 98.0 [94.1–100.0] | 92.2 | 90.2 | 92.2 | 0/0/0 |

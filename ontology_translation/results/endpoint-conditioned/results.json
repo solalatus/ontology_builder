@@ -29,6 +29,12 @@
       "relationships": 108,
       "relPerClass": 1.588235294117647,
       "distinctEndpointShare": 1
+    },
+    "epo-ordering": {
+      "classes": 25,
+      "relationships": 25,
+      "relPerClass": 1,
+      "distinctEndpointShare": 1
     }
   },
   "readings": {
@@ -1519,6 +1525,219 @@
           "eligibleShare": 0.7378195281421087,
           "relToClassRecall": 1.0271273709417856
         }
+      },
+      "persona-ablation": {
+        "itops": {
+          "runs": [
+            "ontology_translation/results/persona-ablation/runs/run-01/itops",
+            "ontology_translation/results/persona-ablation/runs/run-02/itops",
+            "ontology_translation/results/persona-ablation/runs/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.27941176470588236,
+              "relRecall": 0.12037037037037036,
+              "eligibleShare": 0.25,
+              "conditionalRate": 0.48148148148148145,
+              "eligible": 27,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.39705882352941174,
+              "relRecall": 0.1574074074074074,
+              "eligibleShare": 0.35185185185185186,
+              "conditionalRate": 0.4473684210526316,
+              "eligible": 38,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.3382352941176471,
+              "relRecall": 0.1111111111111111,
+              "eligibleShare": 0.2777777777777778,
+              "conditionalRate": 0.4,
+              "eligible": 30,
+              "recoveredEligible": 12,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.44294996751137106,
+              "min": 0.4,
+              "max": 0.48148148148148145
+            },
+            "classRecall": 0.338235294117647,
+            "relRecall": 0.12962962962962962,
+            "eligibleShare": 0.2932098765432099,
+            "relToClassRecall": 0.38325281803542677,
+            "eligible": [
+              27,
+              38,
+              30
+            ],
+            "recoveredEligible": [
+              13,
+              17,
+              12
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "epo-interactive": {
+        "epo-ordering": {
+          "runs": [
+            "ontology_translation/results/epo-heldout/interactive/run-01/epo-ordering",
+            "ontology_translation/results/epo-heldout/interactive/run-02/epo-ordering",
+            "ontology_translation/results/epo-heldout/interactive/run-03/epo-ordering"
+          ],
+          "perRun": [
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 25,
+              "recoveredEligible": 25,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            },
+            {
+              "classRecall": 0.96,
+              "relRecall": 0.96,
+              "eligibleShare": 0.96,
+              "conditionalRate": 1,
+              "eligible": 24,
+              "recoveredEligible": 24,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            },
+            {
+              "classRecall": 0.96,
+              "relRecall": 0.96,
+              "eligibleShare": 0.96,
+              "conditionalRate": 1,
+              "eligible": 24,
+              "recoveredEligible": 24,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.9733333333333333,
+            "relRecall": 0.9733333333333333,
+            "eligibleShare": 0.9733333333333333,
+            "relToClassRecall": 1,
+            "eligible": [
+              25,
+              24,
+              24
+            ],
+            "recoveredEligible": [
+              25,
+              24,
+              24
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "epo-b3": {
+        "epo-ordering": {
+          "runs": [
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-01/epo-ordering/snapshots/A",
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-02/epo-ordering/snapshots/A",
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-03/epo-ordering/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.76,
+              "eligibleShare": 0.76,
+              "conditionalRate": 1,
+              "eligible": 19,
+              "recoveredEligible": 19,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            },
+            {
+              "classRecall": 0.96,
+              "relRecall": 0.92,
+              "eligibleShare": 0.92,
+              "conditionalRate": 1,
+              "eligible": 23,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            },
+            {
+              "classRecall": 0.56,
+              "relRecall": 0.56,
+              "eligibleShare": 0.56,
+              "conditionalRate": 1,
+              "eligible": 14,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.7733333333333334,
+            "relRecall": 0.7466666666666667,
+            "eligibleShare": 0.7466666666666667,
+            "relToClassRecall": 0.9655172413793103,
+            "eligible": [
+              19,
+              23,
+              14
+            ],
+            "recoveredEligible": [
+              19,
+              23,
+              14
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
       }
     },
     "semantic/full": {
@@ -3007,6 +3226,219 @@
           "relRecall": 0.6958456418133838,
           "eligibleShare": 0.7378195281421087,
           "relToClassRecall": 1.1734332316073606
+        }
+      },
+      "persona-ablation": {
+        "itops": {
+          "runs": [
+            "ontology_translation/results/persona-ablation/runs/run-01/itops",
+            "ontology_translation/results/persona-ablation/runs/run-02/itops",
+            "ontology_translation/results/persona-ablation/runs/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.29411764705882354,
+              "relRecall": 0.1388888888888889,
+              "eligibleShare": 0.25925925925925924,
+              "conditionalRate": 0.5357142857142857,
+              "eligible": 28,
+              "recoveredEligible": 15,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.39705882352941174,
+              "relRecall": 0.1574074074074074,
+              "eligibleShare": 0.35185185185185186,
+              "conditionalRate": 0.4473684210526316,
+              "eligible": 38,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.35294117647058826,
+              "relRecall": 0.1574074074074074,
+              "eligibleShare": 0.2962962962962963,
+              "conditionalRate": 0.53125,
+              "eligible": 32,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.5047775689223057,
+              "min": 0.4473684210526316,
+              "max": 0.5357142857142857
+            },
+            "classRecall": 0.34803921568627455,
+            "relRecall": 0.15123456790123457,
+            "eligibleShare": 0.30246913580246915,
+            "relToClassRecall": 0.4345331246739697,
+            "eligible": [
+              28,
+              38,
+              32
+            ],
+            "recoveredEligible": [
+              15,
+              17,
+              17
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "epo-interactive": {
+        "epo-ordering": {
+          "runs": [
+            "ontology_translation/results/epo-heldout/interactive/run-01/epo-ordering",
+            "ontology_translation/results/epo-heldout/interactive/run-02/epo-ordering",
+            "ontology_translation/results/epo-heldout/interactive/run-03/epo-ordering"
+          ],
+          "perRun": [
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 25,
+              "recoveredEligible": 25,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            },
+            {
+              "classRecall": 0.96,
+              "relRecall": 0.96,
+              "eligibleShare": 0.96,
+              "conditionalRate": 1,
+              "eligible": 24,
+              "recoveredEligible": 24,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            },
+            {
+              "classRecall": 0.96,
+              "relRecall": 0.96,
+              "eligibleShare": 0.96,
+              "conditionalRate": 1,
+              "eligible": 24,
+              "recoveredEligible": 24,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.9733333333333333,
+            "relRecall": 0.9733333333333333,
+            "eligibleShare": 0.9733333333333333,
+            "relToClassRecall": 1,
+            "eligible": [
+              25,
+              24,
+              24
+            ],
+            "recoveredEligible": [
+              25,
+              24,
+              24
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "epo-b3": {
+        "epo-ordering": {
+          "runs": [
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-01/epo-ordering/snapshots/A",
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-02/epo-ordering/snapshots/A",
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-03/epo-ordering/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.76,
+              "eligibleShare": 0.76,
+              "conditionalRate": 1,
+              "eligible": 19,
+              "recoveredEligible": 19,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            },
+            {
+              "classRecall": 0.96,
+              "relRecall": 0.92,
+              "eligibleShare": 0.92,
+              "conditionalRate": 1,
+              "eligible": 23,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            },
+            {
+              "classRecall": 0.56,
+              "relRecall": 0.56,
+              "eligibleShare": 0.56,
+              "conditionalRate": 1,
+              "eligible": 14,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 25,
+              "goldClasses": 25
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.7733333333333334,
+            "relRecall": 0.7466666666666667,
+            "eligibleShare": 0.7466666666666667,
+            "relToClassRecall": 0.9655172413793103,
+            "eligible": [
+              19,
+              23,
+              14
+            ],
+            "recoveredEligible": [
+              19,
+              23,
+              14
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
         }
       }
     },
@@ -4497,6 +4929,219 @@
           "eligibleShare": 0.8693843384035536,
           "relToClassRecall": 0.8880446800911121
         }
+      },
+      "persona-ablation": {
+        "itops": {
+          "runs": [
+            "ontology_translation/results/persona-ablation/runs/run-01/itops",
+            "ontology_translation/results/persona-ablation/runs/run-02/itops",
+            "ontology_translation/results/persona-ablation/runs/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5416666666666666,
+              "relRecall": 0.2222222222222222,
+              "eligibleShare": 0.4722222222222222,
+              "conditionalRate": 0.47058823529411764,
+              "eligible": 17,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.7083333333333334,
+              "relRecall": 0.2777777777777778,
+              "eligibleShare": 0.6388888888888888,
+              "conditionalRate": 0.43478260869565216,
+              "eligible": 23,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.7083333333333334,
+              "relRecall": 0.19444444444444445,
+              "eligibleShare": 0.6111111111111112,
+              "conditionalRate": 0.3181818181818182,
+              "eligible": 22,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.4078508873905293,
+              "min": 0.3181818181818182,
+              "max": 0.47058823529411764
+            },
+            "classRecall": 0.6527777777777778,
+            "relRecall": 0.23148148148148148,
+            "eligibleShare": 0.5740740740740741,
+            "relToClassRecall": 0.3546099290780142,
+            "eligible": [
+              17,
+              23,
+              22
+            ],
+            "recoveredEligible": [
+              8,
+              10,
+              7
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "epo-interactive": {
+        "epo-ordering": {
+          "runs": [
+            "ontology_translation/results/epo-heldout/interactive/run-01/epo-ordering",
+            "ontology_translation/results/epo-heldout/interactive/run-02/epo-ordering",
+            "ontology_translation/results/epo-heldout/interactive/run-03/epo-ordering"
+          ],
+          "perRun": [
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 17,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 17,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 17,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 1,
+            "relRecall": 1,
+            "eligibleShare": 1,
+            "relToClassRecall": 1,
+            "eligible": [
+              17,
+              17,
+              17
+            ],
+            "recoveredEligible": [
+              17,
+              17,
+              17
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "epo-b3": {
+        "epo-ordering": {
+          "runs": [
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-01/epo-ordering/snapshots/A",
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-02/epo-ordering/snapshots/A",
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-03/epo-ordering/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.9411764705882353,
+              "relRecall": 0.9411764705882353,
+              "eligibleShare": 0.9411764705882353,
+              "conditionalRate": 1,
+              "eligible": 16,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 17,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            },
+            {
+              "classRecall": 0.7647058823529411,
+              "relRecall": 0.7647058823529411,
+              "eligibleShare": 0.7647058823529411,
+              "conditionalRate": 1,
+              "eligible": 13,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.9019607843137255,
+            "relRecall": 0.9019607843137255,
+            "eligibleShare": 0.9019607843137255,
+            "relToClassRecall": 1,
+            "eligible": [
+              16,
+              17,
+              13
+            ],
+            "recoveredEligible": [
+              16,
+              17,
+              13
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
       }
     },
     "semantic/practical": {
@@ -5985,6 +6630,219 @@
           "relRecall": 0.8140830416834925,
           "eligibleShare": 0.8693843384035536,
           "relToClassRecall": 0.9903856368473289
+        }
+      },
+      "persona-ablation": {
+        "itops": {
+          "runs": [
+            "ontology_translation/results/persona-ablation/runs/run-01/itops",
+            "ontology_translation/results/persona-ablation/runs/run-02/itops",
+            "ontology_translation/results/persona-ablation/runs/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5833333333333334,
+              "relRecall": 0.25,
+              "eligibleShare": 0.5,
+              "conditionalRate": 0.5,
+              "eligible": 18,
+              "recoveredEligible": 9,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.2777777777777778,
+              "eligibleShare": 0.7222222222222222,
+              "conditionalRate": 0.38461538461538464,
+              "eligible": 26,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.3055555555555556,
+              "eligibleShare": 0.6666666666666666,
+              "conditionalRate": 0.4583333333333333,
+              "eligible": 24,
+              "recoveredEligible": 11,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.4476495726495726,
+              "min": 0.38461538461538464,
+              "max": 0.5
+            },
+            "classRecall": 0.6944444444444445,
+            "relRecall": 0.2777777777777778,
+            "eligibleShare": 0.6296296296296297,
+            "relToClassRecall": 0.39999999999999997,
+            "eligible": [
+              18,
+              26,
+              24
+            ],
+            "recoveredEligible": [
+              9,
+              10,
+              11
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "epo-interactive": {
+        "epo-ordering": {
+          "runs": [
+            "ontology_translation/results/epo-heldout/interactive/run-01/epo-ordering",
+            "ontology_translation/results/epo-heldout/interactive/run-02/epo-ordering",
+            "ontology_translation/results/epo-heldout/interactive/run-03/epo-ordering"
+          ],
+          "perRun": [
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 17,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 17,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 17,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 1,
+            "relRecall": 1,
+            "eligibleShare": 1,
+            "relToClassRecall": 1,
+            "eligible": [
+              17,
+              17,
+              17
+            ],
+            "recoveredEligible": [
+              17,
+              17,
+              17
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "epo-b3": {
+        "epo-ordering": {
+          "runs": [
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-01/epo-ordering/snapshots/A",
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-02/epo-ordering/snapshots/A",
+            "ontology_translation/results/epo-heldout/b3-no-commit/run-03/epo-ordering/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 1,
+              "relRecall": 0.9411764705882353,
+              "eligibleShare": 1,
+              "conditionalRate": 0.9411764705882353,
+              "eligible": 17,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 17,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            },
+            {
+              "classRecall": 0.7647058823529411,
+              "relRecall": 0.7647058823529411,
+              "eligibleShare": 0.7647058823529411,
+              "conditionalRate": 1,
+              "eligible": 13,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 17
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9803921568627452,
+              "min": 0.9411764705882353,
+              "max": 1
+            },
+            "classRecall": 0.9215686274509803,
+            "relRecall": 0.9019607843137255,
+            "eligibleShare": 0.9215686274509803,
+            "relToClassRecall": 0.9787234042553192,
+            "eligible": [
+              17,
+              17,
+              13
+            ],
+            "recoveredEligible": [
+              16,
+              17,
+              13
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
         }
       }
     }

@@ -42,3 +42,5 @@ Interactive − B3:
 
 - The first attempt of interactive run-02 failed on an HTTP 429 rate limit while two blocks ran in parallel. It is kept in `failed-attempts/`, not averaged, and was rerun alone with the owner's approval.
 - The interactive composite was looked at after the interactive block ended and before B3 finished. No analysis choice was changed after that. The post-hoc persona check was added at that point and is labelled as such.
+
+Bootstrap seeds: `tests/evals/run-intervals.mjs` repeats the two ePO differences with its own seed offset. It gives relationship F1 [4.8, 26.2] instead of [4.8, 26.8], and the composite interval is identical. The article quotes this report (`epo-heldout-report.mjs`).

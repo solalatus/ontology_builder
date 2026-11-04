@@ -54,6 +54,14 @@ function fromFirstPaper() {
   return { itops: runs };
 }
 
+// Added 2026-11-04 after the paid runs: persona ablation and held-out ePO, rescored like the first paper.
+function fromRescored(dirOf, domain) {
+  return { [domain]: ["run-01", "run-02", "run-03"].map((id) => {
+    const m = rescoreRun(dirOf(id), domain).heuristic.full;
+    return { composite: m.recoveryEffectiveness, classF1: m.classes.f1, relF1: m.relationships.f1, propF1: m.properties.f1 };
+  }) };
+}
+
 const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
 function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6d2b79f5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 const resample = (xs, r) => xs.map(() => xs[Math.floor(r() * xs.length)]);
@@ -77,6 +85,9 @@ export function runAll() {
     "baseline-b1": fromBaselines("b1-one-shot"),
     "baseline-b2": fromBaselines("b2-generic-interviewer"),
     "baseline-b3": fromBaselines("b3-no-commit"),
+    "persona-ablation": fromRescored((id) => path.join(RESULTS, "persona-ablation", "runs", id, "itops"), "itops"),
+    "epo-interactive": fromRescored((id) => path.join(RESULTS, "epo-heldout", "interactive", id, "epo-ordering"), "epo-ordering"),
+    "epo-b3": fromRescored((id) => path.join(RESULTS, "epo-heldout", "b3-no-commit", id, "epo-ordering", "snapshots", "A"), "epo-ordering"),
   };
   const out = { draws: DRAWS, seed: SEED, cells: {}, macro: {}, differences: {} };
   for (const [gen, doms] of Object.entries(sources)) {
@@ -110,6 +121,12 @@ export function runAll() {
   diff("published relF1: interactive - B3", "baseline-interactive", "baseline-b3", "relF1", PUBLISHED, k++);
   diff("published composite: interactive - B2", "baseline-interactive", "baseline-b2", "composite", PUBLISHED, k++);
   diff("itops composite: interactive - B3", "baseline-interactive", "baseline-b3", "composite", ["itops"], k++);
+  // Added 2026-11-04 (seed offsets continue, so the earlier differences keep their draws).
+  diff("itops composite: final - persona ablation", "final", "persona-ablation", "composite", ["itops"], k++);
+  diff("itops composite: persona ablation - first paper", "persona-ablation", "first-paper", "composite", ["itops"], k++);
+  diff("itops relF1: persona ablation - first paper", "persona-ablation", "first-paper", "relF1", ["itops"], k++);
+  diff("epo composite: interactive - B3", "epo-interactive", "epo-b3", "composite", ["epo-ordering"], k++);
+  diff("epo relF1: interactive - B3", "epo-interactive", "epo-b3", "relF1", ["epo-ordering"], k++);
   return out;
 }
 
