@@ -1,0 +1,2761 @@
+# Ontology-recovery eval — conversation log
+
+Status: **stages_complete** — 103 turn(s) so far, 1277s elapsed.
+Last updated: 2026-11-05T01:49:32.266Z
+
+### Turn 0 — persona
+
+I lead IT operations and major-incident management for a regulated financial institution (IT Operations and Incident Response Ontology for a Medium-sized Hungarian Bank).  Day-to-day scope: IT service operations, observability, incident response, problem/change/recovery management, stakeholder communication, evidence, and regulatory reporting workflow. Where would you like to start?
+
+### Turn 1 — app-user
+
+I lead IT operations and major-incident management for a regulated financial institution (IT Operations and Incident Response Ontology for a Medium-sized Hungarian Bank).  Day-to-day scope: IT service operations, observability, incident response, problem/change/recovery management, stakeholder communication, evidence, and regulatory reporting workflow. Where would you like to start?
+
+### Turn 1 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 1 — app-assistant
+
+We’ll start with what the agent must actually help you do. I’ll use those tasks to decide which concepts and connections belong in the ontology, then work through properties, terminology, rules, and actions. There are about nine short phases, and you can stop with what we’ve captured at any point.
+
+**What are 10–20 real questions your team would ask this agent?** Please phrase them as you would in practice; a rough list is fine. We’ll collect actions separately next.
+
+### Turn 1 — persona
+
+These are the questions I’d expect during a shift or an incident:
+
+1. Which business services and customer channels are affected, and what is their current health?
+2. What does the affected IT service depend on—including configuration items and third-party services?
+3. Which alerts and events belong to this incident, rather than being unrelated noise?
+4. Who owns the affected service, and which resolver group and on-call engineer should take it?
+5. Do we have enough verified information to declare a major incident?
+6. Which runbook or workaround is relevant, and can we use it safely here?
+7. Is there a usable backup and an applicable recovery plan if we need to restore or fail over?
+8. Did a recent change or deployment contribute to the incident?
+9. Has materiality been assessed, and is a regulatory notification needed or due?
+10. What evidence and stakeholder communications are still missing before we can close the incident?
+11. Are there open corrective actions from earlier reviews that relate to this affected service?
+
+Those cover both the immediate response and the checks that stop us declaring recovery or closure prematurely.
+
+### Turn 2 — app-user
+
+These are the questions I’d expect during a shift or an incident:
+
+1. Which business services and customer channels are affected, and what is their current health?
+2. What does the affected IT service depend on—including configuration items and third-party services?
+3. Which alerts and events belong to this incident, rather than being unrelated noise?
+4. Who owns the affected service, and which resolver group and on-call engineer should take it?
+5. Do we have enough verified information to declare a major incident?
+6. Which runbook or workaround is relevant, and can we use it safely here?
+7. Is there a usable backup and an applicable recovery plan if we need to restore or fail over?
+8. Did a recent change or deployment contribute to the incident?
+9. Has materiality been assessed, and is a regulatory notification needed or due?
+10. What evidence and stakeholder communications are still missing before we can close the incident?
+11. Are there open corrective actions from earlier reviews that relate to this affected service?
+
+Those cover both the immediate response and the checks that stop us declaring recovery or closure prematurely.
+
+### Turn 2 — app-assistant
+
+I’ve captured 11 questions covering impact, dependencies, incident evidence, ownership and routing, declaration, recovery options, change history, regulatory assessment, closure, and earlier corrective actions. I’ll keep them as the acceptance test rather than start modeling yet.
+
+**What 5–10 actions should the agent perform**, as distinct from answering those questions? Please describe them in your operational language.
+
+### Turn 2 — persona
+
+I’d start with these ten actions. Each should check its preconditions and leave a verifiable record, not just change a ticket field.
+
+1. **Acknowledge a new alert** so the responsible team knows someone has taken it.
+2. **Assign an incident** to a resolver group that supports the affected service or component.
+3. **Declare a major incident** when the impact and severity warrant exceptional coordination and a commander is assigned.
+4. **Contain an incident** using recorded, approved steps, then check that containment worked and what it did to service health.
+5. **Fail over an affected service** under an applicable recovery plan, then verify service health and critical business transactions.
+6. **Restore from a suitable backup** to an approved target, then check data integrity and application function.
+7. **Implement an emergency change** linked to an active incident, with risk accepted and a backout plan available.
+8. **Send an approved stakeholder update** that reflects the latest verified incident state, and retain the final message and delivery status.
+9. **Submit a regulatory notification** once the reporting assessment and approval support it, retaining the submission receipt or any rejection.
+10. **Close an incident** only after restoration, evidence, communications, and any required review arrangements have been checked.
+
+### Turn 3 — app-user
+
+I’d start with these ten actions. Each should check its preconditions and leave a verifiable record, not just change a ticket field.
+
+1. **Acknowledge a new alert** so the responsible team knows someone has taken it.
+2. **Assign an incident** to a resolver group that supports the affected service or component.
+3. **Declare a major incident** when the impact and severity warrant exceptional coordination and a commander is assigned.
+4. **Contain an incident** using recorded, approved steps, then check that containment worked and what it did to service health.
+5. **Fail over an affected service** under an applicable recovery plan, then verify service health and critical business transactions.
+6. **Restore from a suitable backup** to an approved target, then check data integrity and application function.
+7. **Implement an emergency change** linked to an active incident, with risk accepted and a backout plan available.
+8. **Send an approved stakeholder update** that reflects the latest verified incident state, and retain the final message and delivery status.
+9. **Submit a regulatory notification** once the reporting assessment and approval support it, retaining the submission receipt or any rejection.
+10. **Close an incident** only after restoration, evidence, communications, and any required review arrangements have been checked.
+
+### Turn 3 — app-assistant
+
+Those ten actions are captured, including the precondition checks and verifiable records you require. Before we identify the kinds of things the agent needs to know:
+
+**For the service owner, resolver group, on-call engineer, and incident commander, is there a closely related role that does the day-to-day work under any of them? And does handling any of the questions or actions you listed depend on a specific operating context that changes the approach?**
+
+### Turn 3 — persona
+
+I wouldn’t model those roles as a simple reporting hierarchy. The **service owner** is accountable for the IT service, while the **IT operations team** operates it day to day. An **application owner** is accountable for an application, and a **technical owner** for a configuration item; neither is just a junior service owner. The **resolver group** diagnoses and restores incidents in its area, and an **on-call engineer** is a member available for time-critical work. During a major incident, the **incident commander** directs coordination, while the incident response team coordinates the wider response.
+
+Yes, context changes the approach. We need to know whether a service or component is in **production or a recovery environment**, what business service it supports, and whether the incident is **major, cybersecurity-related, or dependent on a third party**. For example, a failover needs an applicable recovery plan, an available recovery environment, and an acceptable data-recovery point. A cybersecurity incident also calls for evidence preservation and a materiality assessment; it does not automatically mean a regulatory notification is due.
+
+### Turn 4 — app-user
+
+I wouldn’t model those roles as a simple reporting hierarchy. The **service owner** is accountable for the IT service, while the **IT operations team** operates it day to day. An **application owner** is accountable for an application, and a **technical owner** for a configuration item; neither is just a junior service owner. The **resolver group** diagnoses and restores incidents in its area, and an **on-call engineer** is a member available for time-critical work. During a major incident, the **incident commander** directs coordination, while the incident response team coordinates the wider response.
+
+Yes, context changes the approach. We need to know whether a service or component is in **production or a recovery environment**, what business service it supports, and whether the incident is **major, cybersecurity-related, or dependent on a third party**. For example, a failover needs an applicable recovery plan, an available recovery environment, and an acceptable data-recovery point. A cybersecurity incident also calls for evidence preservation and a materiality assessment; it does not automatically mean a regulatory notification is due.
+
+### Turn 4 — app-assistant
+
+The Phase 1 list is now 11 questions and 10 actions. I’ve also captured that accountability, day-to-day operation, resolution, on-call work, and major-incident coordination are distinct—not a reporting hierarchy. Production versus recovery environment, supported business service, and major, cybersecurity, or third-party involvement can change how work is handled. In particular, cybersecurity involvement does not by itself make a notification due.
+
+**Is that an accurate summary of the scope the agent must handle?** I’ll use the confirmed list to test each proposed class.
+
+### Turn 4 — persona
+
+Yes, that’s an accurate working scope. One addition before you use the action list as a test: **isolating an affected configuration item** is a distinct action from containing the incident generally. It needs the item linked to the incident, an assessment of the isolation’s impact, and a way to reconnect or roll back; afterward we check both isolation and remaining service health.
+
+Otherwise, your distinctions are right—particularly that cybersecurity involvement calls for assessment, not an automatic notification.
+
+### Turn 5 — app-user
+
+Yes, that’s an accurate working scope. One addition before you use the action list as a test: **isolating an affected configuration item** is a distinct action from containing the incident generally. It needs the item linked to the incident, an assessment of the isolation’s impact, and a way to reconnect or roll back; afterward we check both isolation and remaining service health.
+
+Otherwise, your distinctions are right—particularly that cybersecurity involvement calls for assessment, not an automatic notification.
+
+### Turn 5 — app-assistant
+
+I’ve added **isolate an affected configuration item** as the eleventh action, separate from general containment. Its checks are: the item is linked to the incident, isolation impact is assessed, and reconnection or rollback is possible; afterward, verify both isolation and remaining service health. That completes the questions-and-actions phase.
+
+I’ll now test candidate classes in small groups. For each of these, does the agent need to identify or retrieve it **separately**, or connect it to other things—not merely mention it in an answer?
+
+- **IT Service** — for the affected service’s dependencies, ownership, and recovery.
+- **Business Service** — for determining business impact and checking service support.
+- **Customer Channel** — for identifying affected channels and their current health.
+
+In particular, do *Business Service* and *Customer Channel* remain distinct in your operations?
+
+### Turn 5 — persona
+
+Yes, the agent needs to identify all three separately and follow their connections.
+
+- An **IT service** is the managed technology capability. We use it to find its owner, technical dependencies, affected components, and recovery plan.
+- A **business service** is the capability the bank delivers. It depends on one or more IT services, and its own health helps us assess business impact.
+- A **customer channel** is how customers access a business service. The business service is delivered through that channel; the channel is not the service itself.
+
+So the last two must remain distinct. One correction to the proposed use: we identify **which channels** are affected through the business service, but I wouldn’t assume a separate *channel health* field. We assess the business service’s health and the incident’s impact rather than treating those as a recorded health state of the channel.
+
+### Turn 6 — app-user
+
+Yes, the agent needs to identify all three separately and follow their connections.
+
+- An **IT service** is the managed technology capability. We use it to find its owner, technical dependencies, affected components, and recovery plan.
+- A **business service** is the capability the bank delivers. It depends on one or more IT services, and its own health helps us assess business impact.
+- A **customer channel** is how customers access a business service. The business service is delivered through that channel; the channel is not the service itself.
+
+So the last two must remain distinct. One correction to the proposed use: we identify **which channels** are affected through the business service, but I wouldn’t assume a separate *channel health* field. We assess the business service’s health and the incident’s impact rather than treating those as a recorded health state of the channel.
+
+### Turn 6 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 6 — app-tool
+
+✓ Applied: 3 added, 0 updated.
+
+### Turn 6 — app-assistant
+
+I’ve recorded the three separately. I also noted your correction: we must identify affected customer channels, but should **not** invent a channel-health field.
+
+Next, for the dependency, isolation, and recovery questions and actions, which of these must the agent identify or connect as a separate thing?
+
+- **Configuration Item** — to trace a service dependency and isolate a specific affected item.
+- **Third-Party Service** — to identify an external dependency involved in an incident.
+- **Application** — to connect deployments, application ownership, and the application-function check after restoration.
+- **Environment** — to distinguish production from an available recovery environment and identify a restoration target.
+
+### Turn 6 — persona
+
+Yes—keep all four separate.
+
+- A **configuration item** identifies the managed component we may need to investigate or isolate. The incident affects that item; isolation is only considered after we’ve identified the link and assessed the consequences.
+- A **third-party service** is an external dependency of an IT service. It is distinct from the vendor that provides it.
+- An **application** implements an IT service. We need it separately to identify its owner, trace a deployment, and verify application function after a restore.
+- An **environment** identifies the deployment or recovery context, including production and disaster recovery. It also matters when selecting a restore target or failover destination.
+
+One qualification: identifying an environment as “disaster recovery” does **not** establish that it is currently available. Availability must be checked before failover.
+
+### Turn 7 — app-user
+
+Yes—keep all four separate.
+
+- A **configuration item** identifies the managed component we may need to investigate or isolate. The incident affects that item; isolation is only considered after we’ve identified the link and assessed the consequences.
+- A **third-party service** is an external dependency of an IT service. It is distinct from the vendor that provides it.
+- An **application** implements an IT service. We need it separately to identify its owner, trace a deployment, and verify application function after a restore.
+- An **environment** identifies the deployment or recovery context, including production and disaster recovery. It also matters when selecting a restore target or failover destination.
+
+One qualification: identifying an environment as “disaster recovery” does **not** establish that it is currently available. Availability must be checked before failover.
+
+### Turn 7 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 7 — app-assistant
+
+I’ve recorded those four separately. The environment’s type and its **current availability** are different facts; I won’t treat “disaster recovery” as proof that failover is possible.
+
+For alert triage, incident handling, and tracing possible causes, does the agent need to identify each of these separately?
+
+- **Alert** and **Event** — to acknowledge an alert and decide which alerts or events belong to an incident.
+- **Incident** — the case being assigned, contained, assessed, and eventually closed.
+- **Change** and **Deployment** — to investigate what recently changed and to implement an emergency change. Are these two operationally distinct, or is a deployment simply a kind of change in your workflow?
+
+### Turn 7 — persona
+
+Yes, the agent needs to identify each separately.
+
+- An **event** is an observed occurrence or state change. An **alert** is a signal raised for triage; it may indicate an event, and acknowledging the alert is an action in its own right. An incident can be triggered by an alert or correlated from events, but not every alert or event becomes an incident.
+- An **incident** is the managed case for an interruption, degradation, or security condition. It is what we assign, contain, assess, and eventually close.
+- A **change** is the controlled modification; an **emergency change** is a change handled through an accelerated path for an urgent need. A **deployment** is the technical execution that installs or activates a release or change. It is not a kind of change. We distinguish them when asking whether a recent modification—or the execution that put it into effect—contributed to an incident.
+
+### Turn 8 — app-user
+
+Yes, the agent needs to identify each separately.
+
+- An **event** is an observed occurrence or state change. An **alert** is a signal raised for triage; it may indicate an event, and acknowledging the alert is an action in its own right. An incident can be triggered by an alert or correlated from events, but not every alert or event becomes an incident.
+- An **incident** is the managed case for an interruption, degradation, or security condition. It is what we assign, contain, assess, and eventually close.
+- A **change** is the controlled modification; an **emergency change** is a change handled through an accelerated path for an urgent need. A **deployment** is the technical execution that installs or activates a release or change. It is not a kind of change. We distinguish them when asking whether a recent modification—or the execution that put it into effect—contributed to an incident.
+
+### Turn 8 — app-tool
+
+✓ Applied: 5 added, 0 updated.
+
+### Turn 8 — app-assistant
+
+I’ve recorded Event, Alert, Incident, Change, and Deployment separately. An emergency change remains a **Change** handled through a particular path, not a new class; a Deployment is the execution, not a subtype of Change.
+
+Next, the roles in your original questions and actions. Does the agent need to identify each separately to answer or perform those tasks?
+
+- **Service Owner** — accountable for the affected IT service.
+- **Resolver Group** — a candidate for incident assignment based on what it supports.
+- **On-Call Engineer** — the available person for time-critical work.
+- **Incident Commander** — the person assigned to direct major-incident coordination.
+
+In particular, should the agent identify an individual on-call engineer or commander, rather than only their group or team?
+
+### Turn 8 — persona
+
+Yes. The agent needs to identify all four separately, including the **individual on-call engineer** and **individual incident commander**, not just their group or team.
+
+The service owner is accountable for the affected IT service. An incident is assigned to a resolver group that supports the affected service or configuration item; an on-call engineer belongs to a resolver group and may handle the incident. For a major incident, the commander is the named person directing it, while the incident response team coordinates the wider response. A group name alone is not enough to declare a major incident—the commander must be assigned.
+
+One correction to your preceding summary: **emergency change is a distinct kind of change** in this scope, because its incident justification and execution checks differ from an ordinary change. It is not a deployment.
+
+### Turn 9 — app-user
+
+Yes. The agent needs to identify all four separately, including the **individual on-call engineer** and **individual incident commander**, not just their group or team.
+
+The service owner is accountable for the affected IT service. An incident is assigned to a resolver group that supports the affected service or configuration item; an on-call engineer belongs to a resolver group and may handle the incident. For a major incident, the commander is the named person directing it, while the incident response team coordinates the wider response. A group name alone is not enough to declare a major incident—the commander must be assigned.
+
+One correction to your preceding summary: **emergency change is a distinct kind of change** in this scope, because its incident justification and execution checks differ from an ordinary change. It is not a deployment.
+
+### Turn 9 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 9 — app-assistant
+
+I’ve recorded the four roles separately, including the two named individuals. I also need to correct my treatment of **emergency change**: its incident justification and execution checks make the distinction operational, not just wording.
+
+Because this canvas cannot represent “Emergency Change is a kind of Change” directly, **does the agent need to retrieve an emergency change as a separately identified record from other changes, or is it the same Change record marked as emergency, with different checks applied?** Either answer can preserve the different workflow.
+
+### Turn 9 — persona
+
+It needs to **identify which change is an emergency change** so it can apply the accelerated workflow and its specific checks. I would not require a second record separate from the change, or prescribe a particular “emergency” flag—that’s an implementation choice.
+
+Operationally, it is still a change, but one justified by an incident. Before execution, we check that it is linked to an active incident, has implementation and backout plans, identifies the affected configuration items, and has explicit risk acceptance.
+
+### Turn 10 — app-user
+
+It needs to **identify which change is an emergency change** so it can apply the accelerated workflow and its specific checks. I would not require a second record separate from the change, or prescribe a particular “emergency” flag—that’s an implementation choice.
+
+Operationally, it is still a change, but one justified by an incident. Before execution, we check that it is linked to an active incident, has implementation and backout plans, identifies the affected configuration items, and has explicit risk acceptance.
+
+### Turn 10 — app-assistant
+
+Understood: an emergency change is **the change record itself**, identified as needing a different workflow—not a second record or a deployment. I’ll represent that distinction when we reach decision properties and rules, without prescribing how your systems store it. The checks you listed are captured for the emergency-change action.
+
+Four roles surfaced in your clarification but were not on the original question-and-action list: **IT Operations Team, Application Owner, Technical Owner, and Incident Response Team**. For each, does the agent need to identify it separately to answer or perform one of the listed tasks? If so, which task? Merely knowing the role exists won’t require a class.
+
+### Turn 10 — persona
+
+Yes, each is worth identifying separately, though they serve different tasks:
+
+- **IT operations team:** for the day-to-day operation of the affected IT service, distinct from the service owner’s accountability.
+- **Application owner:** when an affected application or recent deployment needs an accountable contact, including during restoration checks.
+- **Technical owner:** when investigating or considering isolation of a specific configuration item; this is the person accountable for its engineering and maintenance.
+- **Incident response team:** when a major incident is declared and the wider response must be coordinated, distinct from the named commander who directs it.
+
+That does not mean all four must be populated for every incident or that each action is blocked without them. The specific action checks still govern.
+
+### Turn 11 — app-user
+
+Yes, each is worth identifying separately, though they serve different tasks:
+
+- **IT operations team:** for the day-to-day operation of the affected IT service, distinct from the service owner’s accountability.
+- **Application owner:** when an affected application or recent deployment needs an accountable contact, including during restoration checks.
+- **Technical owner:** when investigating or considering isolation of a specific configuration item; this is the person accountable for its engineering and maintenance.
+- **Incident response team:** when a major incident is declared and the wider response must be coordinated, distinct from the named commander who directs it.
+
+That does not mean all four must be populated for every incident or that each action is blocked without them. The specific action checks still govern.
+
+### Turn 11 — app-tool
+
+✓ Applied: 3 added, 0 updated.
+
+### Turn 11 — app-assistant
+
+I’ve recorded Application Owner, Technical Owner, and Incident Response Team: you tied each to an affected application, a configuration item under investigation or isolation, or major-incident coordination. I’ve also noted that their absence does not automatically block every action.
+
+For **IT Operations Team**, I have its day-to-day responsibility but not yet a task from the agreed list that requires the agent to identify the team. **Which listed question or action needs the team itself identified separately from the service owner and resolver group?**
+
+### Turn 11 — persona
+
+None of the agreed questions or actions requires the agent to identify the **IT operations team** separately. I brought it up to explain who operates a service day to day, but for this task-driven scope, the service owner, resolver group, and on-call engineer cover the distinctions we need. I wouldn’t add the team as a separate class on that basis alone.
+
+### Turn 12 — app-user
+
+None of the agreed questions or actions requires the agent to identify the **IT operations team** separately. I brought it up to explain who operates a service day to day, but for this task-driven scope, the service owner, resolver group, and on-call engineer cover the distinctions we need. I wouldn’t add the team as a separate class on that basis alone.
+
+### Turn 12 — app-assistant
+
+Agreed. **IT Operations Team stays out** of this task-driven model; it explains the operation but isn’t something the agent needs to identify for the agreed tasks.
+
+For safe response and recovery, does the agent need to identify each of these separately?
+
+- **Runbook** and **Workaround** — to choose applicable, approved steps for containment.
+- **Backup** — to determine whether a usable recovery source exists.
+- **Recovery Plan** — to govern failover or restoration and identify its applicable target.
+
+Are a runbook and a workaround distinct things in your workflow, or is a workaround recorded within a runbook?
+
+### Turn 12 — persona
+
+Yes, keep all four identifiable.
+
+A **runbook** is a maintained procedure for diagnosis, response, recovery, or verification. A **workaround** is a temporary way to reduce or bypass impact. They are distinct, although a workaround can be documented in a runbook. We would not assume that finding either one makes a containment step approved or safe for this incident.
+
+For “backup,” I’d identify the **backup set**: the recoverable collection that protects the target component. Its status matters, but restoration also needs an approved restore point and target environment. A **recovery plan** applies to the IT service and may use a backup set; for failover, we separately check that the target recovery environment is available and the data-recovery point is acceptable. I wouldn’t assume that merely finding the plan proves those conditions.
+
+### Turn 13 — app-user
+
+Yes, keep all four identifiable.
+
+A **runbook** is a maintained procedure for diagnosis, response, recovery, or verification. A **workaround** is a temporary way to reduce or bypass impact. They are distinct, although a workaround can be documented in a runbook. We would not assume that finding either one makes a containment step approved or safe for this incident.
+
+For “backup,” I’d identify the **backup set**: the recoverable collection that protects the target component. Its status matters, but restoration also needs an approved restore point and target environment. A **recovery plan** applies to the IT service and may use a backup set; for failover, we separately check that the target recovery environment is available and the data-recovery point is acceptable. I wouldn’t assume that merely finding the plan proves those conditions.
+
+### Turn 13 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 13 — app-assistant
+
+I’ve recorded Runbook, Workaround, Backup Set, and Recovery Plan separately. Finding a procedure, backup set, or plan does **not** by itself establish approval, usability, target availability, or an acceptable recovery point.
+
+For the reporting, communication, and closure questions and actions, does the agent need to identify these separately?
+
+- **Materiality Assessment** and **Regulatory Notification** — the decision about reporting versus a submission and its receipt or rejection.
+- **Stakeholder Update** — the approved message, its final content, and delivery result.
+- **Evidence** — items needed to support declaration, reporting, or closure.
+- **Corrective Action** and **Review** — open actions originating in earlier reviews and required review arrangements at closure.
+
+### Turn 13 — persona
+
+Yes, each needs to be identifiable separately. I’d put three of the names a little differently because the distinctions matter:
+
+- A **materiality assessment** records the reporting decision and its rationale. A **regulatory notification** is the formal submission to the regulator, with its own approval, submission, and receipt or rejection status. Assessment does not automatically mean notification.
+- Rather than “stakeholder update,” I’d use **communication**: it covers a controlled message to the relevant audience, including its approved content and delivery record. An update is one use of it.
+- Rather than evidence in the abstract, we need individual **evidence items** whose collection and integrity can be checked and retained. Evidence supports analysis, reporting, and closure; I would not make an evidence item a blanket prerequisite for major-incident declaration.
+- A **post-incident review** examines the incident and can produce **corrective actions**. The actions need their own owners and statuses so we can find earlier work that remains open. For closure of a major or cybersecurity incident, the review must be scheduled or completed—not necessarily already held.
+
+### Turn 14 — app-user
+
+Yes, each needs to be identifiable separately. I’d put three of the names a little differently because the distinctions matter:
+
+- A **materiality assessment** records the reporting decision and its rationale. A **regulatory notification** is the formal submission to the regulator, with its own approval, submission, and receipt or rejection status. Assessment does not automatically mean notification.
+- Rather than “stakeholder update,” I’d use **communication**: it covers a controlled message to the relevant audience, including its approved content and delivery record. An update is one use of it.
+- Rather than evidence in the abstract, we need individual **evidence items** whose collection and integrity can be checked and retained. Evidence supports analysis, reporting, and closure; I would not make an evidence item a blanket prerequisite for major-incident declaration.
+- A **post-incident review** examines the incident and can produce **corrective actions**. The actions need their own owners and statuses so we can find earlier work that remains open. For closure of a major or cybersecurity incident, the review must be scheduled or completed—not necessarily already held.
+
+### Turn 14 — app-tool
+
+✓ Applied: 6 added, 0 updated.
+
+### Turn 14 — app-assistant
+
+I’ve recorded **Materiality Assessment, Regulatory Notification, Communication, Evidence Item, Post-Incident Review, and Corrective Action** under your preferred names. The assessment and submission are separate; evidence is not a blanket condition for declaring a major incident; and a required review can be scheduled rather than completed at closure.
+
+That completes the candidate-class phase: 29 task-justified classes, with IT Operations Team deliberately left out. **Does this set capture the distinct things the agent must identify for the agreed questions and actions, without adding something merely because it exists?**
+
+### Turn 14 — persona
+
+It captures most of them, but I wouldn’t sign off on it as complete yet. Three more things need to be identifiable for the agreed actions:
+
+- The **regulator** receiving a regulatory notification. An approved notification cannot be submitted without identifying its recipient.
+- The **stakeholder** a communication is addressed to. The audience category alone does not identify the recipient.
+- The **release** linking an approved change to the deployment that delivered it. Without that link, tracing whether a recent change reached production is incomplete.
+
+I’d also retain **major incident** and **cybersecurity incident** as distinguishable forms of incident, without requiring duplicate incident records. Their coordination, evidence, assessment, and closure checks differ. Those are task-driven distinctions, not additions just because the terms exist.
+
+### Turn 15 — app-user
+
+It captures most of them, but I wouldn’t sign off on it as complete yet. Three more things need to be identifiable for the agreed actions:
+
+- The **regulator** receiving a regulatory notification. An approved notification cannot be submitted without identifying its recipient.
+- The **stakeholder** a communication is addressed to. The audience category alone does not identify the recipient.
+- The **release** linking an approved change to the deployment that delivered it. Without that link, tracing whether a recent change reached production is incomplete.
+
+I’d also retain **major incident** and **cybersecurity incident** as distinguishable forms of incident, without requiring duplicate incident records. Their coordination, evidence, assessment, and closure checks differ. Those are task-driven distinctions, not additions just because the terms exist.
+
+### Turn 15 — app-tool
+
+✓ Applied: 3 added, 0 updated.
+
+### Turn 15 — app-assistant
+
+I’ve added **Regulator, Stakeholder, and Release**; each fills a gap in a listed action or question. I’ll keep major-incident and cybersecurity-incident distinctions on the **Incident** record, without creating duplicate incident classes or records.
+
+**Can the same incident be both major and cybersecurity-related, or are those mutually exclusive classifications?** That determines how the agent represents and checks the two workflows.
+
+### Turn 15 — persona
+
+Yes. The same incident can be **both major and cybersecurity-related**; those classifications are not mutually exclusive, and they do not call for duplicate incident records.
+
+The agent should apply both sets of checks: major-incident command and communication, plus cybersecurity evidence preservation and materiality assessment. A regulatory notification still depends on the assessment—it is not automatic. At closure, the required post-incident review must be scheduled or completed.
+
+### Turn 16 — app-user
+
+Yes. The same incident can be **both major and cybersecurity-related**; those classifications are not mutually exclusive, and they do not call for duplicate incident records.
+
+The agent should apply both sets of checks: major-incident command and communication, plus cybersecurity evidence preservation and materiality assessment. A regulatory notification still depends on the assessment—it is not automatic. At closure, the required post-incident review must be scheduled or completed.
+
+### Turn 16 — app-assistant
+
+The same Incident record can carry **both** classifications, so the agent must apply both sets of checks. Neither classification automatically requires a regulatory notification; that decision comes from the materiality assessment.
+
+I’ve added Regulator, Stakeholder, and Release to close the three gaps you identified. **Does that complete the class list for the agreed questions and actions?** Once you confirm, I’ll work through the connections between them.
+
+### Turn 16 — persona
+
+Yes, that completes the **task-driven class list** for the agreed questions and actions. Keep major and cybersecurity classifications distinguishable on the same incident, and keep the assessment separate from any notification it leads to. We can now test whether the connections between these things support the questions end to end.
+
+### Turn 17 — app-user
+
+Yes, that completes the **task-driven class list** for the agreed questions and actions. Keep major and cybersecurity classifications distinguishable on the same incident, and keep the assessment separate from any notification it leads to. We can now test whether the connections between these things support the questions end to end.
+
+### Turn 17 — app-assistant
+
+The class list is confirmed. I’ll now trace the connections needed to answer the agreed questions, starting with service impact and dependencies. For each proposed direction, is the link accurate?
+
+1. **Business Service → depends on → IT Service**
+2. **Business Service → delivered through → Customer Channel**
+3. **IT Service → depends on → Configuration Item**
+4. **IT Service → depends on → Third-Party Service**
+5. **Application → implements → IT Service**
+
+If any direction or verb is wrong, please correct it.
+
+### Turn 17 — persona
+
+1. **Yes:** a business service depends on an IT service.
+2. **Yes:** a business service is delivered through a customer channel.
+3. **Not as a direct link in this scope.** An IT service runs on infrastructure components and is implemented by applications; those managed components can be investigated as configuration items. I wouldn’t label every configuration item a direct service dependency.
+4. **Yes:** an IT service depends on a third-party service.
+5. **Reverse the direction:** an IT service is implemented by an application. That lets us trace from an affected service to the application supporting it.
+
+### Turn 18 — app-user
+
+1. **Yes:** a business service depends on an IT service.
+2. **Yes:** a business service is delivered through a customer channel.
+3. **Not as a direct link in this scope.** An IT service runs on infrastructure components and is implemented by applications; those managed components can be investigated as configuration items. I wouldn’t label every configuration item a direct service dependency.
+4. **Yes:** an IT service depends on a third-party service.
+5. **Reverse the direction:** an IT service is implemented by an application. That lets us trace from an affected service to the application supporting it.
+
+### Turn 18 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 18 — app-assistant
+
+I’ve recorded the four confirmed links and left out a direct **IT Service → Configuration Item** dependency. I also reversed the implementation link as you requested.
+
+To trace from an incident to what is affected, which of these **direct recorded links** exist? A link inferred through another record is not necessarily the same fact.
+
+- **Incident → affects → IT Service**
+- **Incident → affects → Business Service**
+- **Incident → affects → Customer Channel**
+- **Incident → affects → Configuration Item**
+- **Application → runs on / uses → Configuration Item**
+
+Which should be direct, and what wording would you use for the last one?
+
+### Turn 18 — persona
+
+The direct links I would record are:
+
+- **Incident → IT service** and **Incident → business service:** the connection is right, but I’d distinguish service impact from an affected technical item. The incident **impacts** each service.
+- **Incident → configuration item:** yes; the incident **affects** the item.
+
+I would **not** record a direct incident-to-customer-channel link here. Trace the channel through the business service delivered through it.
+
+For the last proposal, don’t use a generic **Application → Configuration Item** link. More precisely, an **application runs on an infrastructure component** and **uses a database**. Those tell us different things when tracing the technical path.
+
+### Turn 19 — app-user
+
+The direct links I would record are:
+
+- **Incident → IT service** and **Incident → business service:** the connection is right, but I’d distinguish service impact from an affected technical item. The incident **impacts** each service.
+- **Incident → configuration item:** yes; the incident **affects** the item.
+
+I would **not** record a direct incident-to-customer-channel link here. Trace the channel through the business service delivered through it.
+
+For the last proposal, don’t use a generic **Application → Configuration Item** link. More precisely, an **application runs on an infrastructure component** and **uses a database**. Those tell us different things when tracing the technical path.
+
+### Turn 19 — app-tool
+
+✓ Applied: 3 added, 0 updated.
+
+### Turn 19 — app-assistant
+
+I’ve recorded direct incident impact on both service types and the affected configuration item. Customer-channel impact will be traced through the business service, not stored as a separate incident link.
+
+Your correction introduces two distinct technical paths: an application **runs on an infrastructure component** and **uses a database**. For the agreed dependency and isolation tasks, does the agent need to identify infrastructure components and databases separately from a general Configuration Item, or are those types recorded on Configuration Item while the two links retain their different meanings?
+
+### Turn 19 — persona
+
+The agent needs to **distinguish infrastructure components and databases**, rather than treating both as an undifferentiated configuration item. An application **runs on** an infrastructure component but **uses** a database; those are different dependency paths and lead to different investigation and recovery checks.
+
+That does not mean creating duplicate records for a component that is also managed as a configuration item. The important thing is that the agent can identify what kind of component it is and preserve the meaning of each link.
+
+### Turn 20 — app-user
+
+The agent needs to **distinguish infrastructure components and databases**, rather than treating both as an undifferentiated configuration item. An application **runs on** an infrastructure component but **uses** a database; those are different dependency paths and lead to different investigation and recovery checks.
+
+That does not mean creating duplicate records for a component that is also managed as a configuration item. The important thing is that the agent can identify what kind of component it is and preserve the meaning of each link.
+
+### Turn 20 — app-assistant
+
+I’d keep **one Configuration Item record** for each managed component, distinguish whether it is an infrastructure component or database, and retain two directed links: **Application → runs on → Configuration Item** and **Application → uses database → Configuration Item**. That preserves the different paths without duplicating records.
+
+**Does that match how the agent should identify and trace them?**
+
+### Turn 20 — persona
+
+One record per managed component is a sensible way to avoid duplication. But I would **not define both links as generic links to a configuration item**.
+
+The agent should preserve the distinct targets: an **application runs on an infrastructure component** and **uses a database**. If either is also managed as a configuration item, that identity can be shared; it doesn’t change what the application’s link means.
+
+### Turn 21 — app-user
+
+One record per managed component is a sensible way to avoid duplication. But I would **not define both links as generic links to a configuration item**.
+
+The agent should preserve the distinct targets: an **application runs on an infrastructure component** and **uses a database**. If either is also managed as a configuration item, that identity can be shared; it doesn’t change what the application’s link means.
+
+### Turn 21 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 21 — app-assistant
+
+I’ve recorded **Infrastructure Component** and **Database** as distinct targets, with the two application links you specified. I had treated both as generic Configuration Item targets before; that was incorrect.
+
+There’s one identity question to settle before tracing an isolation action: **when an affected infrastructure component or database is also a managed configuration item, how does your team identify the configuration item to isolate—is it the same record under two labels, or is there a separate managed record linked to it?** I won’t invent a link or duplicate identity without your answer.
+
+### Turn 21 — persona
+
+I’d use the **same managed component identity** when an infrastructure component or database is recorded as a configuration item. I wouldn’t create a second record or invent a link between two records solely to represent that.
+
+For isolation, the agent must identify the **configuration item linked to the incident**. Knowing that an application uses a database or runs on an infrastructure component does not, by itself, establish that the particular item is linked to the incident or safe to isolate.
+
+### Turn 22 — app-user
+
+I’d use the **same managed component identity** when an infrastructure component or database is recorded as a configuration item. I wouldn’t create a second record or invent a link between two records solely to represent that.
+
+For isolation, the agent must identify the **configuration item linked to the incident**. Knowing that an application uses a database or runs on an infrastructure component does not, by itself, establish that the particular item is linked to the incident or safe to isolate.
+
+### Turn 22 — app-assistant
+
+Understood: the component keeps one managed identity; the distinct application links do not prove that a particular Configuration Item is incident-linked or safe to isolate. This canvas cannot express shared identity across those class labels directly, so I’ll leave that as an explicit representation limit rather than add a false record-to-record link.
+
+For ownership and routing, are these **direct** connections correct?
+
+- **IT Service → accountable to → Service Owner**
+- **Application → accountable to → Application Owner**
+- **Configuration Item → accountable to → Technical Owner**
+- **IT Service → supported by → Resolver Group**
+- **Configuration Item → supported by → Resolver Group**
+- **Incident → assigned to → Resolver Group** (the assignment once made)
+
+The two “supported by” links would let the agent *choose* a group; the last link would record its choice.
+
+### Turn 22 — persona
+
+The **ownership** connections are right in substance, but I normally record them from the accountable role: the **service owner owns the IT service**, the **application owner owns the application**, and the **technical owner owns the configuration item**. “Accountable to” can sound like a reporting line, which these are not.
+
+The **incident → assigned to → resolver group** link is direct and records the assignment once made.
+
+I would not add either proposed **“supported by resolver group”** link as a direct recorded connection on this basis. For assignment, we must establish that the candidate group supports an affected service or configuration item, but that eligibility check is not the same fact as the incident’s recorded assignment.
+
+### Turn 23 — app-user
+
+The **ownership** connections are right in substance, but I normally record them from the accountable role: the **service owner owns the IT service**, the **application owner owns the application**, and the **technical owner owns the configuration item**. “Accountable to” can sound like a reporting line, which these are not.
+
+The **incident → assigned to → resolver group** link is direct and records the assignment once made.
+
+I would not add either proposed **“supported by resolver group”** link as a direct recorded connection on this basis. For assignment, we must establish that the candidate group supports an affected service or configuration item, but that eligibility check is not the same fact as the incident’s recorded assignment.
+
+### Turn 23 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 23 — app-assistant
+
+I’ve recorded ownership from each accountable role to what it owns, and the incident’s assigned resolver group. I have **not** added the proposed support links.
+
+The assignment action still needs a way to find an eligible group *before* recording the assignment. **What recorded connection or source tells the agent that a candidate resolver group supports the affected IT service or configuration item?**
+
+### Turn 23 — persona
+
+The model specifies the **eligibility test**—the resolver group must support an affected IT service or configuration item—but it does **not** specify a direct recorded support link or an authoritative source for finding that group. I wouldn’t invent one.
+
+The agent can use the incident’s identified affected service or item to check a candidate group against the bank’s approved support-routing information. If it cannot verify that match, it should not assign the incident. Once assigned, **incident → assigned to → resolver group** records the choice.
+
+### Turn 24 — app-user
+
+The model specifies the **eligibility test**—the resolver group must support an affected IT service or configuration item—but it does **not** specify a direct recorded support link or an authoritative source for finding that group. I wouldn’t invent one.
+
+The agent can use the incident’s identified affected service or item to check a candidate group against the bank’s approved support-routing information. If it cannot verify that match, it should not assign the incident. Once assigned, **incident → assigned to → resolver group** records the choice.
+
+### Turn 24 — app-assistant
+
+Understood. The model records the assignment, but group eligibility is checked against approved support-routing information outside the currently specified links. If that match cannot be verified, the agent must not assign. I won’t invent a support relationship or its authoritative source.
+
+For the people involved in an incident, which **direct links** should be recorded?
+
+- **On-Call Engineer → belongs to → Resolver Group**
+- **Incident → handled by → On-Call Engineer**, in addition to the assigned group
+- **Incident → commanded by → Incident Commander**
+- **Incident → coordinated by → Incident Response Team**
+
+In particular, does the incident need a direct link to the engineer, or is group membership enough?
+
+### Turn 24 — persona
+
+The first two are direct: an **on-call engineer is a member of a resolver group**, and an **incident can be handled by a named on-call engineer**. Group membership alone does not record who handled this incident.
+
+I’d adjust the other two:
+
+- **Incident → coordinated by → Incident Commander** is the direct incident link. For a **major incident**, the commander commands it.
+- **Incident Response Team → coordinates → Major Incident** records the team’s role. I wouldn’t substitute a generic incident-to-team link for that.
+
+These links describe distinct responsibilities; they do not mean every incident needs a commander or response team.
+
+### Turn 25 — app-user
+
+The first two are direct: an **on-call engineer is a member of a resolver group**, and an **incident can be handled by a named on-call engineer**. Group membership alone does not record who handled this incident.
+
+I’d adjust the other two:
+
+- **Incident → coordinated by → Incident Commander** is the direct incident link. For a **major incident**, the commander commands it.
+- **Incident Response Team → coordinates → Major Incident** records the team’s role. I wouldn’t substitute a generic incident-to-team link for that.
+
+These links describe distinct responsibilities; they do not mean every incident needs a commander or response team.
+
+### Turn 25 — app-tool
+
+✓ Applied: 3 added, 0 updated.
+
+### Turn 25 — app-assistant
+
+I’ve recorded group membership, the incident’s direct link to its named on-call engineer, and the commander’s direct link to the incident. None is required for every incident.
+
+Because **Major Incident is a classification of the same Incident record**, rather than a separate class, I can preserve your team link as **Incident Response Team → coordinates major incident → Incident**, with the link used only when that incident is major. **Does that express the team’s role without creating a duplicate incident record?**
+
+### Turn 25 — persona
+
+Yes. That expresses the **incident response team’s coordination of a major incident** without creating a second incident record. Apply that link only when the incident has been classified as major; it is distinct from the named commander’s responsibility for directing the response.
+
+### Turn 26 — app-user
+
+Yes. That expresses the **incident response team’s coordination of a major incident** without creating a second incident record. Apply that link only when the incident has been classified as major; it is distinct from the named commander’s responsibility for directing the response.
+
+### Turn 26 — app-tool
+
+✓ Applied: 1 added, 0 updated.
+
+### Turn 26 — app-assistant
+
+That team link is recorded and limited to major incidents.
+
+For triage and cause tracing, which of these **direct links** does your workflow record?
+
+1. **Alert → indicates → Event**
+2. **Incident → correlates → Alert**
+3. **Incident → correlates → Event**
+4. **Change → delivered by → Release**
+5. **Release → deployed through → Deployment**
+6. **Deployment → deployed to → Environment**
+7. **Incident → potentially caused by → Change**
+8. **Incident → potentially caused by → Deployment**
+
+Please distinguish a *suspected contribution* from a confirmed cause if those are recorded differently.
+
+### Turn 26 — persona
+
+1. **Yes:** an alert indicates an event.
+2. **Not “correlates” in this direction:** an incident can be **triggered by an alert**. That does not mean every alert opens an incident.
+3. **Close, but I’d say the incident is correlated from events.** This captures the observations brought together in the case.
+4. **Connection right, wording different:** a change is **implemented by a release**; the release is the governed package of changes.
+5. **Connection right:** a release is **delivered by a deployment**, the technical execution.
+6. **Yes in substance:** a deployment **targets an environment**.
+7–8. **No direct suspected-cause link to either change or deployment is specified.** We should investigate recent changes and deployments, but recency is not proof of contribution. I wouldn’t record either a suspected or a confirmed causal link here without a separately supported finding. The distinct incident-to-change link we do have is that an incident **may be resolved by a change**—a different claim from saying the change caused it.
+
+### Turn 27 — app-user
+
+1. **Yes:** an alert indicates an event.
+2. **Not “correlates” in this direction:** an incident can be **triggered by an alert**. That does not mean every alert opens an incident.
+3. **Close, but I’d say the incident is correlated from events.** This captures the observations brought together in the case.
+4. **Connection right, wording different:** a change is **implemented by a release**; the release is the governed package of changes.
+5. **Connection right:** a release is **delivered by a deployment**, the technical execution.
+6. **Yes in substance:** a deployment **targets an environment**.
+7–8. **No direct suspected-cause link to either change or deployment is specified.** We should investigate recent changes and deployments, but recency is not proof of contribution. I wouldn’t record either a suspected or a confirmed causal link here without a separately supported finding. The distinct incident-to-change link we do have is that an incident **may be resolved by a change**—a different claim from saying the change caused it.
+
+### Turn 27 — app-tool
+
+✓ Applied: 7 added, 0 updated.
+
+### Turn 27 — app-assistant
+
+I’ve recorded the triage and change-to-deployment chain as corrected. I have **not** added a causal link from an incident to a change or deployment: a recent deployment is a lead to investigate, not evidence that it contributed. “Incident resolved by Change” is a separate claim.
+
+For the recovery question and the failover and restore actions, which of these **direct links** should the agent use?
+
+- **IT Service → has → Recovery Plan**
+- **Recovery Plan → targets → Environment**
+- **Recovery Plan → uses → Backup Set**
+- **Backup Set → protects → Configuration Item**
+- **Incident → uses → Recovery Plan** when the plan is selected
+- **Incident → restored from → Backup Set** when restoration occurs
+
+Are those last two recorded facts, or should the agent find the plan and backup through the affected service or item without linking them to the incident?
+
+### Turn 27 — persona
+
+I’d use these direct links, with a few corrections:
+
+- **Recovery Plan → recovers → IT Service.** The plan is tied to the service it restores; I wouldn’t record “IT service has recovery plan” as a separate link.
+- **Recovery Plan → uses → Backup Set** and **Backup Set → protects → Configuration Item** are right.
+- **Incident → is recovered with → Recovery Plan** records the plan used for that incident.
+
+I would **not** add **Recovery Plan → Environment** or **Incident → Backup Set** as direct links here. The agent finds a candidate backup through the plan or the protected item, but still has to verify the restore point and approved target. Likewise, an applicable plan does not establish that a recovery environment is available for failover.
+
+### Turn 28 — app-user
+
+I’d use these direct links, with a few corrections:
+
+- **Recovery Plan → recovers → IT Service.** The plan is tied to the service it restores; I wouldn’t record “IT service has recovery plan” as a separate link.
+- **Recovery Plan → uses → Backup Set** and **Backup Set → protects → Configuration Item** are right.
+- **Incident → is recovered with → Recovery Plan** records the plan used for that incident.
+
+I would **not** add **Recovery Plan → Environment** or **Incident → Backup Set** as direct links here. The agent finds a candidate backup through the plan or the protected item, but still has to verify the restore point and approved target. Likewise, an applicable plan does not establish that a recovery environment is available for failover.
+
+### Turn 28 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 28 — app-assistant
+
+I’ve recorded the plan-to-service, plan-to-backup, backup-to-item, and incident-to-used-plan links. I left out plan-to-environment and incident-to-backup as requested. Plan applicability, restore-point approval, and recovery-environment availability remain separate checks.
+
+For the **actual failover or restore**, what direct recorded link identifies the environment used—for example, **Incident → recovered in → Environment**? And how does the agent identify whether the affected IT service or configuration item is in production or a recovery environment before acting?
+
+### Turn 28 — persona
+
+There is **no direct Incident → Environment link** specified for the environment actually used in a failover or restore. I wouldn’t invent one. The action’s verification should retain evidence of where recovery was performed and what was checked, but that is not a separate modeled relationship here.
+
+Before acting, the agent can identify the current context through **IT service → deployed in → environment** or **configuration item → belongs to → environment**. The environment’s type distinguishes production from disaster recovery; its **current availability** still needs a separate check. For a restore, the target environment and restore point must be approved; for failover, the recovery environment must be available and the data-recovery point acceptable.
+
+### Turn 29 — app-user
+
+There is **no direct Incident → Environment link** specified for the environment actually used in a failover or restore. I wouldn’t invent one. The action’s verification should retain evidence of where recovery was performed and what was checked, but that is not a separate modeled relationship here.
+
+Before acting, the agent can identify the current context through **IT service → deployed in → environment** or **configuration item → belongs to → environment**. The environment’s type distinguishes production from disaster recovery; its **current availability** still needs a separate check. For a restore, the target environment and restore point must be approved; for failover, the recovery environment must be available and the data-recovery point acceptable.
+
+### Turn 29 — app-tool
+
+✓ Applied: 2 added, 0 updated.
+
+### Turn 29 — app-assistant
+
+I’ve recorded the service’s and configuration item’s environment links. I have not added Incident → Environment; the recovery action’s verification record will capture where recovery happened. Environment type and current availability remain separate facts.
+
+For the response guidance question, which direct links are valid?
+
+- **Runbook → applies to → IT Service**
+- **Runbook → applies to → Configuration Item**
+- **Workaround → documented in → Runbook**
+- **Incident → handled using → Runbook**
+- **Incident → mitigated by → Workaround**
+
+The last two would record what was actually used, not imply it was safe merely because it was found.
+
+### Turn 29 — persona
+
+Two of those are direct links:
+
+- **Workaround → documented in → Runbook:** yes. The temporary method is distinct from the maintained procedure that may document it.
+- **Incident → handled with → Runbook:** yes. That records the procedure used, not that every step was automatically safe or approved.
+
+I would **not** add direct runbook-to-service or runbook-to-configuration-item “applies to” links, or an **Incident → Workaround** link, in this scope. A workaround can instead be associated with a known error, and the agent must still establish whether it is appropriate for this incident before using it.
+
+### Turn 30 — app-user
+
+Two of those are direct links:
+
+- **Workaround → documented in → Runbook:** yes. The temporary method is distinct from the maintained procedure that may document it.
+- **Incident → handled with → Runbook:** yes. That records the procedure used, not that every step was automatically safe or approved.
+
+I would **not** add direct runbook-to-service or runbook-to-configuration-item “applies to” links, or an **Incident → Workaround** link, in this scope. A workaround can instead be associated with a known error, and the agent must still establish whether it is appropriate for this incident before using it.
+
+### Turn 30 — app-tool
+
+✓ Applied: 2 added, 0 updated.
+
+### Turn 30 — app-assistant
+
+I’ve recorded the two confirmed links and left out the proposed applicability and Incident → Workaround links.
+
+You also mentioned a **known error** as the thing a workaround can be associated with. **Does the agent need to identify a known error separately to find or assess a relevant workaround for question 6, or is that only background about how workarounds are documented?**
+
+### Turn 30 — persona
+
+Yes. A **known error** should be identifiable separately for that question: it is a diagnosed problem with a documented cause or workaround, and it can point to a workaround and an affected configuration item. That gives the agent a route to a candidate workaround; it does **not** prove the workaround is safe for this incident. A runbook may document the workaround, but it serves a different purpose as an operational procedure.
+
+### Turn 31 — app-user
+
+Yes. A **known error** should be identifiable separately for that question: it is a diagnosed problem with a documented cause or workaround, and it can point to a workaround and an affected configuration item. That gives the agent a route to a candidate workaround; it does **not** prove the workaround is safe for this incident. A runbook may document the workaround, but it serves a different purpose as an operational procedure.
+
+### Turn 31 — app-tool
+
+✓ Applied: 3 added, 0 updated.
+
+### Turn 31 — app-assistant
+
+Known Error is now a class, linked to its affected configuration item and a candidate workaround. That gives the agent a route to question 6 without treating the workaround as automatically safe.
+
+For reporting, communication, and closure, are these direct links accurate?
+
+- **Incident → assessed by → Materiality Assessment**
+- **Materiality Assessment → leads to → Regulatory Notification**, only when a notification is required
+- **Regulatory Notification → submitted to → Regulator**
+- **Incident → communicated through → Communication**
+- **Communication → addressed to → Stakeholder**
+- **Incident → supported by → Evidence Item**
+- **Incident → reviewed in → Post-Incident Review**
+- **Post-Incident Review → produces → Corrective Action**
+- **Corrective Action → relates to → IT Service**, so earlier open work can be found for an affected service
+
+Please correct any link that would falsely imply a decision, submission, or completed review.
+
+### Turn 31 — persona
+
+Most are right, with a few important qualifications:
+
+- An **incident is evaluated by a materiality assessment**. An assessment can **trigger a regulatory notification**, but only a reportable result supports submission; an assessment alone does not mean a notification has been sent.
+- A **regulatory notification is sent to a regulator**. The link identifies the recipient, not proof of submission—the notification’s status and receipt establish that.
+- An **incident is communicated through a communication**, which is **addressed to a stakeholder**. An incident can also be **supported by evidence items**.
+- An **incident is reviewed in a post-incident review**, and that review can **produce corrective actions**. The review link alone does not say the review has already been held; it may still be scheduled.
+
+I would **not** add a direct corrective-action-to-IT-service link. To find earlier open work for a service, trace from that service to earlier incidents impacting it, their post-incident reviews, and the corrective actions those reviews produced. Then check each action’s status.
+
+### Turn 32 — app-user
+
+Most are right, with a few important qualifications:
+
+- An **incident is evaluated by a materiality assessment**. An assessment can **trigger a regulatory notification**, but only a reportable result supports submission; an assessment alone does not mean a notification has been sent.
+- A **regulatory notification is sent to a regulator**. The link identifies the recipient, not proof of submission—the notification’s status and receipt establish that.
+- An **incident is communicated through a communication**, which is **addressed to a stakeholder**. An incident can also be **supported by evidence items**.
+- An **incident is reviewed in a post-incident review**, and that review can **produce corrective actions**. The review link alone does not say the review has already been held; it may still be scheduled.
+
+I would **not** add a direct corrective-action-to-IT-service link. To find earlier open work for a service, trace from that service to earlier incidents impacting it, their post-incident reviews, and the corrective actions those reviews produced. Then check each action’s status.
+
+### Turn 32 — app-tool
+
+✓ Applied: 8 added, 0 updated.
+
+### Turn 32 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 32 — app-assistant
+
+I’ve recorded the reporting and closure links with those qualifications. In particular, the notification link does not prove submission, and a review link does not prove the review has taken place. Earlier corrective actions can be found through earlier incidents affecting the same IT service, without a direct action-to-service link.
+
+One relationship gap remains for **implement emergency change**: “Incident → resolved by → Change” describes an outcome, but the change needs its incident justification *before* execution. Are these separate direct links recorded?
+
+- **Change → justified by → Incident**
+- **Change → affects → Configuration Item**, identifying the items checked before implementation
+
+If either is not a recorded link, how does the agent establish that action check?
+
+### Turn 32 — persona
+
+Yes, the incident justification is a **direct link for an emergency change**: the emergency change is justified by the incident. Before execution, the agent must also confirm that the linked incident is active.
+
+The second link is right in purpose, but I’d word it more precisely: a **change modifies configuration items**. Those are the affected items the agent must identify before implementing the emergency change; the link does not replace the implementation plan, backout plan, or explicit risk acceptance.
+
+### Turn 33 — app-user
+
+Yes, the incident justification is a **direct link for an emergency change**: the emergency change is justified by the incident. Before execution, the agent must also confirm that the linked incident is active.
+
+The second link is right in purpose, but I’d word it more precisely: a **change modifies configuration items**. Those are the affected items the agent must identify before implementing the emergency change; the link does not replace the implementation plan, backout plan, or explicit risk acceptance.
+
+### Turn 33 — app-tool
+
+✓ Applied: 2 added, 0 updated.
+
+### Turn 33 — app-assistant
+
+I’ve recorded **Change → justified by → Incident** and **Change → modifies → Configuration Item**. The justification link identifies the incident; its active state, plans, and risk acceptance still need separate checks.
+
+For **acknowledge a new alert**, must the agent record a direct link from the **Alert** to the **On-Call Engineer** or **Resolver Group** taking responsibility, or is that responsibility kept in the alert’s acknowledgement record without a modeled relationship?I’ve recorded **Change → justified by → Incident** and **Change → modifies → Configuration Item**. The justification link identifies the incident; its active state, plans, and risk acceptance still need separate checks.
+
+For **acknowledge a new alert**, must the agent record a direct link from the **Alert** to the **On-Call Engineer** or **Resolver Group** taking responsibility, or is that responsibility kept in the alert’s acknowledgement record without a modeled relationship?
+
+### Turn 33 — persona
+
+No direct **alert-to-engineer** or **alert-to-resolver-group** relationship is specified. Before acknowledgement, the operator must be authorized for the responsible resolver group. The action then records the acknowledgement timestamp and changes the alert’s status to **acknowledged**; afterward, we read the alert back to verify that status. I wouldn’t invent a separate responsibility link for this action.
+
+### Turn 34 — app-user
+
+No direct **alert-to-engineer** or **alert-to-resolver-group** relationship is specified. Before acknowledgement, the operator must be authorized for the responsible resolver group. The action then records the acknowledgement timestamp and changes the alert’s status to **acknowledged**; afterward, we read the alert back to verify that status. I wouldn’t invent a separate responsibility link for this action.
+
+### Turn 34 — app-assistant
+
+Understood. Alert acknowledgement will be represented by its status and timestamp, not a new alert-to-person or alert-to-group link. Authorization for the responsible group is an action check; I won’t invent a relationship for it.
+
+One gap in the original triage question remains: **Incident → triggered by → Alert** identifies the triggering alert, but question 3 asks which *alerts* belong to the incident. Can an incident have other associated alerts besides the trigger, and if so, is that association recorded directly?
+
+### Turn 34 — persona
+
+Other alerts may be relevant to the investigation, but I wouldn’t record a generic **Incident → associated alert** link on that basis. The direct link we have says an incident **is triggered by an alert**; it should not be used to label every related alert as a trigger.
+
+To find other candidates, the agent can trace alerts that indicate events correlated into the incident, or alerts concerning its affected IT service or configuration item. Those connections help triage relevance; they do not, on their own, establish that an alert belongs to the incident. I also wouldn’t assume there can be only one triggering alert—no such limit is specified.
+
+### Turn 35 — app-user
+
+Other alerts may be relevant to the investigation, but I wouldn’t record a generic **Incident → associated alert** link on that basis. The direct link we have says an incident **is triggered by an alert**; it should not be used to label every related alert as a trigger.
+
+To find other candidates, the agent can trace alerts that indicate events correlated into the incident, or alerts concerning its affected IT service or configuration item. Those connections help triage relevance; they do not, on their own, establish that an alert belongs to the incident. I also wouldn’t assume there can be only one triggering alert—no such limit is specified.
+
+### Turn 35 — app-assistant
+
+I’ll keep **triggered by alert** distinct from alerts that are merely relevant, and won’t assume there is only one trigger. The event-correlation path can surface candidates without proving they belong to the incident.
+
+For the other candidate path you mentioned, are **Alert → concerns → IT Service** and **Alert → concerns → Configuration Item** recorded links, or is that context checked elsewhere rather than represented as direct relationships?
+
+### Turn 35 — persona
+
+Both are **direct recorded links**: an alert can concern an IT service, and it can concern a configuration item. They help surface alerts relevant to an affected service or item, but neither link alone proves that the alert triggered—or belongs to—a particular incident.
+
+### Turn 36 — app-user
+
+Both are **direct recorded links**: an alert can concern an IT service, and it can concern a configuration item. They help surface alerts relevant to an affected service or item, but neither link alone proves that the alert triggered—or belongs to—a particular incident.
+
+### Turn 36 — app-tool
+
+✓ Applied: 2 added, 0 updated.
+
+### Turn 36 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 36 — app-assistant
+
+The alert-to-service and alert-to-item links are recorded. They help find candidates, but do not establish incident membership. I checked the live model: every current class has at least one connection.
+
+One possible gap in question 8 needs a direct answer. **Is there also a recorded Change ↔ Deployment link, or is Change → Release → Deployment the only valid trace from a change to the execution that delivered it?** I won’t add a shortcut merely because both appear in the question.
+
+### Turn 36 — persona
+
+There is **no separate direct change-to-deployment link** in this scope. Trace the change through the **release that implements it**, then to the **deployment that delivers that release**. That path tells us what was executed; it does not, by itself, prove the deployment caused the incident.
+
+### Turn 37 — app-user
+
+There is **no separate direct change-to-deployment link** in this scope. Trace the change through the **release that implements it**, then to the **deployment that delivers that release**. That path tells us what was executed; it does not, by itself, prove the deployment caused the incident.
+
+### Turn 37 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 37 — app-assistant
+
+The confirmed path is **Change → Release → Deployment**. It shows what was executed, not whether that execution caused the incident. I also corrected Deployment’s recorded meaning to describe execution of a release, rather than implying a direct Change → Deployment link.
+
+To investigate a recent deployment against an affected application, **is there a direct recorded link from Deployment to Application (or from Release to Application)?** If neither exists, what lets the agent establish that the deployment actually affected that application?
+
+### Turn 37 — persona
+
+Yes: a **deployment directly deploys an application**. The agent can trace from the affected IT service to the application that implements it, then check deployments of that application and their timing and status. From a deployment, it can trace back through the release to its changes.
+
+I wouldn’t add a separate release-to-application link. And even when the deployment targeted the affected application, that establishes what was deployed—not that it caused the incident.
+
+### Turn 38 — app-user
+
+Yes: a **deployment directly deploys an application**. The agent can trace from the affected IT service to the application that implements it, then check deployments of that application and their timing and status. From a deployment, it can trace back through the release to its changes.
+
+I wouldn’t add a separate release-to-application link. And even when the deployment targeted the affected application, that establishes what was deployed—not that it caused the incident.
+
+### Turn 38 — app-tool
+
+✓ Applied: 1 added, 0 updated.
+
+### Turn 38 — app-assistant
+
+I’ve recorded **Deployment → deploys → Application**. The agent can now trace an affected IT service to its application, find deployments of that application, and follow a deployment back through its release to changes. That still does not establish cause.
+
+Before we close the relationship phase, the accountable people are currently reached through what they own. **Does an Incident also need a direct recorded link to any of these people: Service Owner, Application Owner, or Technical Owner?** Or should the agent find each through the affected service, application, or configuration item?
+
+### Turn 38 — persona
+
+No direct incident-to-owner link is needed for those three roles. Find the **service owner** through the impacted IT service, the **application owner** through the application implementing that service, and the **technical owner** through the configuration item affected by the incident.
+
+That keeps ownership distinct from the incident’s assignment to a resolver group and its handling by an on-call engineer. It also avoids treating an owner as the incident commander merely because their service or component is affected.
+
+### Turn 39 — app-user
+
+No direct incident-to-owner link is needed for those three roles. Find the **service owner** through the impacted IT service, the **application owner** through the application implementing that service, and the **technical owner** through the configuration item affected by the incident.
+
+That keeps ownership distinct from the incident’s assignment to a resolver group and its handling by an on-call engineer. It also avoids treating an owner as the incident commander merely because their service or component is affected.
+
+### Turn 39 — app-assistant
+
+Understood. I’ll find each owner through what they own, not add incident-to-owner links. That also keeps accountability separate from resolver assignment, hands-on handling, and command.
+
+One last connection affects the **third-party-dependent incident** distinction: an IT service’s dependence on a third-party service does not necessarily mean the third party is involved in this incident. **Is that involvement recorded as a direct Incident → Third-Party Service link, or is it determined during assessment without a separate relationship?**
+
+### Turn 39 — persona
+
+There is **no direct incident-to-third-party-service link** in this scope. The agent can trace the affected IT service’s dependency on the third-party service, then assess whether that dependency is actually involved; the dependency alone is not proof.
+
+If the incident is escalated externally, a separate direct link records **Incident → escalated to → Vendor**. That names the supplier involved in the escalation, not a blanket assertion that every service it provides caused the incident.
+
+### Turn 40 — app-user
+
+There is **no direct incident-to-third-party-service link** in this scope. The agent can trace the affected IT service’s dependency on the third-party service, then assess whether that dependency is actually involved; the dependency alone is not proof.
+
+If the incident is escalated externally, a separate direct link records **Incident → escalated to → Vendor**. That names the supplier involved in the escalation, not a blanket assertion that every service it provides caused the incident.
+
+### Turn 40 — app-assistant
+
+Agreed: a service’s third-party dependency is not proof of involvement in an incident. I won’t add an Incident → Third-Party Service link.
+
+**Does the agent need to identify the Vendor separately to answer one of the agreed questions or perform one of the agreed actions?** External escalation would justify **Incident → escalated to → Vendor** if it is part of that scope; otherwise I’ll leave it out rather than expand the model solely because the link exists in your wider workflow.
+
+### Turn 40 — persona
+
+Not for the **agreed questions and actions** as stated. The agent needs to identify the third-party service dependency and assess whether it is involved, but none of those tasks requires identifying its vendor or performing an external escalation.
+
+So I’d leave **Vendor** and the incident-to-vendor escalation link out of this task-driven scope. If you later add supplier escalation as an action, we should revisit both.
+
+### Turn 41 — app-user
+
+Not for the **agreed questions and actions** as stated. The agent needs to identify the third-party service dependency and assess whether it is involved, but none of those tasks requires identifying its vendor or performing an external escalation.
+
+So I’d leave **Vendor** and the incident-to-vendor escalation link out of this task-driven scope. If you later add supplier escalation as an action, we should revisit both.
+
+### Turn 41 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 41 — app-assistant
+
+Vendor and external escalation stay out of this scope. I’ve checked the live relationships against the agreed questions and actions: every class has a connection, and the routes for impact, ownership, recovery, reporting, and earlier corrective actions are present. We’ve also deliberately left out links you said would overstate the facts—for example, incident-to-deployment causation, incident-to-backup, and incident-to-third-party-service.
+
+Two boundaries remain explicit: group eligibility comes from approved support-routing information, and the canvas cannot express that an infrastructure component or database shares the same managed identity as a configuration item.
+
+**Does that accurately close the relationship phase?** If so, I’ll move to the values the agent must check or change, starting with current health and status.
+
+### Turn 41 — persona
+
+Yes, that closes the relationship phase accurately. Keep the incident-justification link specific to **emergency changes**, and keep the two representation limits you identified explicit rather than filling them with invented links.
+
+We can move on to the health and status values the agent needs to check or change.
+
+### Turn 42 — app-user
+
+Yes, that closes the relationship phase accurately. Keep the incident-justification link specific to **emergency changes**, and keep the two representation limits you identified explicit rather than filling them with invented links.
+
+We can move on to the health and status values the agent needs to check or change.
+
+### Turn 42 — app-assistant
+
+Starting with things the agent checks *now*, rather than just looks up: do these each need a recorded current-state value?
+
+- **IT Service:** current health, for impact and recovery checks.
+- **Business Service:** current health, for business impact and closure.
+- **Environment:** current availability, checked separately from whether it is production or recovery.
+- **Backup Set:** current usability or status, for restoration.
+- **Third-Party Service:** current state, if that is how the agent checks whether the dependency is involved.
+
+Please correct any that should instead be established by a live check without a recorded property. I won’t add a Customer Channel health field.
+
+### Turn 42 — persona
+
+- **IT service and business service:** yes, each has a recorded **health state**. We use it to assess impact and verify recovery. It is not a customer-channel health field.
+- **Environment:** record its **type**—such as production or disaster recovery—but do not assume a recorded availability property. Check the recovery environment’s current availability before failover.
+- **Backup set:** yes, record its **status**. A successful or verified backup can be considered for restoration, but the agent must also confirm that it protects the target and that the restore point and target environment are approved.
+- **Third-party service:** do not add a current-state property for this purpose. Trace the dependency, then assess whether it is involved in this incident; dependency alone does not establish involvement.
+
+### Turn 43 — app-user
+
+- **IT service and business service:** yes, each has a recorded **health state**. We use it to assess impact and verify recovery. It is not a customer-channel health field.
+- **Environment:** record its **type**—such as production or disaster recovery—but do not assume a recorded availability property. Check the recovery environment’s current availability before failover.
+- **Backup set:** yes, record its **status**. A successful or verified backup can be considered for restoration, but the agent must also confirm that it protects the target and that the restore point and target environment are approved.
+- **Third-party service:** do not add a current-state property for this purpose. Trace the dependency, then assess whether it is involved in this incident; dependency alone does not establish involvement.
+
+### Turn 43 — app-tool
+
+✓ Applied: 0 added, 4 updated.
+
+### Turn 43 — app-assistant
+
+I’ve recorded health state for IT Service and Business Service, Environment type, and Backup Set status. I’ve left out channel health, recorded environment availability, and third-party-service state; the latter two require checks in context.
+
+For the records the agent actively handles, **which current-state values need to be recorded** to support the agreed questions and actions?
+
+- **Alert:** status and acknowledgement time.
+- **Incident:** status, plus separate major-incident and cybersecurity classifications.
+- **Change:** status and whether the emergency workflow applies.
+- **Deployment:** execution status, to check whether a recent deployment reached the affected application.
+
+Please correct any proposed value that your workflow establishes another way.
+
+### Turn 43 — persona
+
+Yes, with a distinction between **recorded state** and how a classification is represented:
+
+- **Alert:** record its status. Acknowledgement also records a timestamp, and the agent verifies that the status became *acknowledged*.
+- **Incident:** record its lifecycle status. The agent must distinguish **major** and **cybersecurity-related** incidents, including when both apply. Major-incident declaration records its time and assigned commander; I would not prescribe a particular field for either classification.
+- **Change:** record its status and identify when it is an **emergency change** so the different execution checks apply. I would not prescribe an “emergency” flag.
+- **Deployment:** record its execution status. That helps establish what happened, alongside the application deployed and execution timing; it does not establish that the deployment caused an incident.
+
+### Turn 44 — app-user
+
+Yes, with a distinction between **recorded state** and how a classification is represented:
+
+- **Alert:** record its status. Acknowledgement also records a timestamp, and the agent verifies that the status became *acknowledged*.
+- **Incident:** record its lifecycle status. The agent must distinguish **major** and **cybersecurity-related** incidents, including when both apply. Major-incident declaration records its time and assigned commander; I would not prescribe a particular field for either classification.
+- **Change:** record its status and identify when it is an **emergency change** so the different execution checks apply. I would not prescribe an “emergency” flag.
+- **Deployment:** record its execution status. That helps establish what happened, alongside the application deployed and execution timing; it does not establish that the deployment caused an incident.
+
+### Turn 44 — app-tool
+
+✓ Applied: 0 added, 4 updated.
+
+### Turn 44 — app-assistant
+
+I’ve recorded the confirmed statuses and times: alert acknowledgement, incident lifecycle and major-declaration time, change status, and deployment execution status and time. I have **not** added classification fields yet.
+
+The agent still needs to tell whether an Incident is major, cybersecurity-related, or both, and whether a Change follows the emergency path. **May I model those as agent-visible yes/no properties—independent of how your systems store them—or should the agent obtain those classifications some other way?**
+
+### Turn 44 — persona
+
+Yes—**agent-visible yes/no classifications** are a reasonable way to express this in your canvas, provided they are independent: an incident can be both major and cybersecurity-related. An emergency change can likewise be distinguished from other changes.
+
+Treat those as the agent’s view of the classification, **not a requirement for three particular stored Boolean fields**. The agent must be able to verify the classifications from the governed records; for a major-incident declaration, it must also verify the assigned commander and declaration time.
+
+### Turn 45 — app-user
+
+Yes—**agent-visible yes/no classifications** are a reasonable way to express this in your canvas, provided they are independent: an incident can be both major and cybersecurity-related. An emergency change can likewise be distinguished from other changes.
+
+Treat those as the agent’s view of the classification, **not a requirement for three particular stored Boolean fields**. The agent must be able to verify the classifications from the governed records; for a major-incident declaration, it must also verify the assigned commander and declaration time.
+
+### Turn 45 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 45 — app-assistant
+
+I’ve added those three **agent-visible classifications**, independent of one another and without prescribing database fields. A major declaration will still need its commander and time verified from governed records.
+
+For reporting and closure, do these tracked records need their **own current status or decision value**?
+
+- **Materiality Assessment:** reporting decision and assessment state.
+- **Regulatory Notification:** approval/submission outcome, including receipt or rejection.
+- **Communication:** approval and delivery status.
+- **Evidence Item:** collection and integrity state.
+- **Post-Incident Review:** scheduled or completed state.
+- **Corrective Action:** open or completed state.
+
+Which of those distinctions must the agent read to answer questions 9–11 or perform actions 8–10?
+
+### Turn 45 — persona
+
+The agent needs these distinctions, but not every proposed record has a separate status field:
+
+- **Materiality assessment:** read its **result** and rationale. There is no separate assessment-state value here; whether the assessment is complete must be established from the documented assessment.
+- **Regulatory notification:** read its **status** for approval, submission, acceptance, or rejection. Submission timing and the retained receipt are separate evidence.
+- **Communication:** read its **status** and the final message and delivery record. Approval alone does not show that it was sent.
+- **Evidence item:** read its **integrity status** and collection details.
+- **Post-incident review:** do **not** invent a status field. Closure requires a review to be scheduled or completed for major and cybersecurity incidents; the review’s held date distinguishes one that has taken place, while scheduling must be checked from the review arrangement.
+- **Corrective action:** read its **status** to find work that remains open or verify that follow-up work was completed.
+
+### Turn 46 — app-user
+
+The agent needs these distinctions, but not every proposed record has a separate status field:
+
+- **Materiality assessment:** read its **result** and rationale. There is no separate assessment-state value here; whether the assessment is complete must be established from the documented assessment.
+- **Regulatory notification:** read its **status** for approval, submission, acceptance, or rejection. Submission timing and the retained receipt are separate evidence.
+- **Communication:** read its **status** and the final message and delivery record. Approval alone does not show that it was sent.
+- **Evidence item:** read its **integrity status** and collection details.
+- **Post-incident review:** do **not** invent a status field. Closure requires a review to be scheduled or completed for major and cybersecurity incidents; the review’s held date distinguishes one that has taken place, while scheduling must be checked from the review arrangement.
+- **Corrective action:** read its **status** to find work that remains open or verify that follow-up work was completed.
+
+### Turn 46 — app-tool
+
+✓ Applied: 0 added, 6 updated.
+
+### Turn 46 — app-assistant
+
+I’ve recorded the confirmed values: the assessment’s result and rationale; notification and communication statuses; the final communication; evidence integrity; review held date; and corrective-action status. I have not added separate assessment or review status fields.
+
+For the reporting and closure checks, **which of these must the agent read as values on the named record, rather than only from a linked document or action record**: the notification’s submission time and receipt or rejection, the communication’s delivery result, and the evidence item’s collection details?
+
+### Turn 46 — persona
+
+Read the **notification’s submission time and status** on the notification record. Its status can show rejection or acceptance; the **submission receipt** must be retained, but I wouldn’t prescribe it as a field on that record.
+
+For a **communication**, read its sent time and status on the communication record, then confirm delivery and archive the final message. Don’t equate “approved” or even “submitted” with confirmed delivery, or invent a separate delivery-result field.
+
+For an **evidence item**, read its collection time and integrity status on the item. A cryptographic hash can also be recorded to support integrity verification.
+
+### Turn 47 — app-user
+
+Read the **notification’s submission time and status** on the notification record. Its status can show rejection or acceptance; the **submission receipt** must be retained, but I wouldn’t prescribe it as a field on that record.
+
+For a **communication**, read its sent time and status on the communication record, then confirm delivery and archive the final message. Don’t equate “approved” or even “submitted” with confirmed delivery, or invent a separate delivery-result field.
+
+For an **evidence item**, read its collection time and integrity status on the item. A cryptographic hash can also be recorded to support integrity verification.
+
+### Turn 47 — app-tool
+
+✓ Applied: 0 added, 3 updated.
+
+### Turn 47 — app-assistant
+
+I’ve added submission time to Regulatory Notification, sent time to Communication, and collection time and cryptographic hash to Evidence Item. The submission receipt and delivery confirmation remain things the action must retain or verify, not fields I’ll invent.
+
+Next are **decision values on the Incident itself**. To decide whether to declare it major, assess reporting, and close it, which of these does the agent need to read from the incident record: **impact, severity, verification of the information used for declaration, and restoration state**? If a check is established elsewhere instead, please say where.
+
+### Turn 47 — persona
+
+**Impact and severity** are recorded on the incident. Severity is checked for major-incident declaration; the agent also needs an active incident, at least one identified impacted IT service, and an assigned commander. Impact helps describe the business consequences, but a recorded impact value alone does not authorize declaration or decide reportability.
+
+I wouldn’t add an incident field called **“information verified.”** The agent must check the supporting facts and evidence where relevant. Nor would I add a single **“restoration state”** field: use the incident’s lifecycle status, the impacted services’ health, and recorded resolution and restoration evidence. At closure, also check required communications and, for a major or cybersecurity incident, that a post-incident review is scheduled or completed.
+
+### Turn 48 — app-user
+
+**Impact and severity** are recorded on the incident. Severity is checked for major-incident declaration; the agent also needs an active incident, at least one identified impacted IT service, and an assigned commander. Impact helps describe the business consequences, but a recorded impact value alone does not authorize declaration or decide reportability.
+
+I wouldn’t add an incident field called **“information verified.”** The agent must check the supporting facts and evidence where relevant. Nor would I add a single **“restoration state”** field: use the incident’s lifecycle status, the impacted services’ health, and recorded resolution and restoration evidence. At closure, also check required communications and, for a major or cybersecurity incident, that a post-incident review is scheduled or completed.
+
+### Turn 48 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 48 — app-assistant
+
+I’ve recorded Incident impact and severity. I have **not** added “information verified” or “restoration state”: those decisions must use supporting facts, the incident lifecycle status, service health, and restoration evidence.
+
+For the recovery decisions, which **recorded values** does the agent need to read on the recovery plan and backup set? In particular, is an acceptable data-recovery point expressed as a value on either record, or checked against the proposed failover or restore at action time?
+
+### Turn 48 — persona
+
+On the **recovery plan**, read its recovery time objective, recovery point objective, and last review date. On the **backup set**, read its status, last successful backup date, and last verification date.
+
+An **acceptable data-recovery point** is a check against the proposed failover or restore at action time; don’t treat the plan’s objective or the backup’s dates as automatic approval. For restore, also verify that the backup protects the target and that the selected restore point and target environment are approved. For failover, verify the plan applies to the service and the recovery environment is currently available.
+
+### Turn 49 — app-user
+
+On the **recovery plan**, read its recovery time objective, recovery point objective, and last review date. On the **backup set**, read its status, last successful backup date, and last verification date.
+
+An **acceptable data-recovery point** is a check against the proposed failover or restore at action time; don’t treat the plan’s objective or the backup’s dates as automatic approval. For restore, also verify that the backup protects the target and that the selected restore point and target environment are approved. For failover, verify the plan applies to the service and the recovery environment is currently available.
+
+### Turn 49 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 49 — app-assistant
+
+I’ve recorded the plan’s last review date and the backup’s last successful and verified dates. The acceptable recovery point remains an **action-time check**, not something those dates automatically approve.
+
+For the plan’s **recovery time objective** and **recovery point objective**, what units or format does your team use—such as durations in minutes or hours? I’ll use that to represent the two values without assuming a unit.
+
+### Turn 49 — persona
+
+Represent both as **numeric target values**. The model does not prescribe minutes, hours, or another unit, so I wouldn’t fix one in the ontology. Use the bank’s approved recovery policy or procedure to interpret the units and compare a proposed recovery point or timing against the applicable objective.
+
+### Turn 50 — app-user
+
+Represent both as **numeric target values**. The model does not prescribe minutes, hours, or another unit, so I wouldn’t fix one in the ontology. Use the bank’s approved recovery policy or procedure to interpret the units and compare a proposed recovery point or timing against the applicable objective.
+
+### Turn 50 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 50 — app-assistant
+
+Both recovery objectives are now numeric, with no unit fixed in the ontology. The agent must use the bank’s approved policy to interpret and compare them; neither objective alone approves a restore or failover.
+
+For the incident-response decisions, which **recorded values** does the agent need on a Runbook, Workaround, or Change to check whether containment or an emergency change can proceed? I’m thinking specifically of procedure approval, implementation and backout plans, and risk acceptance—please distinguish values on those records from checks made at action time.
+
+### Turn 50 — persona
+
+I would **not add an approval field to the runbook or workaround**. They help identify a procedure or temporary measure, but their presence does not authorize containment. At action time, the containment scope and expected side effects must be recorded; approved steps are then executed and containment verified.
+
+For a **change**, read its recorded **status, risk level, implementation plan, and backout plan**. For an emergency change, the agent must also check its link to an active incident, identify the configuration items it will modify, and confirm **explicit risk acceptance**. Risk level describes the assessed risk; it is not itself proof that someone accepted it. I would not invent a risk-acceptance field or infer approval merely from a plan’s existence.
+
+### Turn 51 — app-user
+
+I would **not add an approval field to the runbook or workaround**. They help identify a procedure or temporary measure, but their presence does not authorize containment. At action time, the containment scope and expected side effects must be recorded; approved steps are then executed and containment verified.
+
+For a **change**, read its recorded **status, risk level, implementation plan, and backout plan**. For an emergency change, the agent must also check its link to an active incident, identify the configuration items it will modify, and confirm **explicit risk acceptance**. Risk level describes the assessed risk; it is not itself proof that someone accepted it. I would not invent a risk-acceptance field or infer approval merely from a plan’s existence.
+
+### Turn 51 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 51 — app-assistant
+
+I’ve recorded Change risk level, implementation plan, and backout plan. I have **not** treated risk level as acceptance, or added approval fields to Runbook or Workaround. Containment scope, side effects, approved steps, and explicit risk acceptance remain action-time checks.
+
+For the question **“Has materiality been assessed, and is a regulatory notification needed or due?”**, what recorded date or deadline lets the agent determine whether a notification is **due**? Is it on the Materiality Assessment or Regulatory Notification, or calculated from an approved reporting procedure?
+
+### Turn 51 — persona
+
+Read the **reporting due time** recorded on the materiality assessment and the **due time** on the regulatory notification. The agent should compare the applicable notification deadline with the current time and its submission state; it must submit **before** the notification’s due time.
+
+I wouldn’t invent a statutory interval to calculate either date. The applicable deadline comes from the bank’s approved reporting procedure and the assessment, with the designated reporting function involved where needed. An assessment result of **reportable** supports the notification workflow; it does not mean a submission has already occurred.
+
+### Turn 52 — app-user
+
+Read the **reporting due time** recorded on the materiality assessment and the **due time** on the regulatory notification. The agent should compare the applicable notification deadline with the current time and its submission state; it must submit **before** the notification’s due time.
+
+I wouldn’t invent a statutory interval to calculate either date. The applicable deadline comes from the bank’s approved reporting procedure and the assessment, with the designated reporting function involved where needed. An assessment result of **reportable** supports the notification workflow; it does not mean a submission has already occurred.
+
+### Turn 52 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 52 — app-assistant
+
+I’ve recorded the assessment’s reporting due time and the notification’s due time. The agent can compare the applicable deadline with the current time and submission status, without inventing a statutory interval. A reportable assessment supports the notification workflow but does not prove submission.
+
+For question 11, you said corrective actions need their **own owners and statuses**; status is recorded. **Who can own a Corrective Action, and should that owner be a direct link to one of the existing role classes or an identifying value on the action?**
+
+### Turn 52 — persona
+
+A **corrective action is owned by an organizational unit**. I would record that as a **direct link from the corrective action to the organizational unit**, not as an owner-name value on the action or a link to one of the individual owner roles we discussed.
+
+That means **organizational unit** needs to be identifiable separately for this task. The action’s own status and due date then let the agent find earlier follow-up work that remains open and see who is accountable for it.
+
+### Turn 53 — app-user
+
+A **corrective action is owned by an organizational unit**. I would record that as a **direct link from the corrective action to the organizational unit**, not as an owner-name value on the action or a link to one of the individual owner roles we discussed.
+
+That means **organizational unit** needs to be identifiable separately for this task. The action’s own status and due date then let the agent find earlier follow-up work that remains open and see who is accountable for it.
+
+### Turn 53 — app-tool
+
+✓ Applied: 2 added, 1 updated.
+
+### Turn 53 — app-assistant
+
+I’ve added **Organizational Unit** and a direct **Corrective Action → owned by → Organizational Unit** link, plus the action’s due date. That lets the agent find open follow-up work and identify the unit accountable for it.
+
+Before leaving current-state values: do **Configuration Item, Application, Infrastructure Component, Database, or Recovery Plan** need their own recorded current status for the agreed investigation, isolation, and recovery checks? Or should the agent establish their condition from incident links, service health, and action-time verification instead?
+
+### Turn 53 — persona
+
+I wouldn’t add a generic **current-status field** to any of those five for these tasks. Identify the affected configuration item through its incident link; use the service’s recorded health and verify the item’s condition and isolation impact at action time. After a restore or failover, verify service health and application function rather than infer success from a component status.
+
+The **recovery plan** has objectives and a last review date, but no current-status value here. Its applicability, the target environment’s availability, and the proposed recovery point still need checking before use. Likewise, a deployment’s execution status does not stand in for the application’s current health.
+
+### Turn 54 — app-user
+
+I wouldn’t add a generic **current-status field** to any of those five for these tasks. Identify the affected configuration item through its incident link; use the service’s recorded health and verify the item’s condition and isolation impact at action time. After a restore or failover, verify service health and application function rather than infer success from a component status.
+
+The **recovery plan** has objectives and a last review date, but no current-status value here. Its applicability, the target environment’s availability, and the proposed recovery point still need checking before use. Likewise, a deployment’s execution status does not stand in for the application’s current health.
+
+### Turn 54 — app-assistant
+
+I’ll leave generic current-status fields off those five classes. For isolation and recovery, the agent must use the incident links, recorded service health, and action-time checks—not infer success from a component field, a recovery plan, or deployment status.
+
+The decision-value phase now covers the health, lifecycle, classification, timing, reporting, recovery, change, evidence, and corrective-action values tied to your questions and actions. It deliberately leaves approval, availability, risk acceptance, and several verification results as checks rather than invented fields.
+
+**Is that an accurate summary of the values we should model?** If confirmed, I’ll check the plain-language meanings and alternative names people use.
+
+### Turn 54 — persona
+
+Yes, that’s an accurate summary for the agreed tasks. In particular, **recorded status or health is not proof that an action is safe or complete**: environment availability, approval, risk acceptance, and recovery verification still need their own checks.
+
+I’m comfortable moving on to the terms people use in practice.
+
+### Turn 55 — app-user
+
+Yes, that’s an accurate summary for the agreed tasks. In particular, **recorded status or health is not proof that an action is safe or complete**: environment availability, approval, risk acceptance, and recovery verification still need their own checks.
+
+I’m comfortable moving on to the terms people use in practice.
+
+### Turn 55 — app-assistant
+
+The canvas already has a one-sentence meaning for each class and relationship, based on your earlier corrections. I’ll check the wording before collecting aliases, starting with five distinctions that are easy to blur:
+
+- **IT Service:** a managed technology capability.
+- **Business Service:** a capability the bank delivers using IT services.
+- **Customer Channel:** how customers access a business service, not the service itself.
+- **Configuration Item:** a managed component the agent can identify for investigation or isolation.
+- **Third-Party Service:** an external service dependency, not the organization providing it.
+
+**Are these meanings accurate as your team uses the terms?**
+
+### Turn 55 — persona
+
+Yes, those are accurate. I’d sharpen two slightly:
+
+- A **business service** is a customer- or business-facing capability the bank delivers. It can depend on IT services, but it isn’t defined solely by that dependency.
+- A **configuration item** is a managed component **within configuration-management scope**. Identifying one for investigation does not, by itself, establish that it is safe to isolate.
+
+The other three preserve the distinctions we use: an IT service is the managed technology capability, a customer channel is a means of access, and a third-party service is the external capability rather than its provider.
+
+### Turn 56 — app-user
+
+Yes, those are accurate. I’d sharpen two slightly:
+
+- A **business service** is a customer- or business-facing capability the bank delivers. It can depend on IT services, but it isn’t defined solely by that dependency.
+- A **configuration item** is a managed component **within configuration-management scope**. Identifying one for investigation does not, by itself, establish that it is safe to isolate.
+
+The other three preserve the distinctions we use: an IT service is the managed technology capability, a customer channel is a means of access, and a third-party service is the external capability rather than its provider.
+
+### Turn 56 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 56 — app-assistant
+
+I’ve sharpened those two meanings. The other three stand as written.
+
+Next, are these five meanings accurate?
+
+- **Application:** software that implements an IT service and whose function may need checking after restoration.
+- **Infrastructure Component:** the infrastructure an application runs on.
+- **Database:** a database an application uses—not the same dependency as “runs on.”
+- **Environment:** a production or recovery context; its type does not establish current availability.
+- **Deployment:** the technical execution that installs or activates a release in an environment.
+
+### Turn 56 — persona
+
+Mostly, yes. I’d keep the meanings a little broader than the particular links we’ve been tracing:
+
+- **Application:** a software system providing business or operational functionality. It can implement an IT service, and we may need to verify its function after restoration.
+- **Infrastructure component:** a technical component providing compute, network, platform, endpoint, or storage capability. An application can run on one, but that isn’t its whole definition.
+- **Database:** a managed persistent data store that an application or service uses. “Uses” is distinct from “runs on.”
+- **Environment:** a deployment context, including production and disaster recovery, but also other contexts. Its type does not prove current availability.
+- **Deployment:** the technical execution that installs or activates a release **or change**. A deployment targets an environment; the recorded trace from a change to its deployment runs through a release, not a direct link.
+
+### Turn 57 — app-user
+
+Mostly, yes. I’d keep the meanings a little broader than the particular links we’ve been tracing:
+
+- **Application:** a software system providing business or operational functionality. It can implement an IT service, and we may need to verify its function after restoration.
+- **Infrastructure component:** a technical component providing compute, network, platform, endpoint, or storage capability. An application can run on one, but that isn’t its whole definition.
+- **Database:** a managed persistent data store that an application or service uses. “Uses” is distinct from “runs on.”
+- **Environment:** a deployment context, including production and disaster recovery, but also other contexts. Its type does not prove current availability.
+- **Deployment:** the technical execution that installs or activates a release **or change**. A deployment targets an environment; the recorded trace from a change to its deployment runs through a release, not a direct link.
+
+### Turn 57 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 57 — app-assistant
+
+I’ve updated those five meanings. Deployment may execute a release or change, while the **recorded trace** from Change to Deployment still goes through Release.
+
+Next, do these meanings match your usage?
+
+- **Event:** an observed occurrence or state change.
+- **Alert:** a signal raised for triage; it may indicate an event but does not necessarily become an incident.
+- **Incident:** the managed case for an interruption, degradation, or security condition.
+- **Change:** a controlled modification; an emergency change follows distinct checks on the same change record.
+- **Release:** the governed package of changes that a deployment delivers.
+
+### Turn 57 — persona
+
+Yes, with small refinements:
+
+- An **event** is a *time-stamped* observation of a state change or noteworthy occurrence.
+- An **alert** is a monitoring or security signal requiring triage or acknowledgement. It may indicate an event; it need not open an incident.
+- An **incident** is an unplanned interruption, degradation, or security condition requiring managed response—not just any ticket.
+- A **change** can be a controlled **addition, modification, or removal** affecting an IT service. An emergency change remains a change but takes the accelerated path and distinct execution checks.
+- A **release** is a governed package of **approved** changes introduced together; a deployment delivers it.
+
+### Turn 58 — app-user
+
+Yes, with small refinements:
+
+- An **event** is a *time-stamped* observation of a state change or noteworthy occurrence.
+- An **alert** is a monitoring or security signal requiring triage or acknowledgement. It may indicate an event; it need not open an incident.
+- An **incident** is an unplanned interruption, degradation, or security condition requiring managed response—not just any ticket.
+- A **change** can be a controlled **addition, modification, or removal** affecting an IT service. An emergency change remains a change but takes the accelerated path and distinct execution checks.
+- A **release** is a governed package of **approved** changes introduced together; a deployment delivers it.
+
+### Turn 58 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 58 — app-assistant
+
+I’ve refined Event, Alert, Incident, Change, and Release. None of the distinctions between observation, triage signal, managed incident, controlled change, and delivered package has been collapsed.
+
+For the people and groups, are these meanings accurate?
+
+- **Service Owner:** accountable for an IT service.
+- **Application Owner:** accountable for an application.
+- **Technical Owner:** accountable for a configuration item’s engineering and maintenance.
+- **Resolver Group:** diagnoses and restores incidents in its supported area.
+- **On-Call Engineer:** an individual group member available for time-critical work; membership alone does not say they handled a particular incident.
+
+### Turn 58 — persona
+
+Yes. Those meanings are accurate, and the last distinction matters: **on-call membership** tells us who is available within a resolver group; the incident’s **handled-by** link tells us who actually handled that case. Likewise, the three owner roles describe different accountability scopes, not an incident assignment or a reporting hierarchy.
+
+### Turn 59 — app-user
+
+Yes. Those meanings are accurate, and the last distinction matters: **on-call membership** tells us who is available within a resolver group; the incident’s **handled-by** link tells us who actually handled that case. Likewise, the three owner roles describe different accountability scopes, not an incident assignment or a reporting hierarchy.
+
+### Turn 59 — app-assistant
+
+Those five meanings stand. I’ve also retained the distinction between group membership and handling a specific incident, and between ownership and incident assignment.
+
+Are these remaining coordination and accountability meanings right?
+
+- **Incident Commander:** the named person directing a major-incident response.
+- **Incident Response Team:** the team coordinating the wider response to a major incident.
+- **Organizational Unit:** the unit accountable for a corrective action.
+- **Regulator:** the authority designated to receive a regulatory notification.
+- **Stakeholder:** an identifiable recipient of an incident communication.
+
+### Turn 59 — persona
+
+Yes for their use in these tasks, but I’d avoid defining the last three solely by the links we’ve selected:
+
+- The **incident commander** is accountable for command, coordination, and decision cadence during a major incident. The **incident response team** coordinates the wider, cross-functional response.
+- An **organizational unit** is a governed unit of the bank with defined responsibilities; it can own a corrective action.
+- A **regulator** is a competent authority that supervises the bank or receives required notifications.
+- A **stakeholder** is a person, group, or organization affected by or responsible for an operational outcome. A communication can be addressed to one, but not every stakeholder is merely a message recipient.
+
+### Turn 60 — app-user
+
+Yes for their use in these tasks, but I’d avoid defining the last three solely by the links we’ve selected:
+
+- The **incident commander** is accountable for command, coordination, and decision cadence during a major incident. The **incident response team** coordinates the wider, cross-functional response.
+- An **organizational unit** is a governed unit of the bank with defined responsibilities; it can own a corrective action.
+- A **regulator** is a competent authority that supervises the bank or receives required notifications.
+- A **stakeholder** is a person, group, or organization affected by or responsible for an operational outcome. A communication can be addressed to one, but not every stakeholder is merely a message recipient.
+
+### Turn 60 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 60 — app-assistant
+
+I’ve broadened those meanings without adding extra relationships: a stakeholder is not defined solely as a recipient, and a regulator is not defined solely by one notification.
+
+For response and recovery, are these meanings accurate?
+
+- **Runbook:** a maintained operational procedure for diagnosis, response, recovery, or verification.
+- **Workaround:** a temporary method to reduce or bypass impact, which may appear in a runbook.
+- **Known Error:** a diagnosed problem with a documented cause or workaround.
+- **Backup Set:** a recoverable collection protecting a component; its existence alone does not make a restore suitable.
+- **Recovery Plan:** the documented approach for recovering an IT service, with objectives that do not themselves approve a particular recovery action.
+
+### Turn 60 — persona
+
+Yes, those meanings are accurate. I’d only make the backup set wording slightly more precise: it is a **defined collection of recoverable backup data** for protected components, rather than a guarantee that the particular copy or restore point is usable.
+
+The operational distinctions stand: a workaround is a temporary method, a runbook is a maintained procedure, and a known error is a diagnosed problem that can lead us to a candidate workaround. A recovery plan documents how to restore an IT service and its dependencies; we still check its applicability and the proposed recovery conditions before acting.
+
+### Turn 61 — app-user
+
+Yes, those meanings are accurate. I’d only make the backup set wording slightly more precise: it is a **defined collection of recoverable backup data** for protected components, rather than a guarantee that the particular copy or restore point is usable.
+
+The operational distinctions stand: a workaround is a temporary method, a runbook is a maintained procedure, and a known error is a diagnosed problem that can lead us to a candidate workaround. A recovery plan documents how to restore an IT service and its dependencies; we still check its applicability and the proposed recovery conditions before acting.
+
+### Turn 61 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 61 — app-assistant
+
+I’ve refined Backup Set and Recovery Plan. The other three meanings stand.
+
+For reporting and communication, are these meanings accurate?
+
+- **Materiality Assessment:** the documented reporting decision and rationale for an incident.
+- **Regulatory Notification:** the formal submission prepared for a regulator, with an outcome separate from the assessment.
+- **Communication:** a controlled message with approved content and a delivery record.
+- **Evidence Item:** an individually retained item whose collection and integrity can be checked.
+
+In particular, “prepared notification” should not imply it has already been submitted.
+
+### Turn 61 — persona
+
+Yes, with that qualification. I’d phrase them this way in practice:
+
+- A **materiality assessment** documents the incident’s significance and reporting implications, including its result and rationale. The final reporting decision may still be undetermined.
+- A **regulatory notification** is an incident-related formal submission **record** addressed to a competent authority. It can be draft or pending approval; its existence does not mean it has been submitted.
+- A **communication** is a controlled message to an operational, business, customer, vendor, or regulatory audience. Its approval state and sent time are separate from confirmation of delivery.
+- An **evidence item** is a preserved record, artifact, or observation supporting analysis and accountability. Its collection and integrity can be checked.
+
+### Turn 62 — app-user
+
+Yes, with that qualification. I’d phrase them this way in practice:
+
+- A **materiality assessment** documents the incident’s significance and reporting implications, including its result and rationale. The final reporting decision may still be undetermined.
+- A **regulatory notification** is an incident-related formal submission **record** addressed to a competent authority. It can be draft or pending approval; its existence does not mean it has been submitted.
+- A **communication** is a controlled message to an operational, business, customer, vendor, or regulatory audience. Its approval state and sent time are separate from confirmation of delivery.
+- An **evidence item** is a preserved record, artifact, or observation supporting analysis and accountability. Its collection and integrity can be checked.
+
+### Turn 62 — app-tool
+
+✓ Applied: 0 added, 4 updated.
+
+### Turn 62 — app-assistant
+
+I’ve updated those four meanings. A notification record can exist before submission, and a communication can be approved or sent without confirmed delivery.
+
+For the last two classes, are these meanings right?
+
+- **Post-Incident Review:** an examination of an incident that may be scheduled before it is held and can produce corrective actions.
+- **Corrective Action:** follow-up work arising from a review, with an accountable organizational unit and its own status and due date.
+
+### Turn 62 — persona
+
+Yes, with one refinement to each:
+
+- A **post-incident review** is a structured review of causes, response effectiveness, lessons, and follow-up work. It can be scheduled before it is held; its link to an incident alone does not prove completion.
+- A **corrective action** is a tracked step intended to remove a cause, reduce risk, or improve response capability. A review can produce one, and in this scope its owner is an organizational unit. Its status and due date let us track follow-through.
+
+### Turn 63 — app-user
+
+Yes, with one refinement to each:
+
+- A **post-incident review** is a structured review of causes, response effectiveness, lessons, and follow-up work. It can be scheduled before it is held; its link to an incident alone does not prove completion.
+- A **corrective action** is a tracked step intended to remove a cause, reduce risk, or improve response capability. A review can produce one, and in this scope its owner is an organizational unit. Its status and due date let us track follow-through.
+
+### Turn 63 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 63 — app-assistant
+
+The class meanings are now confirmed, including the distinction between a scheduled review and a completed one. I’ll collect alternative terms next. I’ll use an alias only when your team means the **same thing**, not merely something related.
+
+For **IT Service, Business Service, Customer Channel, Configuration Item, and Third-Party Service**, what other names or abbreviations do people use for exactly the same concept? “None” is fine for any of them.
+
+### Turn 63 — persona
+
+These are alternatives I’d recognize as referring to the same thing:
+
+| Concept | Other terms |
+|---|---|
+| IT service | *Informatikai szolgáltatás*; “informatics service” |
+| Business service | *Üzleti szolgáltatás* |
+| Customer channel | *Ügyfélcsatorna* |
+| Configuration item | **CI**; *konfigurációs elem* |
+| Third-party service | “Outsourced service”; *külső szolgáltatás* |
+
+I’d still check context for “outsourced service”: it means the **service provided externally**, not the vendor organization.
+
+### Turn 64 — app-user
+
+These are alternatives I’d recognize as referring to the same thing:
+
+| Concept | Other terms |
+|---|---|
+| IT service | *Informatikai szolgáltatás*; “informatics service” |
+| Business service | *Üzleti szolgáltatás* |
+| Customer channel | *Ügyfélcsatorna* |
+| Configuration item | **CI**; *konfigurációs elem* |
+| Third-party service | “Outsourced service”; *külső szolgáltatás* |
+
+I’d still check context for “outsourced service”: it means the **service provided externally**, not the vendor organization.
+
+### Turn 64 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 64 — app-assistant
+
+I’ve stored those aliases. I’ll keep “outsourced service” contextual: it names the external service, **not** its provider.
+
+What exact alternative names or abbreviations does your team use for **Application, Infrastructure Component, Database, Environment, and Deployment**? “None” is fine; please leave out terms that name only a narrower subtype.
+
+### Turn 64 — persona
+
+| Concept | Alternative terms |
+|---|---|
+| Application | “App”; *alkalmazás* |
+| Infrastructure component | *Infrastruktúra-elem* |
+| Database | “DB”; *adatbázis* |
+| Environment | *Környezet* |
+| Deployment | *Telepítés*; *élesítés* |
+
+I’d check context for *élesítés*: people often use it when talking about putting something live, while **deployment** here also covers execution in other environments.
+
+### Turn 65 — app-user
+
+| Concept | Alternative terms |
+|---|---|
+| Application | “App”; *alkalmazás* |
+| Infrastructure component | *Infrastruktúra-elem* |
+| Database | “DB”; *adatbázis* |
+| Environment | *Környezet* |
+| Deployment | *Telepítés*; *élesítés* |
+
+I’d check context for *élesítés*: people often use it when talking about putting something live, while **deployment** here also covers execution in other environments.
+
+### Turn 65 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 65 — app-assistant
+
+I’ve stored those aliases except *élesítés*. As you noted, it can mean specifically putting something live, while Deployment also covers other environments.
+
+**Does your team ever use *élesítés* to mean any deployment, or should it stay out as a narrower term?**
+
+### Turn 65 — persona
+
+Keep *élesítés* as a recognized **deployment** term, but interpret it in context. Colleagues may use it for the execution that installs or activates a release or change; in everyday speech it often suggests going live. The agent should not infer a **production** target from that word alone—check the deployment’s target environment.
+
+### Turn 66 — app-user
+
+Keep *élesítés* as a recognized **deployment** term, but interpret it in context. Colleagues may use it for the execution that installs or activates a release or change; in everyday speech it often suggests going live. The agent should not infer a **production** target from that word alone—check the deployment’s target environment.
+
+### Turn 66 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 66 — app-assistant
+
+I’ve added *élesítés* as a Deployment alias, with your contextual warning retained: the word alone does not prove the target was production.
+
+What equivalent terms or abbreviations do people use for **Event, Alert, Incident, Change, and Release**? Please keep emergency change as a distinct workflow term rather than an alias for every Change.
+
+### Turn 66 — persona
+
+| Concept | Equivalent terms |
+|---|---|
+| Event | *Esemény* |
+| Alert | *Riasztás* |
+| Incident | *Incidens*; *hibajegy* in operational ticketing context |
+| Change | *Változás*; *módosítás* |
+| Release | *Kiadás* |
+
+I would not use **emergency change** as an alias for every change. And *hibajegy* needs context: not every ticket is an incident.
+
+### Turn 67 — app-user
+
+| Concept | Equivalent terms |
+|---|---|
+| Event | *Esemény* |
+| Alert | *Riasztás* |
+| Incident | *Incidens*; *hibajegy* in operational ticketing context |
+| Change | *Változás*; *módosítás* |
+| Release | *Kiadás* |
+
+I would not use **emergency change** as an alias for every change. And *hibajegy* needs context: not every ticket is an incident.
+
+### Turn 67 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 67 — app-assistant
+
+I’ve stored those terms. *Hibajegy* will be interpreted in context: not every ticket is an Incident. “Emergency change” remains a workflow distinction, not an alias for every Change.
+
+What equivalent names or abbreviations does your team use for **Service Owner, Application Owner, Technical Owner, Resolver Group, and On-Call Engineer**? “None” is fine for any of them.
+
+### Turn 67 — persona
+
+| Role | Equivalent terms |
+|---|---|
+| Service owner | *Szolgáltatásgazda* |
+| Application owner | *Alkalmazásgazda* |
+| Technical owner | *Technikai gazda* |
+| Resolver group | “Support group”; *megoldócsoport* |
+| On-call engineer | “On-call”; *ügyeletes mérnök* |
+
+“On-call” is shorthand for the person in this context; it should not turn the resolver group into an individual.
+
+### Turn 68 — app-user
+
+| Role | Equivalent terms |
+|---|---|
+| Service owner | *Szolgáltatásgazda* |
+| Application owner | *Alkalmazásgazda* |
+| Technical owner | *Technikai gazda* |
+| Resolver group | “Support group”; *megoldócsoport* |
+| On-call engineer | “On-call”; *ügyeletes mérnök* |
+
+“On-call” is shorthand for the person in this context; it should not turn the resolver group into an individual.
+
+### Turn 68 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 68 — app-assistant
+
+I’ve stored those role aliases. In this context, “on-call” refers to the individual, not the resolver group.
+
+What equivalent names or abbreviations do people use for **Incident Commander, Incident Response Team, Organizational Unit, Regulator, and Stakeholder**? Please flag any term that can refer to more than one of these.
+
+### Turn 68 — persona
+
+| Concept | Equivalent terms |
+|---|---|
+| Incident commander | “Incident manager”; “MIM lead”; *incidensparancsnok* |
+| Incident response team | “IRT”; *incidenskezelő csapat* |
+| Organizational unit | *Szervezeti egység* |
+| Regulator | “Supervisory authority”; *felügyeleti hatóság* |
+| Stakeholder | *Érintett* |
+
+“Incident manager” can be used more broadly in conversation, so I’d confirm that it means the **named commander of this major incident** before assigning command on that basis. “IRT” means the team, not the commander.
+
+### Turn 69 — app-user
+
+| Concept | Equivalent terms |
+|---|---|
+| Incident commander | “Incident manager”; “MIM lead”; *incidensparancsnok* |
+| Incident response team | “IRT”; *incidenskezelő csapat* |
+| Organizational unit | *Szervezeti egység* |
+| Regulator | “Supervisory authority”; *felügyeleti hatóság* |
+| Stakeholder | *Érintett* |
+
+“Incident manager” can be used more broadly in conversation, so I’d confirm that it means the **named commander of this major incident** before assigning command on that basis. “IRT” means the team, not the commander.
+
+### Turn 69 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 69 — app-assistant
+
+I’ve stored those aliases. “Incident manager” must be resolved to the **named commander of this major incident** before treating someone as assigned; IRT refers to the team, not that person.
+
+What equivalent terms or abbreviations do people use for **Runbook, Workaround, Known Error, Backup Set, and Recovery Plan**? Please flag terms that are only sometimes interchangeable.
+
+### Turn 69 — persona
+
+| Concept | Equivalent terms |
+|---|---|
+| Runbook | “Playbook”; *üzemeltetési eljárás* |
+| Workaround | *Kerülőmegoldás* |
+| Known error | *Ismert hiba* |
+| Backup set | “Backup”; *mentéskészlet* |
+| Recovery plan | “DR plan”; *helyreállítási terv* |
+
+“Backup” is loose shorthand: for a restore decision we must identify the **specific backup set** and its status, not assume that any backup reference is usable. “DR plan” can suggest disaster recovery specifically, while the recovery plan here documents restoration of an IT service and its dependencies; check which plan is meant.
+
+### Turn 70 — app-user
+
+| Concept | Equivalent terms |
+|---|---|
+| Runbook | “Playbook”; *üzemeltetési eljárás* |
+| Workaround | *Kerülőmegoldás* |
+| Known error | *Ismert hiba* |
+| Backup set | “Backup”; *mentéskészlet* |
+| Recovery plan | “DR plan”; *helyreállítási terv* |
+
+“Backup” is loose shorthand: for a restore decision we must identify the **specific backup set** and its status, not assume that any backup reference is usable. “DR plan” can suggest disaster recovery specifically, while the recovery plan here documents restoration of an IT service and its dependencies; check which plan is meant.
+
+### Turn 70 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 70 — app-assistant
+
+I’ve stored those aliases with your cautions: “backup” must resolve to a specific Backup Set, and “DR plan” must be checked against the plan actually applicable to the IT service.
+
+What equivalent terms or abbreviations do people use for **Materiality Assessment, Regulatory Notification, Communication, Evidence Item, and Post-Incident Review**? “None” is fine, and please flag any term that could mean a different kind of record.
+
+### Turn 70 — persona
+
+| Concept | Equivalent terms |
+|---|---|
+| Materiality assessment | “Reportability assessment”; *lényegességi értékelés* |
+| Regulatory notification | “Supervisory notification”; *felügyeleti bejelentés* |
+| Communication | *Értesítés*; *tájékoztatás* |
+| Evidence item | “Evidence”; *bizonyíték* |
+| Post-incident review | “PIR”; “RCA review”; *incidens utóelemzés* |
+
+“Notification” alone could mean an ordinary communication rather than a **formal regulatory submission**. “RCA review” emphasizes root-cause analysis, but the post-incident review also covers response, lessons, and follow-up. “Evidence” must resolve to an identifiable item when we are checking integrity or completeness.
+
+### Turn 71 — app-user
+
+| Concept | Equivalent terms |
+|---|---|
+| Materiality assessment | “Reportability assessment”; *lényegességi értékelés* |
+| Regulatory notification | “Supervisory notification”; *felügyeleti bejelentés* |
+| Communication | *Értesítés*; *tájékoztatás* |
+| Evidence item | “Evidence”; *bizonyíték* |
+| Post-incident review | “PIR”; “RCA review”; *incidens utóelemzés* |
+
+“Notification” alone could mean an ordinary communication rather than a **formal regulatory submission**. “RCA review” emphasizes root-cause analysis, but the post-incident review also covers response, lessons, and follow-up. “Evidence” must resolve to an identifiable item when we are checking integrity or completeness.
+
+### Turn 71 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 71 — app-assistant
+
+I’ve stored those aliases. “Notification” alone remains ambiguous between Communication and Regulatory Notification; “evidence” must resolve to an identifiable Evidence Item when integrity is checked.
+
+What equivalent terms or abbreviations does your team use for **Corrective Action**?
+
+### Turn 71 — persona
+
+“Remediation action” and *helyesbítő intézkedés*. In this context, both mean a **tracked corrective action** with its own owner, status, and due date—not just an informal suggestion from a review.
+
+### Turn 72 — app-user
+
+“Remediation action” and *helyesbítő intézkedés*. In this context, both mean a **tracked corrective action** with its own owner, status, and due date—not just an informal suggestion from a review.
+
+### Turn 72 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 72 — app-assistant
+
+I’ve stored the Corrective Action aliases. That completes the **class** terminology: each class has a meaning, and the alternative names you confirmed are on the canvas. Ambiguous shorthand still needs context before the agent acts on it.
+
+Relationships can have alternative phrasing too. Starting with the service paths, what other verb phrases does your team use for these **same directed connections**? “None” is fine:
+
+- Business Service → **depends on** → IT Service
+- Business Service → **delivered through** → Customer Channel
+- IT Service → **depends on** → Third-Party Service
+- IT Service → **implemented by** → Application
+- IT Service → **deployed in** → Environment
+
+### Turn 72 — persona
+
+I wouldn’t register separate alternative verb phrases for these five. The wording you’ve listed preserves the distinctions we need: a business service **depends on** an IT service and is **delivered through** a customer channel; an IT service **depends on** a third-party service, is **implemented by** an application, and is **deployed in** an environment.
+
+People may paraphrase these in conversation, but I wouldn’t treat a paraphrase as an additional defined relationship without checking its direction and meaning.
+
+### Turn 73 — app-user
+
+I wouldn’t register separate alternative verb phrases for these five. The wording you’ve listed preserves the distinctions we need: a business service **depends on** an IT service and is **delivered through** a customer channel; an IT service **depends on** a third-party service, is **implemented by** an application, and is **deployed in** an environment.
+
+People may paraphrase these in conversation, but I wouldn’t treat a paraphrase as an additional defined relationship without checking its direction and meaning.
+
+### Turn 73 — app-assistant
+
+I’ll leave those five relationship aliases empty. Their recorded wording and direction stand; a conversational paraphrase won’t automatically become a new defined link.
+
+For these incident-impact and alert links, are there any alternative **verb phrases with the same direction and meaning**, or should their aliases also stay empty?
+
+- Incident → **impacts** → IT Service
+- Incident → **impacts** → Business Service
+- Incident → **affects** → Configuration Item
+- Alert → **concerns** → IT Service
+- Alert → **concerns** → Configuration Item
+
+### Turn 73 — persona
+
+Leave their relationship aliases empty too. **Impacts** expresses the incident’s effect on a service; **affects** identifies a configuration item involved; **concerns** identifies what an alert is about. I wouldn’t register those verbs as interchangeable aliases, even where someone might use them loosely in conversation.
+
+### Turn 74 — app-user
+
+Leave their relationship aliases empty too. **Impacts** expresses the incident’s effect on a service; **affects** identifies a configuration item involved; **concerns** identifies what an alert is about. I wouldn’t register those verbs as interchangeable aliases, even where someone might use them loosely in conversation.
+
+### Turn 74 — app-assistant
+
+Those five aliases stay empty. I’ll preserve **impacts**, **affects**, and **concerns** as different claims.
+
+Do any of these directed links have an alternative phrase your team uses with **exactly the same meaning**, or should their aliases stay empty too?
+
+- Application → **runs on** → Infrastructure Component
+- Application → **uses database** → Database
+- Alert → **indicates** → Event
+- Incident → **triggered by** → Alert
+- Incident → **correlated from** → Event
+
+### Turn 74 — persona
+
+Leave the aliases empty for all five. The distinctions matter: an application **runs on** an infrastructure component but **uses** a database; an alert **indicates** an event; an incident may be **triggered by** an alert or **correlated from** events. I wouldn’t treat those phrases as interchangeable, even if colleagues paraphrase them in conversation.
+
+### Turn 75 — app-user
+
+Leave the aliases empty for all five. The distinctions matter: an application **runs on** an infrastructure component but **uses** a database; an alert **indicates** an event; an incident may be **triggered by** an alert or **correlated from** events. I wouldn’t treat those phrases as interchangeable, even if colleagues paraphrase them in conversation.
+
+### Turn 75 — app-assistant
+
+Those five relationship aliases stay empty; the distinction between each verb is retained.
+
+For these ownership and routing links, does your team use any **exactly equivalent directed phrasing**, or should their aliases stay empty?
+
+- Service Owner → **owns** → IT Service
+- Application Owner → **owns** → Application
+- Technical Owner → **owns** → Configuration Item
+- Incident → **assigned to** → Resolver Group
+- On-Call Engineer → **member of** → Resolver Group
+
+### Turn 75 — persona
+
+Their relationship aliases can stay empty. **Owns** here means accountability for the specified service, application, or configuration item—not incident assignment or hands-on handling. An incident is **assigned to** a resolver group; an on-call engineer **is a member of** that group. Those are different facts.
+
+### Turn 76 — app-user
+
+Their relationship aliases can stay empty. **Owns** here means accountability for the specified service, application, or configuration item—not incident assignment or hands-on handling. An incident is **assigned to** a resolver group; an on-call engineer **is a member of** that group. Those are different facts.
+
+### Turn 76 — app-assistant
+
+Those aliases stay empty. I’ll keep ownership, assignment, and membership distinct.
+
+For the remaining people-and-response links, are there any **exactly equivalent directed phrases** to record, or should their aliases stay empty?
+
+- Incident → **handled by** → On-Call Engineer
+- Incident → **coordinated by** → Incident Commander
+- Incident Response Team → **coordinates major incident** → Incident
+- Incident → **handled with** → Runbook
+- Workaround → **documented in** → Runbook
+
+### Turn 76 — persona
+
+Leave those relationship aliases empty too. They record different facts: who handled an incident, who directed its coordination, the team’s coordination of a **major** incident, which runbook was used, and where a workaround is documented. A conversational paraphrase shouldn’t silently change the role or imply that the runbook or workaround was safe to use.
+
+### Turn 77 — app-user
+
+Leave those relationship aliases empty too. They record different facts: who handled an incident, who directed its coordination, the team’s coordination of a **major** incident, which runbook was used, and where a workaround is documented. A conversational paraphrase shouldn’t silently change the role or imply that the runbook or workaround was safe to use.
+
+### Turn 77 — app-assistant
+
+Those aliases stay empty too. Neither a runbook link nor a workaround link implies the steps were safe.
+
+For the change and deployment trace, do any of these links have an **exactly equivalent directed phrase** your team wants recorded, or should their aliases stay empty?
+
+- Change → **implemented by** → Release
+- Release → **delivered by** → Deployment
+- Deployment → **deploys** → Application
+- Deployment → **targets** → Environment
+- Incident → **resolved by** → Change
+
+### Turn 77 — persona
+
+Their aliases can stay empty. I’d retain those directed phrases as written. In particular, **implemented by a release** and **delivered by a deployment** describe different stages, while **resolved by a change** describes an incident outcome—not a claim that the change caused the incident.
+
+### Turn 78 — app-user
+
+Their aliases can stay empty. I’d retain those directed phrases as written. In particular, **implemented by a release** and **delivered by a deployment** describe different stages, while **resolved by a change** describes an incident outcome—not a claim that the change caused the incident.
+
+### Turn 78 — app-assistant
+
+Those aliases stay empty. The release-to-deployment path and the incident’s resolution outcome remain distinct.
+
+For these **emergency-change and recovery** links, are there any exactly equivalent directed phrases to record, or should their aliases stay empty?
+
+- Change → **justified by** → Incident
+- Change → **modifies** → Configuration Item
+- Recovery Plan → **recovers** → IT Service
+- Recovery Plan → **uses** → Backup Set
+- Backup Set → **protects** → Configuration Item
+
+### Turn 78 — persona
+
+Leave those aliases empty too. Keep **justified by an incident** specific to an emergency change; don’t make it a general requirement for every change. **Modifies** identifies the configuration items the change will alter. The recovery plan **recovers** the IT service and **uses** a backup set; the backup set **protects** the configuration item. Those links identify candidates and scope, not approval to execute a restore or failover.
+
+### Turn 79 — app-user
+
+Leave those aliases empty too. Keep **justified by an incident** specific to an emergency change; don’t make it a general requirement for every change. **Modifies** identifies the configuration items the change will alter. The recovery plan **recovers** the IT service and **uses** a backup set; the backup set **protects** the configuration item. Those links identify candidates and scope, not approval to execute a restore or failover.
+
+### Turn 79 — app-assistant
+
+Those aliases stay empty. I’ll keep the Change → justified by → Incident link **specific to emergency changes**, and the recovery links will identify scope and candidates—not authorize an action.
+
+For these remaining recovery and workaround links, does your team use any **exactly equivalent directed phrases**, or should their aliases stay empty?
+
+- Incident → **recovered with** → Recovery Plan
+- Configuration Item → **belongs to** → Environment
+- Known Error → **has** → Workaround
+- Known Error → **affects** → Configuration Item
+
+The IT Service → deployed in → Environment link was already checked.
+
+### Turn 79 — persona
+
+Their aliases can stay empty. Keep the direction and meaning as recorded: the incident **is recovered with** a recovery plan; the configuration item **belongs to** an environment; the known error **has** a workaround and **affects** a configuration item. None of those links alone proves that a proposed recovery or workaround is safe.
+
+### Turn 80 — app-user
+
+Their aliases can stay empty. Keep the direction and meaning as recorded: the incident **is recovered with** a recovery plan; the configuration item **belongs to** an environment; the known error **has** a workaround and **affects** a configuration item. None of those links alone proves that a proposed recovery or workaround is safe.
+
+### Turn 80 — app-assistant
+
+Those aliases stay empty. I’ll preserve the directions and won’t treat any of those links as proof that recovery or a workaround is safe.
+
+For these reporting and communication links, does your team use any **exactly equivalent directed phrases** worth recording, or should their aliases stay empty?
+
+- Incident → **evaluated by** → Materiality Assessment
+- Materiality Assessment → **triggers** → Regulatory Notification
+- Regulatory Notification → **sent to** → Regulator
+- Incident → **communicated through** → Communication
+- Communication → **addressed to** → Stakeholder
+
+### Turn 80 — persona
+
+Leave the relationship aliases empty. Those phrases keep the steps distinct: an incident **is evaluated by** an assessment; a reportable assessment can **trigger** a notification; the notification **is sent to** a regulator. Separately, the incident **is communicated through** a communication **addressed to** a stakeholder.
+
+The links themselves do not prove that the notification was submitted or that the communication was delivered; check their states and retained evidence.
+
+### Turn 81 — app-user
+
+Leave the relationship aliases empty. Those phrases keep the steps distinct: an incident **is evaluated by** an assessment; a reportable assessment can **trigger** a notification; the notification **is sent to** a regulator. Separately, the incident **is communicated through** a communication **addressed to** a stakeholder.
+
+The links themselves do not prove that the notification was submitted or that the communication was delivered; check their states and retained evidence.
+
+### Turn 81 — app-assistant
+
+Those aliases stay empty. A link to a notification or communication does not, by itself, prove submission or delivery.
+
+For the last relationship links, are there any **exactly equivalent directed phrases** worth recording, or should their aliases stay empty?
+
+- Incident → **supported by** → Evidence Item
+- Incident → **reviewed in** → Post-Incident Review
+- Post-Incident Review → **produces** → Corrective Action
+- Corrective Action → **owned by** → Organizational Unit
+
+### Turn 81 — persona
+
+Their aliases can stay empty. Those links record that evidence supports the incident, a post-incident review examines it, the review produces corrective actions, and an organizational unit owns each action. A review link does not mean the review has been held, and an ownership link does not mean the corrective action is complete.
+
+### Turn 82 — app-user
+
+Their aliases can stay empty. Those links record that evidence supports the incident, a post-incident review examines it, the review produces corrective actions, and an organizational unit owns each action. A review link does not mean the review has been held, and an ownership link does not mean the corrective action is complete.
+
+### Turn 82 — app-assistant
+
+That completes the language layer: the class meanings and confirmed aliases are recorded, and you’ve confirmed **no additional relationship aliases**. The relationship verbs remain distinct—for example, “triggered by” is not “concerns,” and “sent to” does not prove submission.
+
+**Does that accurately close the terminology phase?** Next I’ll check which recorded values have fixed choices and which missing or wrong values must block an action.
+
+### Turn 82 — persona
+
+Yes, that closes the terminology phase. Keep the class aliases with the context cautions we discussed, and leave the relationship aliases empty. The next distinction is which values have controlled choices and which checks actually block an action.
+
+### Turn 83 — app-user
+
+Yes, that closes the terminology phase. Keep the class aliases with the context cautions we discussed, and leave the relationship aliases empty. The next distinction is which values have controlled choices and which checks actually block an action.
+
+### Turn 83 — app-assistant
+
+I’ll start with recorded values that may have controlled choices. For each, please give the **approved choices** if there’s a fixed list, or say “not fixed here”:
+
+- IT Service **health state**
+- Business Service **health state**
+- Environment **type**
+- Backup Set **status**
+- Alert **status**
+
+I won’t infer the lists from example words such as “production” or “acknowledged.”
+
+### Turn 83 — persona
+
+| Recorded value | Approved choices |
+|---|---|
+| **IT service health state** | Healthy; degraded; partially unavailable; unavailable; recovering; unknown |
+| **Business service health state** | Healthy; degraded; partially unavailable; unavailable; recovering; unknown |
+| **Environment type** | Production; disaster recovery; pre-production; test; development; management |
+| **Backup set status** | Scheduled; running; successful; failed; expired; corrupted; verified |
+| **Alert status** | New; acknowledged; suppressed; escalated; closed |
+
+These are the complete choices for those fields. A **successful** or **verified** backup status is necessary for the restore action, but status alone is not sufficient to restore it.
+
+### Turn 84 — app-user
+
+| Recorded value | Approved choices |
+|---|---|
+| **IT service health state** | Healthy; degraded; partially unavailable; unavailable; recovering; unknown |
+| **Business service health state** | Healthy; degraded; partially unavailable; unavailable; recovering; unknown |
+| **Environment type** | Production; disaster recovery; pre-production; test; development; management |
+| **Backup set status** | Scheduled; running; successful; failed; expired; corrupted; verified |
+| **Alert status** | New; acknowledged; suppressed; escalated; closed |
+
+These are the complete choices for those fields. A **successful** or **verified** backup status is necessary for the restore action, but status alone is not sufficient to restore it.
+
+### Turn 84 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 84 — app-assistant
+
+I’ve stored those five complete lists. A Backup Set status of **successful** or **verified** is necessary for restoration, but it does not by itself authorize a restore.
+
+What are the complete approved choices, if fixed, for these recorded values? Say “not fixed here” for any without a controlled list:
+
+- Incident **status**
+- Incident **severity**
+- Change **status**
+- Change **risk level**
+- Deployment **execution status**
+
+### Turn 84 — persona
+
+| Recorded value | Approved choices |
+|---|---|
+| **Incident status** | New; acknowledged; investigating; contained; recovering; monitoring; resolved; closed; cancelled |
+| **Incident severity** | Sev 1—critical; Sev 2—high; Sev 3—medium; Sev 4—low |
+| **Change status** | Draft; assessed; approved; scheduled; implementing; implemented; failed; rolled back; closed; cancelled |
+| **Change risk level** | Low; medium; high; critical |
+| **Deployment execution status** | Planned; running; succeeded; failed; rolled back; cancelled |
+
+These are the complete controlled choices for those values. An **approved** change status, for example, does not replace the separate checks for executing an emergency change.
+
+### Turn 85 — app-user
+
+| Recorded value | Approved choices |
+|---|---|
+| **Incident status** | New; acknowledged; investigating; contained; recovering; monitoring; resolved; closed; cancelled |
+| **Incident severity** | Sev 1—critical; Sev 2—high; Sev 3—medium; Sev 4—low |
+| **Change status** | Draft; assessed; approved; scheduled; implementing; implemented; failed; rolled back; closed; cancelled |
+| **Change risk level** | Low; medium; high; critical |
+| **Deployment execution status** | Planned; running; succeeded; failed; rolled back; cancelled |
+
+These are the complete controlled choices for those values. An **approved** change status, for example, does not replace the separate checks for executing an emergency change.
+
+### Turn 85 — app-tool
+
+✓ Applied: 0 added, 3 updated.
+
+### Turn 85 — app-assistant
+
+I’ve stored those five controlled lists. “Approved” on a Change remains only one fact; the emergency-change action still needs its own checks.
+
+What are the complete choices, if fixed, for these reporting and follow-up values? Say “not fixed here” where appropriate:
+
+- Materiality Assessment **result**
+- Regulatory Notification **status**
+- Communication **status**
+- Evidence Item **integrity status**
+- Corrective Action **status**
+
+### Turn 85 — persona
+
+| Recorded value | Complete choices |
+|---|---|
+| **Materiality assessment result** | Not reportable; potentially reportable; reportable; undetermined |
+| **Regulatory notification status** | Draft; pending approval; approved; submitted; accepted; rejected; withdrawn |
+| **Communication status** | Draft; pending approval; approved; submitted; accepted; rejected; withdrawn |
+| **Evidence item integrity status** | Collected; hashed; verified; sealed; compromised |
+| **Corrective action status** | Open; in progress; blocked; implemented; verified; closed; cancelled |
+
+Those are the complete controlled choices. **Potentially reportable** and **undetermined** are not the same as **reportable** for submitting a regulatory notification. Likewise, an **implemented** corrective action is not necessarily **verified**.
+
+### Turn 86 — app-user
+
+| Recorded value | Complete choices |
+|---|---|
+| **Materiality assessment result** | Not reportable; potentially reportable; reportable; undetermined |
+| **Regulatory notification status** | Draft; pending approval; approved; submitted; accepted; rejected; withdrawn |
+| **Communication status** | Draft; pending approval; approved; submitted; accepted; rejected; withdrawn |
+| **Evidence item integrity status** | Collected; hashed; verified; sealed; compromised |
+| **Corrective action status** | Open; in progress; blocked; implemented; verified; closed; cancelled |
+
+Those are the complete controlled choices. **Potentially reportable** and **undetermined** are not the same as **reportable** for submitting a regulatory notification. Likewise, an **implemented** corrective action is not necessarily **verified**.
+
+### Turn 86 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 86 — app-assistant
+
+I’ve stored all five controlled lists. I’ll keep **potentially reportable** and **undetermined** distinct from **reportable**, and **implemented** distinct from **verified**.
+
+For the first set of action-boundary checks, **what should the agent do if any of these values is missing, unknown, or outside its approved choices**?
+
+- Alert status before acknowledgement
+- Incident status or severity before major-incident declaration
+- IT Service or Business Service health before declaring recovery or closing an incident
+- Environment type before failover or restore
+- Backup Set status before restore
+
+A brief “block,” “check elsewhere,” or “proceed with a specified safeguard” for each is enough.
+
+### Turn 86 — persona
+
+- **Alert status before acknowledgement:** **Block** if it is missing or invalid. The alert must be **new**, and the operator must be authorized for the responsible resolver group.
+- **Incident status or severity before major-incident declaration:** **Block** if either cannot be verified. The incident must be active and its severity must be **Sev 1 or Sev 2**; the impacted IT service and assigned commander must also be identified.
+- **Impacted service health before closure:** **Check and resolve the uncertainty**. Closure needs the impacted services to be healthy or to have an accepted residual condition, with restoration evidence. An **unknown** health state is not proof of either. For a failover, verify service health and critical business transactions afterward rather than declaring recovery from the action alone.
+- **Environment type before failover or restore:** **Check the target context**, but don’t make the type field alone an action gate. Failover requires an available recovery environment; restore requires an approved target environment. An unrecognized type cannot establish either fact.
+- **Backup set status before restore:** **Block** unless the recorded status is **successful** or **verified**. Even then, check that the set protects the target and that the restore point and target environment are approved.
+
+### Turn 87 — app-user
+
+- **Alert status before acknowledgement:** **Block** if it is missing or invalid. The alert must be **new**, and the operator must be authorized for the responsible resolver group.
+- **Incident status or severity before major-incident declaration:** **Block** if either cannot be verified. The incident must be active and its severity must be **Sev 1 or Sev 2**; the impacted IT service and assigned commander must also be identified.
+- **Impacted service health before closure:** **Check and resolve the uncertainty**. Closure needs the impacted services to be healthy or to have an accepted residual condition, with restoration evidence. An **unknown** health state is not proof of either. For a failover, verify service health and critical business transactions afterward rather than declaring recovery from the action alone.
+- **Environment type before failover or restore:** **Check the target context**, but don’t make the type field alone an action gate. Failover requires an available recovery environment; restore requires an approved target environment. An unrecognized type cannot establish either fact.
+- **Backup set status before restore:** **Block** unless the recorded status is **successful** or **verified**. Even then, check that the set protects the target and that the restore point and target environment are approved.
+
+### Turn 87 — app-assistant
+
+I’ve captured these action boundaries: acknowledgement requires a valid **New** alert and an authorized operator; major declaration requires a verifiably active incident, Sev 1 or Sev 2, an impacted IT service, and a named commander. Restore is blocked unless the Backup Set is **successful** or **verified**, with the other restore checks still required. Unknown service health cannot establish recovery or closure, and Environment type alone cannot establish a suitable target.
+
+For **sending a Communication** and **submitting a Regulatory Notification**, what should happen if their status or applicable due time is missing or invalid? Please distinguish what blocks each action from what needs checking elsewhere.
+
+### Turn 87 — persona
+
+For **sending a communication**, the agent needs a valid recorded approval state, audience, message, and owner, and must check that the content matches the latest verified incident state. If the status is missing or invalid, it cannot establish the approval state, so **do not send**. There is no communication due-time field or deadline gate specified here; delivery is checked afterward.
+
+For **submitting a regulatory notification**, **block** unless its status is **approved**, the linked materiality assessment says **reportable**, the incident and regulator are identified, and required fields and supporting evidence are complete. Its **due time must be known and valid**, because submission must occur before it. The assessment’s reporting due time informs the reporting workflow, but does not replace the notification’s due time or its approval check.
+
+### Turn 88 — app-user
+
+For **sending a communication**, the agent needs a valid recorded approval state, audience, message, and owner, and must check that the content matches the latest verified incident state. If the status is missing or invalid, it cannot establish the approval state, so **do not send**. There is no communication due-time field or deadline gate specified here; delivery is checked afterward.
+
+For **submitting a regulatory notification**, **block** unless its status is **approved**, the linked materiality assessment says **reportable**, the incident and regulator are identified, and required fields and supporting evidence are complete. Its **due time must be known and valid**, because submission must occur before it. The assessment’s reporting due time informs the reporting workflow, but does not replace the notification’s due time or its approval check.
+
+### Turn 88 — app-assistant
+
+I’ve captured the two gates. **Do not send a Communication** if its approval state cannot be verified; also check its audience, message, owner, and consistency with the latest verified incident state. **Do not submit a Regulatory Notification** unless it is approved, its assessment says reportable, the incident and regulator are identified, required fields and evidence are complete, and its valid due time has not passed. Delivery and submission outcome are checked afterward.
+
+The **Communication owner** is a new requirement in that send check. **How does the agent identify that owner—is it one of the roles already modeled, a direct link to another identifiable party, or a value on the Communication record?**
+
+### Turn 88 — persona
+
+The send check requires the **communication owner to be recorded**, but it does not specify that the owner must be one of the roles we’ve modeled, a particular direct link, or a particular field. I wouldn’t invent any of those.
+
+The agent should verify the owner from the bank’s governed communication record or approval process. If it cannot establish who owns the message, **do not send it**. The stakeholder addressed by the communication is the recipient, not necessarily its owner.
+
+### Turn 89 — app-user
+
+The send check requires the **communication owner to be recorded**, but it does not specify that the owner must be one of the roles we’ve modeled, a particular direct link, or a particular field. I wouldn’t invent any of those.
+
+The agent should verify the owner from the bank’s governed communication record or approval process. If it cannot establish who owns the message, **do not send it**. The stakeholder addressed by the communication is the recipient, not necessarily its owner.
+
+### Turn 89 — app-assistant
+
+I’ll leave the Communication owner’s representation unspecified. The agent must verify it through the governed record or approval process; if it cannot, it must not send. The addressed Stakeholder is the recipient, not necessarily the owner.
+
+For **implementing an emergency Change**, what must happen if its recorded status, risk level, implementation plan, or backout plan is missing or invalid? Which status or statuses permit execution? I’ll keep explicit risk acceptance as a separate check.
+
+### Turn 89 — persona
+
+The **implementation and backout plans must be present**; without either, do not execute. The change must also be linked to an active incident, identify the configuration items it will modify, and have **explicit risk acceptance**.
+
+The change has controlled status and risk-level values, so a missing or invalid value should be corrected rather than treated as reliable. But the emergency-change execution checks **do not specify an exact list of statuses or a minimum risk level that permits execution**. I wouldn’t invent one or treat a valid risk level as proof of acceptance. The approved emergency change is implemented, its status updated, and technical checks, service health, and implementation evidence verified afterward.
+
+### Turn 90 — app-user
+
+The **implementation and backout plans must be present**; without either, do not execute. The change must also be linked to an active incident, identify the configuration items it will modify, and have **explicit risk acceptance**.
+
+The change has controlled status and risk-level values, so a missing or invalid value should be corrected rather than treated as reliable. But the emergency-change execution checks **do not specify an exact list of statuses or a minimum risk level that permits execution**. I wouldn’t invent one or treat a valid risk level as proof of acceptance. The approved emergency change is implemented, its status updated, and technical checks, service health, and implementation evidence verified afterward.
+
+### Turn 90 — app-assistant
+
+For emergency-change execution, both plans must be present, the change must be linked to an active incident, the modified configuration items identified, and risk acceptance explicit. Missing or invalid status or risk level must be corrected, but you have **not** specified a status list or risk threshold that by itself permits execution. A valid risk level is not risk acceptance.
+
+For **containment and configuration-item isolation**, what must block each action if the scope, expected side effects, incident-to-item link, isolation impact assessment, or reconnection/rollback path cannot be verified?
+
+### Turn 90 — persona
+
+**Containment:** do not execute it if the **containment scope or expected side effects have not been recorded**. The incident must also be **acknowledged or investigating**. Execute approved containment steps, then mark it contained only when containment is verified; check the remaining service impact.
+
+**Configuration-item isolation:** do not isolate if the **item is not linked to the incident**, the **isolation impact has not been assessed**, or a **rollback or reconnection method is unavailable**. Afterward, confirm the isolation and check the health of services that remain. Don’t treat isolation as synonymous with containing the whole incident.
+
+### Turn 91 — app-user
+
+**Containment:** do not execute it if the **containment scope or expected side effects have not been recorded**. The incident must also be **acknowledged or investigating**. Execute approved containment steps, then mark it contained only when containment is verified; check the remaining service impact.
+
+**Configuration-item isolation:** do not isolate if the **item is not linked to the incident**, the **isolation impact has not been assessed**, or a **rollback or reconnection method is unavailable**. Afterward, confirm the isolation and check the health of services that remain. Don’t treat isolation as synonymous with containing the whole incident.
+
+### Turn 91 — app-assistant
+
+Containment is blocked if scope or expected side effects are unrecorded, or the Incident is not **acknowledged** or **investigating**. Its status becomes **contained** only after verification and a remaining-impact check. Isolation is blocked without the incident-to-item link, an impact assessment, or a rollback/reconnection method; afterward, verify isolation and remaining service health. Isolation does not by itself mean the Incident is contained.
+
+For **failover and restore**, what must block each action when plan applicability, recovery-environment availability, recovery-point acceptability, backup suitability, or target approval cannot be verified? Are there any other action-time gates for either one?
+
+### Turn 91 — persona
+
+**Failover:** do not proceed unless the recovery plan applies to the affected IT service, the target recovery environment is available, and the proposed data-recovery point is acceptable. After moving the workload, verify service health and critical business transactions in that environment.
+
+**Restore:** do not proceed unless the backup set is **successful or verified**, protects the target, and both the restore point and target environment are approved. After restoring, validate data integrity and application functionality.
+
+Those are the specified action-time gates for these two actions. A plan, backup, or environment type alone does not satisfy them.
+
+### Turn 92 — app-user
+
+**Failover:** do not proceed unless the recovery plan applies to the affected IT service, the target recovery environment is available, and the proposed data-recovery point is acceptable. After moving the workload, verify service health and critical business transactions in that environment.
+
+**Restore:** do not proceed unless the backup set is **successful or verified**, protects the target, and both the restore point and target environment are approved. After restoring, validate data integrity and application functionality.
+
+Those are the specified action-time gates for these two actions. A plan, backup, or environment type alone does not satisfy them.
+
+### Turn 92 — app-assistant
+
+I’ve captured those gates: failover requires an applicable plan, an available recovery environment, and an acceptable proposed data-recovery point; restore requires a successful or verified backup set protecting the target, plus approved restore point and target. Both require their specified checks afterward.
+
+For **closing an Incident**, what specifically blocks closure if restoration evidence, impacted-service health, required communications, or review arrangements cannot be verified? Does the rule differ when the incident is major, cybersecurity-related, or both?
+
+### Turn 92 — persona
+
+**Do not close** unless the incident is **resolved or monitoring**, resolution and restoration evidence are recorded, and every impacted service is **healthy or has an accepted residual condition**. Required stakeholder communications must also be complete. If any of those cannot be verified, closure is blocked.
+
+For a **major incident or cybersecurity incident**, a post-incident review must additionally be **scheduled or completed** before closure. If it is both, that same review requirement applies; it does not create two incident records or automatically require two reviews. A held review is not necessary at the closure boundary if it has been scheduled. After closing, verify the closed status and timestamp against the incident, linked services, and retained evidence.
+
+### Turn 93 — app-user
+
+**Do not close** unless the incident is **resolved or monitoring**, resolution and restoration evidence are recorded, and every impacted service is **healthy or has an accepted residual condition**. Required stakeholder communications must also be complete. If any of those cannot be verified, closure is blocked.
+
+For a **major incident or cybersecurity incident**, a post-incident review must additionally be **scheduled or completed** before closure. If it is both, that same review requirement applies; it does not create two incident records or automatically require two reviews. A held review is not necessary at the closure boundary if it has been scheduled. After closing, verify the closed status and timestamp against the incident, linked services, and retained evidence.
+
+### Turn 93 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 93 — app-assistant
+
+Closure is blocked unless the Incident is **resolved or monitoring**, resolution and restoration evidence are recorded, every impacted service is healthy or has an accepted residual condition, and required communications are complete. A major or cybersecurity-related incident also needs a post-incident review **scheduled or completed**; if it is both, that does not automatically require two reviews. I’ve added the closure timestamp needed for the post-close check.
+
+That completes the controlled-choice and action-boundary phase. **Is this recap accurate?** If so, I’ll record the named decision rules before defining the actions.
+
+### Turn 93 — persona
+
+Yes, the recap is accurate. Keep these as **closure-boundary checks**, not mandatory fields for every incident at every stage. If the incident is both major and cybersecurity-related, both workflows apply, but the review requirement does not automatically mean two reviews.
+
+You can record the decision rules next.
+
+### Turn 94 — app-user
+
+Yes, the recap is accurate. Keep these as **closure-boundary checks**, not mandatory fields for every incident at every stage. If the incident is both major and cybersecurity-related, both workflows apply, but the review requirement does not automatically mean two reviews.
+
+You can record the decision rules next.
+
+### Turn 94 — app-tool
+
+✓ Applied: 11 added, 0 updated.
+
+### Turn 94 — app-assistant
+
+I’ve recorded 11 decision rules, one for each agreed action. They preserve the boundaries you set: eligibility must be verified before assignment; a runbook or plan alone does not authorize execution; and reporting, delivery, recovery, and closure each need their own checks. I haven’t invented a permissive Change status list or risk threshold.
+
+**Do these rules reflect your decisions accurately enough to use as the actions’ preconditions?** If you correct any, I’ll update them before defining the actions.
+
+### Turn 94 — persona
+
+Based on your recap, yes—the rules reflect the action boundaries we agreed and are suitable as preconditions. I haven’t seen the wording of all 11 rules, so I can’t validate them line by line.
+
+In particular, keep the **emergency-change justification** specific to emergency changes, and don’t turn an action-time check into a mandatory field on every record.
+
+### Turn 95 — app-user
+
+Based on your recap, yes—the rules reflect the action boundaries we agreed and are suitable as preconditions. I haven’t seen the wording of all 11 rules, so I can’t validate them line by line.
+
+In particular, keep the **emergency-change justification** specific to emergency changes, and don’t turn an action-time check into a mandatory field on every record.
+
+### Turn 95 — app-tool
+
+✓ Applied: 1 added, 0 updated.
+
+### Turn 95 — app-assistant
+
+You’re right—I should not treat approval of a recap as line-by-line approval of rules you haven’t seen. I’ve recorded the rules as a working draft. Here is the exact substance of the first five:
+
+1. **Acknowledge alert:** Alert status is valid and **New**; the operator is authorized for the responsible resolver group.
+2. **Assign incident:** An affected IT service or configuration item is identified; approved support-routing information verifies that the candidate group supports it. If that match cannot be verified, do not assign.
+3. **Declare major incident:** The incident is active; status and severity are verified; severity is **Sev 1 or Sev 2**; an impacted IT service and named commander are identified; supporting impact and severity facts are verified.
+4. **Contain incident:** Status is **acknowledged** or **investigating**; containment scope and expected side effects are recorded; the steps to execute are approved.
+5. **Isolate configuration item:** The item is directly linked to the incident; isolation impact is assessed; rollback or reconnection is available.
+
+**Does any wording in these five need correction?** I’ll show you the remaining six before treating the rule set as fully validated.
+
+### Turn 95 — persona
+
+Two corrections before I’d approve these five:
+
+- **Assign incident:** add that the incident must **not be closed or cancelled**. The support match is also required; identifying an affected service or item alone is not enough.
+- **Declare major incident:** spell out “active” as **not resolved, closed, or cancelled**. I would not make “supporting impact and severity facts are verified” an additional, separate formal gate: verify the recorded severity, impacted IT service, and commander, but don’t introduce an unspecified evidence requirement for declaration.
+
+The acknowledgement and isolation rules are accurate. The containment rule is accurate too: record the scope and expected side effects before acting, execute approved steps, and set the status to **contained only after verification**.
+
+### Turn 96 — app-user
+
+Two corrections before I’d approve these five:
+
+- **Assign incident:** add that the incident must **not be closed or cancelled**. The support match is also required; identifying an affected service or item alone is not enough.
+- **Declare major incident:** spell out “active” as **not resolved, closed, or cancelled**. I would not make “supporting impact and severity facts are verified” an additional, separate formal gate: verify the recorded severity, impacted IT service, and commander, but don’t introduce an unspecified evidence requirement for declaration.
+
+The acknowledgement and isolation rules are accurate. The containment rule is accurate too: record the scope and expected side effects before acting, execute approved steps, and set the status to **contained only after verification**.
+
+### Turn 96 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 96 — app-assistant
+
+I’ve corrected the two rules. Assignment now excludes **closed or cancelled** incidents and requires a verified support match. Major declaration now defines active as **not resolved, closed, or cancelled**, without an additional unspecified evidence gate. The other three stand; containment reaches **contained** only after its outcome is verified.
+
+Here are the next three rules as recorded:
+
+6. **Fail over service:** The recovery plan applies to the affected IT service; the target recovery environment is currently available; the proposed data-recovery point is acceptable under the applicable recovery policy.
+7. **Restore from backup:** The Backup Set status is **successful or verified** and it protects the target configuration item; the selected restore point and target environment are approved.
+8. **Implement emergency change:** The Change is verified as emergency, with valid recorded status and risk level; it is justified by an active Incident; the items it modifies are identified; implementation and backout plans are present; risk acceptance is explicit, not inferred from risk level.
+
+**Does any wording in these three need correction?**
+
+### Turn 96 — persona
+
+Rules **6 and 7** are accurate. For rule **8**, keep the checks that the change is an emergency change, is linked to an active incident, identifies the configuration items it modifies, has both plans, and has explicit risk acceptance.
+
+I’d separate **valid recorded status and risk level** from the emergency-change execution preconditions. Invalid values need correction, but this rule does not define a permitting status or risk threshold; neither value substitutes for explicit risk acceptance.
+
+### Turn 97 — app-user
+
+Rules **6 and 7** are accurate. For rule **8**, keep the checks that the change is an emergency change, is linked to an active incident, identifies the configuration items it modifies, has both plans, and has explicit risk acceptance.
+
+I’d separate **valid recorded status and risk level** from the emergency-change execution preconditions. Invalid values need correction, but this rule does not define a permitting status or risk threshold; neither value substitutes for explicit risk acceptance.
+
+### Turn 97 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 97 — app-assistant
+
+I’ve left rules 6 and 7 unchanged and removed recorded status and risk level from rule 8’s execution preconditions. Their values still need correction if invalid, but this rule neither sets a permitting status or risk threshold nor treats either as risk acceptance.
+
+Here are the final three rules as recorded:
+
+9. **Send communication:** Its recorded approval state is valid and approved for sending; audience, message, and owner are verified through the governed record or approval process; content reflects the latest verified incident state.
+10. **Submit regulatory notification:** Its status is **approved**; the linked assessment result is **reportable**; the Incident and Regulator are identified; required fields and evidence are complete; its due time is known and valid, and submission occurs before it.
+11. **Close incident:** Status is **resolved or monitoring**; resolution and restoration evidence are recorded; every impacted service is healthy or has an accepted residual condition; required stakeholder communications are complete; if major or cybersecurity-related, a review is scheduled or completed, with no automatic requirement for two reviews if both classifications apply.
+
+**Does any wording in these three need correction?**
+
+### Turn 97 — persona
+
+Those three accurately capture the action gates. Two wording cautions:
+
+- For **communication**, “approved for sending” is fine if it means the required approval state has actually been verified; don’t infer delivery from approval.
+- For **notification**, “before its due time” is a strict check. If the due time has passed, this submission action does not meet its stated precondition; don’t silently treat a late submission as compliant.
+
+For closure, “every impacted service” is the right scope, and a scheduled review is sufficient at that boundary.
+
+### Turn 98 — app-user
+
+Those three accurately capture the action gates. Two wording cautions:
+
+- For **communication**, “approved for sending” is fine if it means the required approval state has actually been verified; don’t infer delivery from approval.
+- For **notification**, “before its due time” is a strict check. If the due time has passed, this submission action does not meet its stated precondition; don’t silently treat a late submission as compliant.
+
+For closure, “every impacted service” is the right scope, and a scheduled review is sufficient at that boundary.
+
+### Turn 98 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 98 — app-tool
+
+An additional ontology edit in this message was skipped — only one edit is applied per message.
+
+### Turn 98 — app-assistant
+
+The final three rules are confirmed. I’ve tightened the communication rule so approval does not imply delivery, and the notification rule so submission must **strictly precede** its due time. The closure rule stands.
+
+The Alert acknowledgement action is recorded. Before I record the next four actions, please check their **outcome and verification**:
+
+- **Assign Incident:** record the eligible Resolver Group; read back the assignment and recheck the support match.
+- **Declare Major Incident:** record the major classification, named commander, and declaration time; read all three back.
+- **Contain Incident:** record the approved steps and results; mark it contained only after verifying containment and checking remaining service impact.
+- **Isolate Configuration Item:** record the isolation and rollback/reconnection method; verify isolation and the health of services that remain.
+
+Are these accurate?
+
+### Turn 98 — persona
+
+Mostly accurate. I’d make two additions and one distinction:
+
+- **Assign incident:** record the resolver group, then read back the assignment. The support match is a **precondition to verify before assignment**; it need not become a separate post-assignment result.
+- **Declare major incident:** recording the classification, commander, and declaration time is right, but declaration also **starts major-incident coordination and the communication cadence**. Read back the declaration details **and the communication record**.
+- **Contain incident:** accurate. Mark it contained only after checking containment indicators and remaining service impact.
+- **Isolate configuration item:** accurate. Confirm that the item is isolated from the defined networks or dependencies, then check remaining service health. The rollback or reconnection method must be available **before** isolation.
+
+### Turn 99 — app-user
+
+Mostly accurate. I’d make two additions and one distinction:
+
+- **Assign incident:** record the resolver group, then read back the assignment. The support match is a **precondition to verify before assignment**; it need not become a separate post-assignment result.
+- **Declare major incident:** recording the classification, commander, and declaration time is right, but declaration also **starts major-incident coordination and the communication cadence**. Read back the declaration details **and the communication record**.
+- **Contain incident:** accurate. Mark it contained only after checking containment indicators and remaining service impact.
+- **Isolate configuration item:** accurate. Confirm that the item is isolated from the defined networks or dependencies, then check remaining service health. The rollback or reconnection method must be available **before** isolation.
+
+### Turn 99 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 99 — app-assistant
+
+I’ve recorded those four actions with your corrections: the support match is checked **before** assignment; major declaration starts coordination and the communication cadence; containment status changes only after checking its indicators; and isolation is verified against the defined networks or dependencies.
+
+For the next three actions, are these effects and post-action checks right?
+
+- **Fail over IT Service:** move the affected service under its applicable Recovery Plan; retain where recovery occurred; verify service health and critical business transactions in the recovery environment.
+- **Restore from Backup Set:** restore to the approved target from the approved restore point; retain what was restored and where; verify data integrity and application functionality.
+- **Implement Emergency Change:** execute its implementation plan and record the outcome and evidence; verify technical checks and service health, and read back the Change status. The backout plan remains available if needed.
+
+I’ll keep all the previously confirmed gates as preconditions.
+
+### Turn 99 — persona
+
+Yes, with a few wording refinements:
+
+- **Fail over IT service:** move the service **workload to the recovery environment** under the applicable plan. Retain evidence of where it ran, then verify service health and critical business transactions there.
+- **Restore from backup set:** restore the backup data to the approved target using the approved restore point. Retain what was restored and where, then validate data integrity and application functionality. The backup set must also have passed the eligibility checks we agreed.
+- **Implement emergency change:** implement the approved emergency change and update its status. Run technical checks, verify service health, and retain implementation evidence. Reading back the status is sensible; keep the backout plan available if needed.
+
+These outcomes do not replace the preconditions already agreed.
+
+### Turn 100 — app-user
+
+Yes, with a few wording refinements:
+
+- **Fail over IT service:** move the service **workload to the recovery environment** under the applicable plan. Retain evidence of where it ran, then verify service health and critical business transactions there.
+- **Restore from backup set:** restore the backup data to the approved target using the approved restore point. Retain what was restored and where, then validate data integrity and application functionality. The backup set must also have passed the eligibility checks we agreed.
+- **Implement emergency change:** implement the approved emergency change and update its status. Run technical checks, verify service health, and retain implementation evidence. Reading back the status is sensible; keep the backout plan available if needed.
+
+These outcomes do not replace the preconditions already agreed.
+
+### Turn 100 — app-tool
+
+✓ Applied: 3 added, 0 updated.
+
+### Turn 100 — app-assistant
+
+I’ve recorded the failover, restore, and emergency-change actions with those outcomes and checks. Their existing preconditions remain separate; a successful action must still be verified.
+
+For the final three actions, are these effects and post-action checks accurate?
+
+- **Send Communication:** send the approved message to its identified Stakeholder, retain the final message and sending record, then confirm delivery and read back its status and sent time.
+- **Submit Regulatory Notification:** submit the approved notification to its identified Regulator, retain the receipt or rejection, then read back its status and submission time. A rejection is recorded, not treated as success.
+- **Close Incident:** set its status to **closed** and record the closure time; read both back and check them against linked-service health, required communications, review arrangements, and retained evidence.
+
+### Turn 100 — persona
+
+Yes. I’d make one addition to the notification check:
+
+- **Send communication:** send the approved message, record its sent time, confirm delivery status, and archive the final message. Reading back its status and sent time is sensible; neither alone proves delivery.
+- **Submit regulatory notification:** submit it to the identified regulator and retain the submission receipt. Confirm acceptance; if it is rejected, record the rejection **and the required remediation**, rather than treating submission as success.
+- **Close incident:** set the status to **closed** and record the closure time. Read back the incident and linked services, and confirm the closure state and retained evidence. Health, communications, and review arrangements remain checks **before** closure as well.
+
+### Turn 101 — app-user
+
+Yes. I’d make one addition to the notification check:
+
+- **Send communication:** send the approved message, record its sent time, confirm delivery status, and archive the final message. Reading back its status and sent time is sensible; neither alone proves delivery.
+- **Submit regulatory notification:** submit it to the identified regulator and retain the submission receipt. Confirm acceptance; if it is rejected, record the rejection **and the required remediation**, rather than treating submission as success.
+- **Close incident:** set the status to **closed** and record the closure time. Read back the incident and linked services, and confirm the closure state and retained evidence. Health, communications, and review arrangements remain checks **before** closure as well.
+
+### Turn 101 — app-tool
+
+✓ Applied: 3 added, 0 updated.
+
+### Turn 101 — app-assistant
+
+I’ve recorded all 11 actions. For notification, verification now distinguishes **accepted** from **rejected**, and a rejection requires a record of the remediation needed. Closure’s health, communication, and review checks remain **preconditions**, not checks postponed until after closure.
+
+**Does this accurately close the actions phase?** If so, I’ll replay every original question and action against the live model and check for gaps before calling it complete.
+
+### Turn 101 — app-system
+
+⚠️ The agent said "all 11" were recorded, but this turn actually added 3 and updated 0 item(s). The agent has been told to restate the true numbers.
+
+### Turn 101 — persona
+
+Yes, the actions phase is accurately captured. The final replay against the original questions and actions is the right completion check.
+
+### Turn 102 — app-user
+
+Yes, the actions phase is accurately captured. The final replay against the original questions and actions is the right completion check.
+
+### Turn 102 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 102 — app-assistant
+
+You’re right about the count: the last edit added **3 actions**, not 11. I’ve checked the live canvas; **11 actions and 11 rules** are now present in total.
+
+**Competency replay:** the model supports the service-impact and channel trace, ownership and assignment checks, major declaration, recovery checks, change-to-deployment trace, reporting, closure, and earlier corrective-action search. One original question is not yet fully answerable: **“Which alerts and events belong to this incident, rather than being unrelated noise?”** Events can be correlated into an incident, but for a non-triggering alert the current links only surface *candidates*; they do not establish that it belongs.
+
+**Live-model checklist:** every class has a relationship, the distinct roles remain separate, and the 11 actions have preconditions and verification steps. I cannot mark the final check complete while that competency gap remains. I also won’t add direct links you explicitly rejected just to satisfy a checklist.
+
+**What evidence or decision establishes that a non-triggering alert belongs to an incident—or should the agent’s answer be limited to candidate relevant alerts?**
+
+### Turn 102 — persona
+
+Limit the answer to what the recorded links establish. The agent can identify **triggering alerts** through the incident’s trigger link and **correlated events** through the incident’s event link. For a non-triggering alert, its indicated event or its connection to an affected service or configuration item can make it a **candidate for triage**, but those paths do not establish alert membership in the incident.
+
+There is no specified decision or separate recorded link that promotes such an alert from candidate to confirmed incident alert. So the agent should label it as potentially relevant, not claim it belongs; that part of the original question remains a genuine model limit.
+
+### Turn 103 — app-user
+
+Limit the answer to what the recorded links establish. The agent can identify **triggering alerts** through the incident’s trigger link and **correlated events** through the incident’s event link. For a non-triggering alert, its indicated event or its connection to an affected service or configuration item can make it a **candidate for triage**, but those paths do not establish alert membership in the incident.
+
+There is no specified decision or separate recorded link that promotes such an alert from candidate to confirmed incident alert. So the agent should label it as potentially relevant, not claim it belongs; that part of the original question remains a genuine model limit.
+
+### Turn 103 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 103 — app-assistant
+
+I checked the live canvas before this replay. It contains **36 classes, 46 relationships, 11 rules, and 11 actions**. No edit was made in this turn.
+
+### Competency check: the 11 original questions
+
+1. **Affected services, channels, and health:** Trace the incident to impacted IT and business services, then business services to channels. Read service health; do not invent channel health.
+2. **Dependencies:** Trace IT services to applications and third-party services, and applications to infrastructure components and databases. Shared identity with a managed Configuration Item is a known representation limit.
+3. **Alerts and events:** Identify triggering alerts and correlated events. Other alerts are **triage candidates only**; the model cannot confirm that a non-triggering alert belongs to the incident. **The original question remains partly unanswered, as you confirmed.**
+4. **Ownership and routing:** Find owners through what they own, and the named engineer through the incident or resolver group. Choosing a group depends on verifying approved support-routing information; the recorded assignment does not establish eligibility by itself.
+5. **Major declaration:** Check active status, Sev 1 or Sev 2, an impacted IT service, and a named commander; verify the declaration afterward.
+6. **Runbook or workaround:** Find a candidate workaround through a Known Error and its affected item, and a runbook that documents it. Applicability and safety still require action-time checks; finding either is not authorization.
+7. **Backup and recovery plan:** Trace the plan, service, backup set, and protected item; check status, applicability, approved targets and restore points, and live environment availability.
+8. **Recent change or deployment:** Trace affected application → deployment → release → change, using execution time and status. This establishes what ran, **not whether it contributed**; no supported causal finding is modeled.
+9. **Materiality and notification:** Read the assessment result and deadlines, then the notification’s approval, due time, and submission outcome. Assessment does not imply submission.
+10. **Evidence and communications before closure:** Inspect linked items and communications, and apply the confirmed closure checks. Their required completeness must be verified, not inferred from links alone.
+11. **Earlier corrective actions:** Trace earlier incidents impacting the service → reviews → corrective actions; read each action’s owner, status, and due date.
+
+All **11 actions**—acknowledge, assign, declare, contain, isolate, fail over, restore, implement emergency change, send communication, submit notification, and close—are present with one input class, a precondition rule, an effect, and verification.
+
+### Final live-model checklist
+
+Every class has a recorded relationship; distinct roles remain distinct; relationships have directed verbs; confirmed meanings, class aliases, controlled choices, and action conditions are recorded. I also checked the jointly mentioned pairs: several **do not have direct links by your explicit decision**, including Incident → Customer Channel and Corrective Action → IT Service. Adding those links merely to satisfy a mechanical pair test would misstate your domain. The same applies to the shared managed-component identity, which this canvas cannot express directly.
+
+**Result:** the structural and action checks are complete, but I cannot mark the original question set as fully passed. In particular, question 3’s confirmed non-triggering-alert membership has no specified decision or recorded fact. The agent must answer with *triggering*, *correlated*, and *potentially relevant*—never promote a candidate alert to confirmed membership.

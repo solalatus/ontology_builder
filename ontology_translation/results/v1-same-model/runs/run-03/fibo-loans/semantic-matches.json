@@ -1,0 +1,45 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_10",
+        "recoveredId": "e13"
+      },
+      {
+        "goldId": "rel_14",
+        "recoveredId": "e20"
+      },
+      {
+        "goldId": "rel_17",
+        "recoveredId": "e5"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e12"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "PrepaymentTerms.prePaymentPenaltyTermMonths",
+        "matchedPropertyName": "prepaymentPenaltyPeriodMonths"
+      }
+    ],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_17",
+        "recoveredId": "e5"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e12"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  }
+}
