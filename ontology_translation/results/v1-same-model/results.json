@@ -1,0 +1,3433 @@
+{
+  "design": "results/v1-same-model/DESIGN.md",
+  "arms": {
+    "v1": {
+      "brick-hvac": [
+        {
+          "runId": "run-01",
+          "row": {
+            "composite": 0.6025539334433797,
+            "scopedComposite": 0.5152161449375071,
+            "semanticComposite": 0.8604465453298175,
+            "classRecall": 0.8205128205128205,
+            "classPrecision": 0.9696969696969697,
+            "classF1": 0.8888888888888888,
+            "relRecall": 0.4,
+            "relPrecision": 0.3684210526315789,
+            "relF1": 0.3835616438356164,
+            "propRecall": 0.4523809523809524,
+            "propPrecision": 0.6551724137931034,
+            "propF1": 0.5352112676056338,
+            "semClassF1": 0.9166666666666666,
+            "semRelF1": 0.904109589041096,
+            "semPropF1": 0.7605633802816901,
+            "rulesF1": 0,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 14,
+            "classes": 33,
+            "relationships": 38,
+            "properties": 29
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 87,
+          "costUsd": 2.0380344000000004,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 151,
+            "toolRequests": 151,
+            "skipNotesRewritten": 8,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 150
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-02",
+          "row": {
+            "composite": 0.817947817947818,
+            "scopedComposite": 0.5037424528189981,
+            "semanticComposite": 0.9336609336609336,
+            "classRecall": 1,
+            "classPrecision": 1,
+            "classF1": 1,
+            "relRecall": 0.6857142857142857,
+            "relPrecision": 0.6153846153846154,
+            "relF1": 0.6486486486486486,
+            "propRecall": 0.7380952380952381,
+            "propPrecision": 0.8857142857142857,
+            "propF1": 0.8051948051948051,
+            "semClassF1": 1,
+            "semRelF1": 0.8918918918918919,
+            "semPropF1": 0.9090909090909091,
+            "rulesF1": 0,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 18,
+            "classes": 39,
+            "relationships": 39,
+            "properties": 35
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 94,
+          "costUsd": 2.1279994,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 156,
+            "toolRequests": 156,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 155
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-03",
+          "row": {
+            "composite": 0.5884069000507357,
+            "scopedComposite": 0.45385411689759514,
+            "semanticComposite": 0.8754439370877728,
+            "classRecall": 0.8461538461538461,
+            "classPrecision": 0.9705882352941176,
+            "classF1": 0.9041095890410958,
+            "relRecall": 0.4,
+            "relPrecision": 0.3783783783783784,
+            "relF1": 0.3888888888888889,
+            "propRecall": 0.40476190476190477,
+            "propPrecision": 0.5666666666666667,
+            "propF1": 0.4722222222222222,
+            "semClassF1": 0.9041095890410958,
+            "semRelF1": 0.9166666666666667,
+            "semPropF1": 0.8055555555555556,
+            "rulesF1": 0.2222222222222222,
+            "actionsF1": 0.8000000000000002,
+            "valueFidelity": 1,
+            "allowedValueLists": 15,
+            "classes": 34,
+            "relationships": 37,
+            "properties": 30
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 104,
+          "costUsd": 2.0168318,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 162,
+            "toolRequests": 162,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 161
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-04",
+          "row": {
+            "composite": 0.6081642302187692,
+            "scopedComposite": 0.5067378591406051,
+            "semanticComposite": 0.72146331697676,
+            "classRecall": 0.6666666666666666,
+            "classPrecision": 0.9285714285714286,
+            "classF1": 0.7761194029850746,
+            "relRecall": 0.8,
+            "relPrecision": 0.7368421052631579,
+            "relF1": 0.7671232876712328,
+            "propRecall": 0.21428571428571427,
+            "propPrecision": 0.4090909090909091,
+            "propF1": 0.28125,
+            "semClassF1": 0.7761194029850746,
+            "semRelF1": 0.7945205479452055,
+            "semPropF1": 0.59375,
+            "rulesF1": 0,
+            "actionsF1": 0.8000000000000002,
+            "valueFidelity": 1,
+            "allowedValueLists": 8,
+            "classes": 28,
+            "relationships": 38,
+            "properties": 22
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 79,
+          "costUsd": 1.7651878,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0.8620689655172413,
+          "relayAudit": {
+            "requests": 146,
+            "toolRequests": 146,
+            "skipNotesRewritten": 20,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 145
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-05",
+          "row": {
+            "composite": 0.5364745131930333,
+            "scopedComposite": 0.49150326797385624,
+            "semanticComposite": 0.8184741394747701,
+            "classRecall": 0.7435897435897436,
+            "classPrecision": 0.8787878787878788,
+            "classF1": 0.8055555555555556,
+            "relRecall": 0.2571428571428571,
+            "relPrecision": 0.28125,
+            "relF1": 0.26865671641791045,
+            "propRecall": 0.4523809523809524,
+            "propPrecision": 0.6551724137931034,
+            "propF1": 0.5352112676056338,
+            "semClassF1": 0.8888888888888888,
+            "semRelF1": 0.8059701492537314,
+            "semPropF1": 0.7605633802816901,
+            "rulesF1": 0,
+            "actionsF1": 0.6,
+            "valueFidelity": 1,
+            "allowedValueLists": 14,
+            "classes": 33,
+            "relationships": 32,
+            "properties": 29
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 97,
+          "costUsd": 1.8689638,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 5.172413793103448,
+          "relayAudit": {
+            "requests": 158,
+            "toolRequests": 158,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 157
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        }
+      ],
+      "iof-maintenance": [
+        {
+          "runId": "run-01",
+          "row": {
+            "composite": 0.7559258648187868,
+            "scopedComposite": 0.6717171717171717,
+            "semanticComposite": 0.7559258648187868,
+            "classRecall": 0.85,
+            "classPrecision": 0.9444444444444444,
+            "classF1": 0.8947368421052632,
+            "relRecall": 0.9230769230769231,
+            "relPrecision": 0.75,
+            "relF1": 0.8275862068965517,
+            "propRecall": 0.6,
+            "propPrecision": 0.5,
+            "propF1": 0.5454545454545454,
+            "semClassF1": 0.8947368421052632,
+            "semRelF1": 0.8275862068965517,
+            "semPropF1": 0.5454545454545454,
+            "rulesF1": 0.6666666666666666,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 3,
+            "classes": 18,
+            "relationships": 16,
+            "properties": 6
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 76,
+          "costUsd": 1.176774,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 10.526315789473685,
+          "relayAudit": {
+            "requests": 121,
+            "toolRequests": 121,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 120
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-02",
+          "row": {
+            "composite": 0.7178649237472766,
+            "scopedComposite": 0.6735228876789675,
+            "semanticComposite": 0.7734204793028323,
+            "classRecall": 0.65,
+            "classPrecision": 0.9285714285714286,
+            "classF1": 0.7647058823529412,
+            "relRecall": 0.46153846153846156,
+            "relPrecision": 0.5454545454545454,
+            "relF1": 0.4999999999999999,
+            "propRecall": 0.8,
+            "propPrecision": 1,
+            "propF1": 0.888888888888889,
+            "semClassF1": 0.7647058823529412,
+            "semRelF1": 0.6666666666666667,
+            "semPropF1": 0.888888888888889,
+            "rulesF1": 0.42857142857142855,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 14,
+            "relationships": 11,
+            "properties": 4
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 72,
+          "costUsd": 1.17179,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 117,
+            "toolRequests": 117,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 116
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-03",
+          "row": {
+            "composite": 0.7111639268502014,
+            "scopedComposite": 0.6013584117032392,
+            "semanticComposite": 0.7111639268502014,
+            "classRecall": 0.6,
+            "classPrecision": 0.8571428571428571,
+            "classF1": 0.7058823529411764,
+            "relRecall": 0.5384615384615384,
+            "relPrecision": 0.5,
+            "relF1": 0.5185185185185186,
+            "propRecall": 1,
+            "propPrecision": 0.8333333333333334,
+            "propF1": 0.9090909090909091,
+            "semClassF1": 0.7058823529411764,
+            "semRelF1": 0.5185185185185186,
+            "semPropF1": 0.9090909090909091,
+            "rulesF1": 0.8571428571428571,
+            "actionsF1": 0.6,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 14,
+            "relationships": 14,
+            "properties": 6
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 70,
+          "costUsd": 1.1584632000000001,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 118,
+            "toolRequests": 118,
+            "skipNotesRewritten": 60,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 117
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-04",
+          "row": {
+            "composite": 0.7598204264870931,
+            "scopedComposite": 0.5850439882697946,
+            "semanticComposite": 0.7598204264870931,
+            "classRecall": 0.7,
+            "classPrecision": 0.875,
+            "classF1": 0.7777777777777777,
+            "relRecall": 0.6153846153846154,
+            "relPrecision": 0.5714285714285714,
+            "relF1": 0.5925925925925927,
+            "propRecall": 1,
+            "propPrecision": 0.8333333333333334,
+            "propF1": 0.9090909090909091,
+            "semClassF1": 0.7777777777777777,
+            "semRelF1": 0.5925925925925927,
+            "semPropF1": 0.9090909090909091,
+            "rulesF1": 1,
+            "actionsF1": 0.8000000000000002,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 16,
+            "relationships": 14,
+            "properties": 6
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 76,
+          "costUsd": 1.196055,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 2.6315789473684212,
+          "relayAudit": {
+            "requests": 118,
+            "toolRequests": 118,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 117
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-05",
+          "row": {
+            "composite": 0.8015686274509805,
+            "scopedComposite": 0.6433497536945813,
+            "semanticComposite": 0.8015686274509805,
+            "classRecall": 0.65,
+            "classPrecision": 0.9285714285714286,
+            "classF1": 0.7647058823529412,
+            "relRecall": 0.6153846153846154,
+            "relPrecision": 0.6666666666666666,
+            "relF1": 0.64,
+            "propRecall": 1,
+            "propPrecision": 1,
+            "propF1": 1,
+            "semClassF1": 0.7647058823529412,
+            "semRelF1": 0.64,
+            "semPropF1": 1,
+            "rulesF1": 0.6666666666666666,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 14,
+            "relationships": 12,
+            "properties": 5
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 65,
+          "costUsd": 1.0957082000000002,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 112,
+            "toolRequests": 112,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 111
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        }
+      ],
+      "iof-supply-chain": [
+        {
+          "runId": "run-01",
+          "row": {
+            "composite": 0.7363571530452147,
+            "scopedComposite": 0.8790643274853801,
+            "semanticComposite": 0.7363571530452147,
+            "classRecall": 0.5471698113207547,
+            "classPrecision": 1,
+            "classF1": 0.7073170731707317,
+            "relRecall": 0.6666666666666666,
+            "relPrecision": 0.7407407407407407,
+            "relF1": 0.7017543859649122,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.7073170731707317,
+            "semRelF1": 0.7017543859649122,
+            "semPropF1": 0.8,
+            "rulesF1": 0.8000000000000002,
+            "actionsF1": 0.8000000000000002,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 29,
+            "relationships": 27,
+            "properties": 2
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 86,
+          "costUsd": 1.3421512000000002,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 5.813953488372093,
+          "relayAudit": {
+            "requests": 131,
+            "toolRequests": 131,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 130
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-02",
+          "row": {
+            "composite": 0.691538568065365,
+            "scopedComposite": 0.8052738336713996,
+            "semanticComposite": 0.7605040853067443,
+            "classRecall": 0.5660377358490566,
+            "classPrecision": 1,
+            "classF1": 0.7228915662650602,
+            "relRecall": 0.5333333333333333,
+            "relPrecision": 0.5714285714285714,
+            "relF1": 0.5517241379310344,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.7228915662650602,
+            "semRelF1": 0.7586206896551724,
+            "semPropF1": 0.8,
+            "rulesF1": 0.8000000000000002,
+            "actionsF1": 0.8000000000000002,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 30,
+            "relationships": 28,
+            "properties": 2
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 73,
+          "costUsd": 1.1943458,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 3.488372093023256,
+          "relayAudit": {
+            "requests": 118,
+            "toolRequests": 118,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 117
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-03",
+          "row": {
+            "composite": 0.6742971887550201,
+            "scopedComposite": 0.8082845369767946,
+            "semanticComposite": 0.7520749665327978,
+            "classRecall": 0.5660377358490566,
+            "classPrecision": 1,
+            "classF1": 0.7228915662650602,
+            "relRecall": 0.5,
+            "relPrecision": 0.5,
+            "relF1": 0.5,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.7228915662650602,
+            "semRelF1": 0.7333333333333333,
+            "semPropF1": 0.8,
+            "rulesF1": 0.8000000000000002,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 30,
+            "relationships": 30,
+            "properties": 2
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 93,
+          "costUsd": 1.828587,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 10.465116279069768,
+          "relayAudit": {
+            "requests": 144,
+            "toolRequests": 144,
+            "skipNotesRewritten": 181,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 143
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-04",
+          "row": {
+            "composite": 0.6772727272727274,
+            "scopedComposite": 0.8083333333333332,
+            "semanticComposite": 0.6772727272727274,
+            "classRecall": 0.49056603773584906,
+            "classPrecision": 0.9629629629629629,
+            "classF1": 0.65,
+            "relRecall": 0.5333333333333333,
+            "relPrecision": 0.64,
+            "relF1": 0.5818181818181818,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.65,
+            "semRelF1": 0.5818181818181818,
+            "semPropF1": 0.8,
+            "rulesF1": 0.7272727272727272,
+            "actionsF1": 0.8000000000000002,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 27,
+            "relationships": 25,
+            "properties": 2
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 73,
+          "costUsd": 1.263998,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 120,
+            "toolRequests": 120,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 119
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-05",
+          "row": {
+            "composite": 0.6408357075023742,
+            "scopedComposite": 0.8070386725545297,
+            "semanticComposite": 0.7149097815764481,
+            "classRecall": 0.4716981132075472,
+            "classPrecision": 1,
+            "classF1": 0.641025641025641,
+            "relRecall": 0.43333333333333335,
+            "relPrecision": 0.5416666666666666,
+            "relF1": 0.4814814814814815,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.641025641025641,
+            "semRelF1": 0.7037037037037038,
+            "semPropF1": 0.8,
+            "rulesF1": 0.888888888888889,
+            "actionsF1": 0.8000000000000002,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 25,
+            "relationships": 24,
+            "properties": 2
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 88,
+          "costUsd": 1.58156,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 8.13953488372093,
+          "relayAudit": {
+            "requests": 137,
+            "toolRequests": 137,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 136
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        }
+      ],
+      "fibo-loans": [
+        {
+          "runId": "run-01",
+          "row": {
+            "composite": 0.7742685671417854,
+            "scopedComposite": 0.5897183483729833,
+            "semanticComposite": 0.8036592481453697,
+            "classRecall": 0.5087719298245614,
+            "classPrecision": 1,
+            "classF1": 0.6744186046511628,
+            "relRecall": 0.7419354838709677,
+            "relPrecision": 0.7931034482758621,
+            "relF1": 0.7666666666666667,
+            "propRecall": 0.8367346938775511,
+            "propPrecision": 0.9318181818181818,
+            "propF1": 0.8817204301075268,
+            "semClassF1": 0.6744186046511628,
+            "semRelF1": 0.8333333333333334,
+            "semPropF1": 0.9032258064516128,
+            "rulesF1": 0.5,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 29,
+            "relationships": 29,
+            "properties": 44
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 78,
+          "costUsd": 1.501664,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 142,
+            "toolRequests": 142,
+            "skipNotesRewritten": 246,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 141
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-02",
+          "row": {
+            "composite": 0.6652828963160644,
+            "scopedComposite": 0.5250748849705092,
+            "semanticComposite": 0.6871408198133322,
+            "classRecall": 0.47368421052631576,
+            "classPrecision": 0.9310344827586207,
+            "classF1": 0.627906976744186,
+            "relRecall": 0.5806451612903226,
+            "relPrecision": 0.6,
+            "relF1": 0.5901639344262295,
+            "propRecall": 0.7142857142857143,
+            "propPrecision": 0.8536585365853658,
+            "propF1": 0.7777777777777778,
+            "semClassF1": 0.627906976744186,
+            "semRelF1": 0.6557377049180327,
+            "semPropF1": 0.7777777777777778,
+            "rulesF1": 0,
+            "actionsF1": 0.6,
+            "valueFidelity": null,
+            "allowedValueLists": 3,
+            "classes": 29,
+            "relationships": 30,
+            "properties": 41
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 95,
+          "costUsd": 1.847832,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 157,
+            "toolRequests": 157,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 156
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-03",
+          "row": {
+            "composite": 0.6561748633879781,
+            "scopedComposite": 0.613329641698436,
+            "semanticComposite": 0.6978506375227687,
+            "classRecall": 0.5087719298245614,
+            "classPrecision": 0.9666666666666667,
+            "classF1": 0.6666666666666667,
+            "relRecall": 0.6774193548387096,
+            "relPrecision": 0.7,
+            "relF1": 0.6885245901639343,
+            "propRecall": 0.46938775510204084,
+            "propPrecision": 0.8846153846153846,
+            "propF1": 0.6133333333333333,
+            "semClassF1": 0.6666666666666667,
+            "semRelF1": 0.7868852459016393,
+            "semPropF1": 0.64,
+            "rulesF1": 0.39999999999999997,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 30,
+            "relationships": 30,
+            "properties": 26
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 93,
+          "costUsd": 1.6030008,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 152,
+            "toolRequests": 152,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 151
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-04",
+          "row": {
+            "composite": 0.7907251814993067,
+            "scopedComposite": 0.6261770244821092,
+            "semanticComposite": 0.8151154254017455,
+            "classRecall": 0.5789473684210527,
+            "classPrecision": 0.9428571428571428,
+            "classF1": 0.7173913043478262,
+            "relRecall": 0.967741935483871,
+            "relPrecision": 0.8823529411764706,
+            "relF1": 0.923076923076923,
+            "propRecall": 0.6122448979591837,
+            "propPrecision": 0.9090909090909091,
+            "propF1": 0.7317073170731708,
+            "semClassF1": 0.7173913043478262,
+            "semRelF1": 0.923076923076923,
+            "semPropF1": 0.8048780487804877,
+            "rulesF1": 0.3333333333333333,
+            "actionsF1": 0.8000000000000002,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 35,
+            "relationships": 34,
+            "properties": 33
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 89,
+          "costUsd": 1.88059,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 147,
+            "toolRequests": 147,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 146
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-05",
+          "row": {
+            "composite": 0.5966810966810966,
+            "scopedComposite": 0.551892551892552,
+            "semanticComposite": 0.6284271284271284,
+            "classRecall": 0.43859649122807015,
+            "classPrecision": 0.9259259259259259,
+            "classF1": 0.5952380952380952,
+            "relRecall": 0.5161290322580645,
+            "relPrecision": 0.64,
+            "relF1": 0.5714285714285714,
+            "propRecall": 0.4897959183673469,
+            "propPrecision": 0.8571428571428571,
+            "propF1": 0.6233766233766234,
+            "semClassF1": 0.6190476190476191,
+            "semRelF1": 0.6428571428571428,
+            "semPropF1": 0.6233766233766234,
+            "rulesF1": 0.3333333333333333,
+            "actionsF1": 0.8000000000000002,
+            "valueFidelity": null,
+            "allowedValueLists": 2,
+            "classes": 27,
+            "relationships": 25,
+            "properties": 28
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 86,
+          "costUsd": 1.5505442000000003,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 1.4598540145985401,
+          "relayAudit": {
+            "requests": 136,
+            "toolRequests": 136,
+            "skipNotesRewritten": 0,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 135
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        }
+      ],
+      "itops": [
+        {
+          "runId": "run-01",
+          "row": {
+            "composite": 0.5436571668371318,
+            "scopedComposite": 0.6639146886824906,
+            "semanticComposite": 0.5436571668371318,
+            "classRecall": 0.4852941176470588,
+            "classPrecision": 1,
+            "classF1": 0.6534653465346535,
+            "relRecall": 0.37962962962962965,
+            "relPrecision": 0.9111111111111111,
+            "relF1": 0.5359477124183006,
+            "propRecall": 0.3063063063063063,
+            "propPrecision": 0.7906976744186046,
+            "propF1": 0.4415584415584415,
+            "semClassF1": 0.6534653465346535,
+            "semRelF1": 0.5359477124183006,
+            "semPropF1": 0.4415584415584415,
+            "rulesF1": 0.43749999999999994,
+            "actionsF1": 0.9523809523809523,
+            "valueFidelity": 0.8823529411764706,
+            "allowedValueLists": 16,
+            "classes": 33,
+            "relationships": 45,
+            "properties": 43
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 147,
+          "costUsd": 4.182847,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 279,
+            "toolRequests": 279,
+            "skipNotesRewritten": 4,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 278
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-02",
+          "row": {
+            "composite": 0.6914527333131985,
+            "scopedComposite": 0.5909830007390983,
+            "semanticComposite": 0.6954209872814524,
+            "classRecall": 0.6029411764705882,
+            "classPrecision": 0.9761904761904762,
+            "classF1": 0.7454545454545454,
+            "relRecall": 0.5462962962962963,
+            "relPrecision": 0.921875,
+            "relF1": 0.686046511627907,
+            "propRecall": 0.4864864864864865,
+            "propPrecision": 0.9473684210526315,
+            "propF1": 0.6428571428571428,
+            "semClassF1": 0.7454545454545454,
+            "semRelF1": 0.686046511627907,
+            "semPropF1": 0.6547619047619048,
+            "rulesF1": 0.9166666666666666,
+            "actionsF1": 1,
+            "valueFidelity": 0.8260869565217391,
+            "allowedValueLists": 19,
+            "classes": 42,
+            "relationships": 64,
+            "properties": 57
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 104,
+          "costUsd": 3.3326158,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 201,
+            "toolRequests": 201,
+            "skipNotesRewritten": 185,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 200
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        },
+        {
+          "runId": "run-03",
+          "row": {
+            "composite": 0.5818758136638932,
+            "scopedComposite": 0.6504273504273504,
+            "semanticComposite": 0.5862908247014208,
+            "classRecall": 0.5294117647058824,
+            "classPrecision": 1,
+            "classF1": 0.6923076923076924,
+            "relRecall": 0.42592592592592593,
+            "relPrecision": 0.9583333333333334,
+            "relF1": 0.5897435897435898,
+            "propRecall": 0.3153153153153153,
+            "propPrecision": 0.875,
+            "propF1": 0.46357615894039744,
+            "semClassF1": 0.6923076923076924,
+            "semRelF1": 0.5897435897435898,
+            "semPropF1": 0.4768211920529801,
+            "rulesF1": 1,
+            "actionsF1": 1,
+            "valueFidelity": 0.875,
+            "allowedValueLists": 15,
+            "classes": 36,
+            "relationships": 48,
+            "properties": 40
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 103,
+          "costUsd": 2.452592,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": {
+            "requests": 175,
+            "toolRequests": 175,
+            "skipNotesRewritten": 11,
+            "shapes": {
+              "tools(chat)": 1,
+              "tools(responses)": 174
+            },
+            "violations": [],
+            "callsToToolsNotOffered": 0
+          }
+        }
+      ]
+    },
+    "final": {
+      "brick-hvac": [
+        {
+          "runId": "run-01",
+          "row": {
+            "composite": 0.7080368906455862,
+            "scopedComposite": 0.6106060606060605,
+            "semanticComposite": 0.8595520421607379,
+            "classRecall": 0.7692307692307693,
+            "classPrecision": 1,
+            "classF1": 0.8695652173913044,
+            "relRecall": 0.42857142857142855,
+            "relPrecision": 0.4838709677419355,
+            "relF1": 0.4545454545454545,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.8695652173913044,
+            "semRelF1": 0.909090909090909,
+            "semPropF1": 0.8,
+            "rulesF1": 0.15384615384615383,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 13,
+            "classes": 30,
+            "relationships": 31,
+            "properties": 28
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 84,
+          "costUsd": 2.0225474,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-02",
+          "row": {
+            "composite": 0.8252499558381912,
+            "scopedComposite": 0.5835579514824797,
+            "semanticComposite": 0.9232891715244658,
+            "classRecall": 0.8974358974358975,
+            "classPrecision": 1,
+            "classF1": 0.945945945945946,
+            "relRecall": 0.6571428571428571,
+            "relPrecision": 0.696969696969697,
+            "relF1": 0.676470588235294,
+            "propRecall": 0.7619047619047619,
+            "propPrecision": 0.9696969696969697,
+            "propF1": 0.8533333333333334,
+            "semClassF1": 0.945945945945946,
+            "semRelF1": 0.9705882352941176,
+            "semPropF1": 0.8533333333333334,
+            "rulesF1": 0,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 18,
+            "classes": 35,
+            "relationships": 33,
+            "properties": 33
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 115,
+          "costUsd": 3.0131416,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-03",
+          "row": {
+            "composite": 0.8983074796058715,
+            "scopedComposite": 0.6529390420899855,
+            "semanticComposite": 0.9272929868522484,
+            "classRecall": 0.8717948717948718,
+            "classPrecision": 1,
+            "classF1": 0.9315068493150686,
+            "relRecall": 0.8857142857142857,
+            "relPrecision": 0.9117647058823529,
+            "relF1": 0.8985507246376812,
+            "propRecall": 0.7619047619047619,
+            "propPrecision": 1,
+            "propF1": 0.8648648648648648,
+            "semClassF1": 0.9315068493150686,
+            "semRelF1": 0.9855072463768115,
+            "semPropF1": 0.8648648648648648,
+            "rulesF1": 0,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 17,
+            "classes": 34,
+            "relationships": 34,
+            "properties": 32
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 101,
+          "costUsd": 2.5723968,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-04",
+          "row": {
+            "composite": 0.6836131840796019,
+            "scopedComposite": 0.6129079769058561,
+            "semanticComposite": 0.8294465174129352,
+            "classRecall": 0.717948717948718,
+            "classPrecision": 1,
+            "classF1": 0.835820895522388,
+            "relRecall": 0.42857142857142855,
+            "relPrecision": 0.5172413793103449,
+            "relF1": 0.46875000000000006,
+            "propRecall": 0.5952380952380952,
+            "propPrecision": 1,
+            "propF1": 0.7462686567164178,
+            "semClassF1": 0.835820895522388,
+            "semRelF1": 0.90625,
+            "semPropF1": 0.7462686567164178,
+            "rulesF1": 0,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 12,
+            "classes": 28,
+            "relationships": 29,
+            "properties": 25
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 92,
+          "costUsd": 2.3052342,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0.8620689655172413,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-05",
+          "row": {
+            "composite": 0.8404944972109151,
+            "scopedComposite": 0.6699328384588193,
+            "semanticComposite": 0.8404944972109151,
+            "classRecall": 0.717948717948718,
+            "classPrecision": 1,
+            "classF1": 0.835820895522388,
+            "relRecall": 0.8857142857142857,
+            "relPrecision": 1,
+            "relF1": 0.9393939393939393,
+            "propRecall": 0.5952380952380952,
+            "propPrecision": 1,
+            "propF1": 0.7462686567164178,
+            "semClassF1": 0.835820895522388,
+            "semRelF1": 0.9393939393939393,
+            "semPropF1": 0.7462686567164178,
+            "rulesF1": 0.2857142857142857,
+            "actionsF1": 0.8000000000000002,
+            "valueFidelity": 1,
+            "allowedValueLists": 11,
+            "classes": 28,
+            "relationships": 31,
+            "properties": 25
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 107,
+          "costUsd": 2.3896964000000005,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        }
+      ],
+      "iof-maintenance": [
+        {
+          "runId": "run-01",
+          "row": {
+            "composite": 0.9487179487179488,
+            "scopedComposite": 0.738562091503268,
+            "semanticComposite": 0.9487179487179488,
+            "classRecall": 0.9,
+            "classPrecision": 0.9473684210526315,
+            "classF1": 0.9230769230769231,
+            "relRecall": 0.9230769230769231,
+            "relPrecision": 0.9230769230769231,
+            "relF1": 0.9230769230769231,
+            "propRecall": 1,
+            "propPrecision": 1,
+            "propF1": 1,
+            "semClassF1": 0.9230769230769231,
+            "semRelF1": 0.9230769230769231,
+            "semPropF1": 1,
+            "rulesF1": 0.8333333333333333,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 19,
+            "relationships": 13,
+            "properties": 5
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 99,
+          "costUsd": 1.7913242,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 10.526315789473685,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-02",
+          "row": {
+            "composite": 0.896190906353508,
+            "scopedComposite": 0.7868686868686868,
+            "semanticComposite": 0.896190906353508,
+            "classRecall": 1,
+            "classPrecision": 0.9523809523809523,
+            "classF1": 0.975609756097561,
+            "relRecall": 1,
+            "relPrecision": 0.9285714285714286,
+            "relF1": 0.962962962962963,
+            "propRecall": 0.6,
+            "propPrecision": 1,
+            "propF1": 0.7499999999999999,
+            "semClassF1": 0.975609756097561,
+            "semRelF1": 0.962962962962963,
+            "semPropF1": 0.7499999999999999,
+            "rulesF1": 0.6666666666666666,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 21,
+            "relationships": 14,
+            "properties": 3
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 80,
+          "costUsd": 1.5220513999999998,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-03",
+          "row": {
+            "composite": 0.8882882882882882,
+            "scopedComposite": 0.6946428571428572,
+            "semanticComposite": 0.9149549549549549,
+            "classRecall": 0.8,
+            "classPrecision": 0.9411764705882353,
+            "classF1": 0.8648648648648648,
+            "relRecall": 0.7692307692307693,
+            "relPrecision": 0.8333333333333334,
+            "relF1": 0.8,
+            "propRecall": 1,
+            "propPrecision": 1,
+            "propF1": 1,
+            "semClassF1": 0.8648648648648648,
+            "semRelF1": 0.8799999999999999,
+            "semPropF1": 1,
+            "rulesF1": 0.6153846153846153,
+            "actionsF1": 0.33333333333333337,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 17,
+            "relationships": 12,
+            "properties": 5
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 92,
+          "costUsd": 1.543634,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 10.526315789473685,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-04",
+          "row": {
+            "composite": 0.7416190894451765,
+            "scopedComposite": 0.7063492063492062,
+            "semanticComposite": 0.7416190894451765,
+            "classRecall": 0.6,
+            "classPrecision": 0.9230769230769231,
+            "classF1": 0.7272727272727274,
+            "relRecall": 0.5384615384615384,
+            "relPrecision": 0.7,
+            "relF1": 0.608695652173913,
+            "propRecall": 0.8,
+            "propPrecision": 1,
+            "propF1": 0.888888888888889,
+            "semClassF1": 0.7272727272727274,
+            "semRelF1": 0.608695652173913,
+            "semPropF1": 0.888888888888889,
+            "rulesF1": 0.6666666666666666,
+            "actionsF1": 0.5,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 13,
+            "relationships": 10,
+            "properties": 4
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 108,
+          "costUsd": 2.065223,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-05",
+          "row": {
+            "composite": 0.7777777777777778,
+            "scopedComposite": 0.6224537500834838,
+            "semanticComposite": 0.8253968253968255,
+            "classRecall": 0.75,
+            "classPrecision": 0.9375,
+            "classF1": 0.8333333333333334,
+            "relRecall": 0.5384615384615384,
+            "relPrecision": 0.4666666666666667,
+            "relF1": 0.5,
+            "propRecall": 1,
+            "propPrecision": 1,
+            "propF1": 1,
+            "semClassF1": 0.8333333333333334,
+            "semRelF1": 0.6428571428571429,
+            "semPropF1": 1,
+            "rulesF1": 0.6666666666666666,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 16,
+            "relationships": 15,
+            "properties": 5
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 79,
+          "costUsd": 1.4096172000000002,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        }
+      ],
+      "iof-supply-chain": [
+        {
+          "runId": "run-01",
+          "row": {
+            "composite": 0.754851684263449,
+            "scopedComposite": 0.9105202973127501,
+            "semanticComposite": 0.754851684263449,
+            "classRecall": 0.4716981132075472,
+            "classPrecision": 1,
+            "classF1": 0.641025641025641,
+            "relRecall": 0.7,
+            "relPrecision": 1,
+            "relF1": 0.8235294117647058,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.641025641025641,
+            "semRelF1": 0.8235294117647058,
+            "semPropF1": 0.8,
+            "rulesF1": 0.888888888888889,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 25,
+            "relationships": 21,
+            "properties": 2
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 79,
+          "costUsd": 1.5550532000000001,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 5.813953488372093,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-02",
+          "row": {
+            "composite": 0.7623931623931623,
+            "scopedComposite": 0.9463312368972745,
+            "semanticComposite": 0.7623931623931623,
+            "classRecall": 0.4716981132075472,
+            "classPrecision": 1,
+            "classF1": 0.641025641025641,
+            "relRecall": 0.7333333333333333,
+            "relPrecision": 1,
+            "relF1": 0.846153846153846,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.641025641025641,
+            "semRelF1": 0.846153846153846,
+            "semPropF1": 0.8,
+            "rulesF1": 0.888888888888889,
+            "actionsF1": 0.5714285714285715,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 25,
+            "relationships": 22,
+            "properties": 2
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 76,
+          "costUsd": 1.531036,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 3.488372093023256,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-03",
+          "row": {
+            "composite": 0.6459739091318039,
+            "scopedComposite": 0.8078431372549021,
+            "semanticComposite": 0.6459739091318039,
+            "classRecall": 0.41509433962264153,
+            "classPrecision": 0.9565217391304348,
+            "classF1": 0.5789473684210527,
+            "relRecall": 0.6,
+            "relPrecision": 0.8181818181818182,
+            "relF1": 0.6923076923076923,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 0.6666666666666666,
+            "propF1": 0.6666666666666666,
+            "semClassF1": 0.5789473684210527,
+            "semRelF1": 0.6923076923076923,
+            "semPropF1": 0.6666666666666666,
+            "rulesF1": 0.8000000000000002,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 23,
+            "relationships": 22,
+            "properties": 3
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 77,
+          "costUsd": 1.6213306,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-04",
+          "row": {
+            "composite": 0.8139433551198257,
+            "scopedComposite": 0.9453900709219858,
+            "semanticComposite": 0.8139433551198257,
+            "classRecall": 0.6037735849056604,
+            "classPrecision": 1,
+            "classF1": 0.7529411764705882,
+            "relRecall": 0.8,
+            "relPrecision": 1,
+            "relF1": 0.888888888888889,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.7529411764705882,
+            "semRelF1": 0.888888888888889,
+            "semPropF1": 0.8,
+            "rulesF1": 0.8000000000000002,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 32,
+            "relationships": 24,
+            "properties": 2
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 104,
+          "costUsd": 2.03264,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-05",
+          "row": {
+            "composite": 0.7843137254901961,
+            "scopedComposite": 0.936111111111111,
+            "semanticComposite": 0.7843137254901961,
+            "classRecall": 0.6037735849056604,
+            "classPrecision": 1,
+            "classF1": 0.7529411764705882,
+            "relRecall": 0.7333333333333333,
+            "relPrecision": 0.88,
+            "relF1": 0.8,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.7529411764705882,
+            "semRelF1": 0.8,
+            "semPropF1": 0.8,
+            "rulesF1": 0.888888888888889,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 32,
+            "relationships": 25,
+            "properties": 2
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 90,
+          "costUsd": 1.6829776,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 13.953488372093023,
+          "relayAudit": null
+        }
+      ],
+      "fibo-loans": [
+        {
+          "runId": "run-01",
+          "row": {
+            "composite": 0.6618106779065683,
+            "scopedComposite": 0.5961712792619848,
+            "semanticComposite": 0.6618106779065683,
+            "classRecall": 0.40350877192982454,
+            "classPrecision": 1,
+            "classF1": 0.575,
+            "relRecall": 0.6774193548387096,
+            "relPrecision": 1,
+            "relF1": 0.8076923076923077,
+            "propRecall": 0.4489795918367347,
+            "propPrecision": 0.9166666666666666,
+            "propF1": 0.6027397260273972,
+            "semClassF1": 0.575,
+            "semRelF1": 0.8076923076923077,
+            "semPropF1": 0.6027397260273972,
+            "rulesF1": 0.7272727272727273,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 23,
+            "relationships": 21,
+            "properties": 24
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 96,
+          "costUsd": 1.959426,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-02",
+          "row": {
+            "composite": 0.6857300451941212,
+            "scopedComposite": 0.5552692921113974,
+            "semanticComposite": 0.6857300451941212,
+            "classRecall": 0.49122807017543857,
+            "classPrecision": 1,
+            "classF1": 0.6588235294117647,
+            "relRecall": 0.7419354838709677,
+            "relPrecision": 0.8518518518518519,
+            "relF1": 0.7931034482758621,
+            "propRecall": 0.46938775510204084,
+            "propPrecision": 0.8518518518518519,
+            "propF1": 0.6052631578947368,
+            "semClassF1": 0.6588235294117647,
+            "semRelF1": 0.7931034482758621,
+            "semPropF1": 0.6052631578947368,
+            "rulesF1": 0.16666666666666666,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 1,
+            "classes": 28,
+            "relationships": 27,
+            "properties": 27
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 99,
+          "costUsd": 2.2512868,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-03",
+          "row": {
+            "composite": 0.6910108604845447,
+            "scopedComposite": 0.5990066674061202,
+            "semanticComposite": 0.7144026733500418,
+            "classRecall": 0.47368421052631576,
+            "classPrecision": 1,
+            "classF1": 0.6428571428571429,
+            "relRecall": 0.6774193548387096,
+            "relPrecision": 0.8076923076923077,
+            "relF1": 0.7368421052631579,
+            "propRecall": 0.5306122448979592,
+            "propPrecision": 1,
+            "propF1": 0.6933333333333334,
+            "semClassF1": 0.6428571428571429,
+            "semRelF1": 0.8070175438596492,
+            "semPropF1": 0.6933333333333334,
+            "rulesF1": 0,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 27,
+            "relationships": 26,
+            "properties": 26
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 96,
+          "costUsd": 2.0222542000000003,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-04",
+          "row": {
+            "composite": 0.64524976049787,
+            "scopedComposite": 0.7157765303394815,
+            "semanticComposite": 0.6569456669306185,
+            "classRecall": 0.45614035087719296,
+            "classPrecision": 1,
+            "classF1": 0.6265060240963854,
+            "relRecall": 0.7096774193548387,
+            "relPrecision": 0.8461538461538461,
+            "relF1": 0.7719298245614036,
+            "propRecall": 0.3673469387755102,
+            "propPrecision": 1,
+            "propF1": 0.5373134328358209,
+            "semClassF1": 0.6265060240963854,
+            "semRelF1": 0.8070175438596492,
+            "semPropF1": 0.5373134328358209,
+            "rulesF1": 0.2857142857142857,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 26,
+            "relationships": 26,
+            "properties": 18
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 85,
+          "costUsd": 1.7539936,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-05",
+          "row": {
+            "composite": 0.8661729436544695,
+            "scopedComposite": 0.6234207262721388,
+            "semanticComposite": 0.8771019054031036,
+            "classRecall": 0.6491228070175439,
+            "classPrecision": 1,
+            "classF1": 0.7872340425531915,
+            "relRecall": 0.9354838709677419,
+            "relPrecision": 0.9666666666666667,
+            "relF1": 0.9508196721311476,
+            "propRecall": 0.7551020408163265,
+            "propPrecision": 1,
+            "propF1": 0.8604651162790697,
+            "semClassF1": 0.7872340425531915,
+            "semRelF1": 0.9836065573770492,
+            "semPropF1": 0.8604651162790697,
+            "rulesF1": 0,
+            "actionsF1": 0.8000000000000002,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 37,
+            "relationships": 30,
+            "properties": 37
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 107,
+          "costUsd": 2.6478102000000003,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0,
+          "relayAudit": null
+        }
+      ],
+      "itops": [
+        {
+          "runId": "run-01",
+          "row": {
+            "composite": 0.46619299286160265,
+            "scopedComposite": 0.6492957746478873,
+            "semanticComposite": 0.46619299286160265,
+            "classRecall": 0.38235294117647056,
+            "classPrecision": 1,
+            "classF1": 0.5531914893617021,
+            "relRecall": 0.3148148148148148,
+            "relPrecision": 0.9714285714285714,
+            "relF1": 0.4755244755244756,
+            "propRecall": 0.24324324324324326,
+            "propPrecision": 0.7714285714285715,
+            "propF1": 0.36986301369863017,
+            "semClassF1": 0.5531914893617021,
+            "semRelF1": 0.4755244755244756,
+            "semPropF1": 0.36986301369863017,
+            "rulesF1": 0.8571428571428572,
+            "actionsF1": 0.9523809523809523,
+            "valueFidelity": 0.9166666666666666,
+            "allowedValueLists": 13,
+            "classes": 26,
+            "relationships": 35,
+            "properties": 35
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 101,
+          "costUsd": 2.7784958,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0.34843205574912894,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-02",
+          "row": {
+            "composite": 0.6574671870793064,
+            "scopedComposite": 0.6401447990543736,
+            "semanticComposite": 0.6616865963620069,
+            "classRecall": 0.5882352941176471,
+            "classPrecision": 1,
+            "classF1": 0.7407407407407407,
+            "relRecall": 0.5185185185185185,
+            "relPrecision": 0.9655172413793104,
+            "relF1": 0.6746987951807228,
+            "propRecall": 0.3963963963963964,
+            "propPrecision": 0.9361702127659575,
+            "propF1": 0.5569620253164558,
+            "semClassF1": 0.7407407407407407,
+            "semRelF1": 0.6746987951807228,
+            "semPropF1": 0.569620253164557,
+            "rulesF1": 0.8181818181818182,
+            "actionsF1": 1,
+            "valueFidelity": 0.95,
+            "allowedValueLists": 19,
+            "classes": 40,
+            "relationships": 58,
+            "properties": 47
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 137,
+          "costUsd": 4.0383356,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 0.34843205574912894,
+          "relayAudit": null
+        },
+        {
+          "runId": "run-03",
+          "row": {
+            "composite": 0.6063910188487204,
+            "scopedComposite": 0.701610387116903,
+            "semanticComposite": 0.6063910188487204,
+            "classRecall": 0.4852941176470588,
+            "classPrecision": 1,
+            "classF1": 0.6534653465346535,
+            "relRecall": 0.4537037037037037,
+            "relPrecision": 0.98,
+            "relF1": 0.6202531645569621,
+            "propRecall": 0.3783783783783784,
+            "propPrecision": 0.9767441860465116,
+            "propF1": 0.5454545454545454,
+            "semClassF1": 0.6534653465346535,
+            "semRelF1": 0.6202531645569621,
+            "semPropF1": 0.5454545454545454,
+            "rulesF1": 0.761904761904762,
+            "actionsF1": 0.9523809523809523,
+            "valueFidelity": 0.875,
+            "allowedValueLists": 15,
+            "classes": 33,
+            "relationships": 50,
+            "properties": 43
+          },
+          "clean": true,
+          "stoppedReason": "stages_complete",
+          "turns": 114,
+          "costUsd": 3.4217946,
+          "scoredOn": "snapshot A",
+          "interviewerFirstPer100": 3.484320557491289,
+          "relayAudit": null
+        }
+      ]
+    }
+  },
+  "cells": {
+    "v1-same-model": {
+      "brick-hvac": {
+        "n": 5,
+        "composite": {
+          "mean": 0.6307094789707473,
+          "min": 0.5364745131930333,
+          "max": 0.817947817947818,
+          "values": [
+            0.6025539334433797,
+            0.817947817947818,
+            0.5884069000507357,
+            0.6081642302187692,
+            0.5364745131930333
+          ]
+        },
+        "classF1": {
+          "mean": 0.8749346872941229,
+          "min": 0.7761194029850746,
+          "max": 1,
+          "values": [
+            0.8888888888888888,
+            1,
+            0.9041095890410958,
+            0.7761194029850746,
+            0.8055555555555556
+          ]
+        },
+        "relF1": {
+          "mean": 0.49137583709245936,
+          "min": 0.26865671641791045,
+          "max": 0.7671232876712328,
+          "values": [
+            0.3835616438356164,
+            0.6486486486486486,
+            0.3888888888888889,
+            0.7671232876712328,
+            0.26865671641791045
+          ]
+        },
+        "propF1": {
+          "mean": 0.5258179125256589,
+          "min": 0.28125,
+          "max": 0.8051948051948051,
+          "values": [
+            0.5352112676056338,
+            0.8051948051948051,
+            0.4722222222222222,
+            0.28125,
+            0.5352112676056338
+          ]
+        },
+        "classRecall": {
+          "mean": 0.8153846153846154,
+          "min": 0.6666666666666666,
+          "max": 1,
+          "values": [
+            0.8205128205128205,
+            1,
+            0.8461538461538461,
+            0.6666666666666666,
+            0.7435897435897436
+          ]
+        },
+        "classPrecision": {
+          "mean": 0.949528902470079,
+          "min": 0.8787878787878788,
+          "max": 1,
+          "values": [
+            0.9696969696969697,
+            1,
+            0.9705882352941176,
+            0.9285714285714286,
+            0.8787878787878788
+          ]
+        },
+        "relRecall": {
+          "mean": 0.5085714285714286,
+          "min": 0.2571428571428571,
+          "max": 0.8,
+          "values": [
+            0.4,
+            0.6857142857142857,
+            0.4,
+            0.8,
+            0.2571428571428571
+          ]
+        },
+        "relPrecision": {
+          "mean": 0.4760552303315461,
+          "min": 0.28125,
+          "max": 0.7368421052631579,
+          "values": [
+            0.3684210526315789,
+            0.6153846153846154,
+            0.3783783783783784,
+            0.7368421052631579,
+            0.28125
+          ]
+        },
+        "propRecall": {
+          "mean": 0.4523809523809524,
+          "min": 0.21428571428571427,
+          "max": 0.7380952380952381,
+          "values": [
+            0.4523809523809524,
+            0.7380952380952381,
+            0.40476190476190477,
+            0.21428571428571427,
+            0.4523809523809524
+          ]
+        },
+        "propPrecision": {
+          "mean": 0.6343633378116136,
+          "min": 0.4090909090909091,
+          "max": 0.8857142857142857,
+          "values": [
+            0.6551724137931034,
+            0.8857142857142857,
+            0.5666666666666667,
+            0.4090909090909091,
+            0.6551724137931034
+          ]
+        },
+        "rulesF1": {
+          "mean": 0.04444444444444444,
+          "min": 0,
+          "max": 0.2222222222222222,
+          "values": [
+            0,
+            0,
+            0.2222222222222222,
+            0,
+            0
+          ]
+        },
+        "actionsF1": {
+          "mean": 0.8400000000000001,
+          "min": 0.6,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            0.8000000000000002,
+            0.8000000000000002,
+            0.6
+          ]
+        }
+      },
+      "iof-maintenance": {
+        "n": 5,
+        "composite": {
+          "mean": 0.7492687538708677,
+          "min": 0.7111639268502014,
+          "max": 0.8015686274509805,
+          "values": [
+            0.7559258648187868,
+            0.7178649237472766,
+            0.7111639268502014,
+            0.7598204264870931,
+            0.8015686274509805
+          ]
+        },
+        "classF1": {
+          "mean": 0.7815617475060199,
+          "min": 0.7058823529411764,
+          "max": 0.8947368421052632,
+          "values": [
+            0.8947368421052632,
+            0.7647058823529412,
+            0.7058823529411764,
+            0.7777777777777777,
+            0.7647058823529412
+          ]
+        },
+        "relF1": {
+          "mean": 0.6157394636015325,
+          "min": 0.4999999999999999,
+          "max": 0.8275862068965517,
+          "values": [
+            0.8275862068965517,
+            0.4999999999999999,
+            0.5185185185185186,
+            0.5925925925925927,
+            0.64
+          ]
+        },
+        "propF1": {
+          "mean": 0.8505050505050505,
+          "min": 0.5454545454545454,
+          "max": 1,
+          "values": [
+            0.5454545454545454,
+            0.888888888888889,
+            0.9090909090909091,
+            0.9090909090909091,
+            1
+          ]
+        },
+        "classRecall": {
+          "mean": 0.69,
+          "min": 0.6,
+          "max": 0.85,
+          "values": [
+            0.85,
+            0.65,
+            0.6,
+            0.7,
+            0.65
+          ]
+        },
+        "classPrecision": {
+          "mean": 0.9067460317460319,
+          "min": 0.8571428571428571,
+          "max": 0.9444444444444444,
+          "values": [
+            0.9444444444444444,
+            0.9285714285714286,
+            0.8571428571428571,
+            0.875,
+            0.9285714285714286
+          ]
+        },
+        "relRecall": {
+          "mean": 0.6307692307692307,
+          "min": 0.46153846153846156,
+          "max": 0.9230769230769231,
+          "values": [
+            0.9230769230769231,
+            0.46153846153846156,
+            0.5384615384615384,
+            0.6153846153846154,
+            0.6153846153846154
+          ]
+        },
+        "relPrecision": {
+          "mean": 0.6067099567099568,
+          "min": 0.5,
+          "max": 0.75,
+          "values": [
+            0.75,
+            0.5454545454545454,
+            0.5,
+            0.5714285714285714,
+            0.6666666666666666
+          ]
+        },
+        "propRecall": {
+          "mean": 0.8800000000000001,
+          "min": 0.6,
+          "max": 1,
+          "values": [
+            0.6,
+            0.8,
+            1,
+            1,
+            1
+          ]
+        },
+        "propPrecision": {
+          "mean": 0.8333333333333334,
+          "min": 0.5,
+          "max": 1,
+          "values": [
+            0.5,
+            1,
+            0.8333333333333334,
+            0.8333333333333334,
+            1
+          ]
+        },
+        "rulesF1": {
+          "mean": 0.7238095238095237,
+          "min": 0.42857142857142855,
+          "max": 1,
+          "values": [
+            0.6666666666666666,
+            0.42857142857142855,
+            0.8571428571428571,
+            1,
+            0.6666666666666666
+          ]
+        },
+        "actionsF1": {
+          "mean": 0.8800000000000001,
+          "min": 0.6,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            0.6,
+            0.8000000000000002,
+            1
+          ]
+        }
+      },
+      "iof-supply-chain": {
+        "n": 5,
+        "composite": {
+          "mean": 0.6840602689281402,
+          "min": 0.6408357075023742,
+          "max": 0.7363571530452147,
+          "values": [
+            0.7363571530452147,
+            0.691538568065365,
+            0.6742971887550201,
+            0.6772727272727274,
+            0.6408357075023742
+          ]
+        },
+        "classF1": {
+          "mean": 0.6888251693452986,
+          "min": 0.641025641025641,
+          "max": 0.7228915662650602,
+          "values": [
+            0.7073170731707317,
+            0.7228915662650602,
+            0.7228915662650602,
+            0.65,
+            0.641025641025641
+          ]
+        },
+        "relF1": {
+          "mean": 0.563355637439122,
+          "min": 0.4814814814814815,
+          "max": 0.7017543859649122,
+          "values": [
+            0.7017543859649122,
+            0.5517241379310344,
+            0.5,
+            0.5818181818181818,
+            0.4814814814814815
+          ]
+        },
+        "propF1": {
+          "mean": 0.8,
+          "min": 0.8,
+          "max": 0.8,
+          "values": [
+            0.8,
+            0.8,
+            0.8,
+            0.8,
+            0.8
+          ]
+        },
+        "classRecall": {
+          "mean": 0.5283018867924528,
+          "min": 0.4716981132075472,
+          "max": 0.5660377358490566,
+          "values": [
+            0.5471698113207547,
+            0.5660377358490566,
+            0.5660377358490566,
+            0.49056603773584906,
+            0.4716981132075472
+          ]
+        },
+        "classPrecision": {
+          "mean": 0.9925925925925926,
+          "min": 0.9629629629629629,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            1,
+            0.9629629629629629,
+            1
+          ]
+        },
+        "relRecall": {
+          "mean": 0.5333333333333334,
+          "min": 0.43333333333333335,
+          "max": 0.6666666666666666,
+          "values": [
+            0.6666666666666666,
+            0.5333333333333333,
+            0.5,
+            0.5333333333333333,
+            0.43333333333333335
+          ]
+        },
+        "relPrecision": {
+          "mean": 0.5987671957671957,
+          "min": 0.5,
+          "max": 0.7407407407407407,
+          "values": [
+            0.7407407407407407,
+            0.5714285714285714,
+            0.5,
+            0.64,
+            0.5416666666666666
+          ]
+        },
+        "propRecall": {
+          "mean": 0.6666666666666666,
+          "min": 0.6666666666666666,
+          "max": 0.6666666666666666,
+          "values": [
+            0.6666666666666666,
+            0.6666666666666666,
+            0.6666666666666666,
+            0.6666666666666666,
+            0.6666666666666666
+          ]
+        },
+        "propPrecision": {
+          "mean": 1,
+          "min": 1,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "rulesF1": {
+          "mean": 0.8032323232323233,
+          "min": 0.7272727272727272,
+          "max": 0.888888888888889,
+          "values": [
+            0.8000000000000002,
+            0.8000000000000002,
+            0.8000000000000002,
+            0.7272727272727272,
+            0.888888888888889
+          ]
+        },
+        "actionsF1": {
+          "mean": 0.8400000000000002,
+          "min": 0.8000000000000002,
+          "max": 1,
+          "values": [
+            0.8000000000000002,
+            0.8000000000000002,
+            1,
+            0.8000000000000002,
+            0.8000000000000002
+          ]
+        }
+      },
+      "fibo-loans": {
+        "n": 5,
+        "composite": {
+          "mean": 0.6966265210052462,
+          "min": 0.5966810966810966,
+          "max": 0.7907251814993067,
+          "values": [
+            0.7742685671417854,
+            0.6652828963160644,
+            0.6561748633879781,
+            0.7907251814993067,
+            0.5966810966810966
+          ]
+        },
+        "classF1": {
+          "mean": 0.6563243295295874,
+          "min": 0.5952380952380952,
+          "max": 0.7173913043478262,
+          "values": [
+            0.6744186046511628,
+            0.627906976744186,
+            0.6666666666666667,
+            0.7173913043478262,
+            0.5952380952380952
+          ]
+        },
+        "relF1": {
+          "mean": 0.707972137152465,
+          "min": 0.5714285714285714,
+          "max": 0.923076923076923,
+          "values": [
+            0.7666666666666667,
+            0.5901639344262295,
+            0.6885245901639343,
+            0.923076923076923,
+            0.5714285714285714
+          ]
+        },
+        "propF1": {
+          "mean": 0.7255830963336865,
+          "min": 0.6133333333333333,
+          "max": 0.8817204301075268,
+          "values": [
+            0.8817204301075268,
+            0.7777777777777778,
+            0.6133333333333333,
+            0.7317073170731708,
+            0.6233766233766234
+          ]
+        },
+        "classRecall": {
+          "mean": 0.5017543859649123,
+          "min": 0.43859649122807015,
+          "max": 0.5789473684210527,
+          "values": [
+            0.5087719298245614,
+            0.47368421052631576,
+            0.5087719298245614,
+            0.5789473684210527,
+            0.43859649122807015
+          ]
+        },
+        "classPrecision": {
+          "mean": 0.9532968436416711,
+          "min": 0.9259259259259259,
+          "max": 1,
+          "values": [
+            1,
+            0.9310344827586207,
+            0.9666666666666667,
+            0.9428571428571428,
+            0.9259259259259259
+          ]
+        },
+        "relRecall": {
+          "mean": 0.6967741935483871,
+          "min": 0.5161290322580645,
+          "max": 0.967741935483871,
+          "values": [
+            0.7419354838709677,
+            0.5806451612903226,
+            0.6774193548387096,
+            0.967741935483871,
+            0.5161290322580645
+          ]
+        },
+        "relPrecision": {
+          "mean": 0.7230912778904666,
+          "min": 0.6,
+          "max": 0.8823529411764706,
+          "values": [
+            0.7931034482758621,
+            0.6,
+            0.7,
+            0.8823529411764706,
+            0.64
+          ]
+        },
+        "propRecall": {
+          "mean": 0.6244897959183674,
+          "min": 0.46938775510204084,
+          "max": 0.8367346938775511,
+          "values": [
+            0.8367346938775511,
+            0.7142857142857143,
+            0.46938775510204084,
+            0.6122448979591837,
+            0.4897959183673469
+          ]
+        },
+        "propPrecision": {
+          "mean": 0.8872651738505397,
+          "min": 0.8536585365853658,
+          "max": 0.9318181818181818,
+          "values": [
+            0.9318181818181818,
+            0.8536585365853658,
+            0.8846153846153846,
+            0.9090909090909091,
+            0.8571428571428571
+          ]
+        },
+        "rulesF1": {
+          "mean": 0.3133333333333333,
+          "min": 0,
+          "max": 0.5,
+          "values": [
+            0.5,
+            0,
+            0.39999999999999997,
+            0.3333333333333333,
+            0.3333333333333333
+          ]
+        },
+        "actionsF1": {
+          "mean": 0.8400000000000001,
+          "min": 0.6,
+          "max": 1,
+          "values": [
+            1,
+            0.6,
+            1,
+            0.8000000000000002,
+            0.8000000000000002
+          ]
+        }
+      },
+      "itops": {
+        "n": 3,
+        "composite": {
+          "mean": 0.6056619046047412,
+          "min": 0.5436571668371318,
+          "max": 0.6914527333131985,
+          "values": [
+            0.5436571668371318,
+            0.6914527333131985,
+            0.5818758136638932
+          ]
+        },
+        "classF1": {
+          "mean": 0.697075861432297,
+          "min": 0.6534653465346535,
+          "max": 0.7454545454545454,
+          "values": [
+            0.6534653465346535,
+            0.7454545454545454,
+            0.6923076923076924
+          ]
+        },
+        "relF1": {
+          "mean": 0.6039126045965991,
+          "min": 0.5359477124183006,
+          "max": 0.686046511627907,
+          "values": [
+            0.5359477124183006,
+            0.686046511627907,
+            0.5897435897435898
+          ]
+        },
+        "propF1": {
+          "mean": 0.5159972477853273,
+          "min": 0.4415584415584415,
+          "max": 0.6428571428571428,
+          "values": [
+            0.4415584415584415,
+            0.6428571428571428,
+            0.46357615894039744
+          ]
+        },
+        "classRecall": {
+          "mean": 0.5392156862745098,
+          "min": 0.4852941176470588,
+          "max": 0.6029411764705882,
+          "values": [
+            0.4852941176470588,
+            0.6029411764705882,
+            0.5294117647058824
+          ]
+        },
+        "classPrecision": {
+          "mean": 0.9920634920634921,
+          "min": 0.9761904761904762,
+          "max": 1,
+          "values": [
+            1,
+            0.9761904761904762,
+            1
+          ]
+        },
+        "relRecall": {
+          "mean": 0.4506172839506173,
+          "min": 0.37962962962962965,
+          "max": 0.5462962962962963,
+          "values": [
+            0.37962962962962965,
+            0.5462962962962963,
+            0.42592592592592593
+          ]
+        },
+        "relPrecision": {
+          "mean": 0.9304398148148149,
+          "min": 0.9111111111111111,
+          "max": 0.9583333333333334,
+          "values": [
+            0.9111111111111111,
+            0.921875,
+            0.9583333333333334
+          ]
+        },
+        "propRecall": {
+          "mean": 0.36936936936936937,
+          "min": 0.3063063063063063,
+          "max": 0.4864864864864865,
+          "values": [
+            0.3063063063063063,
+            0.4864864864864865,
+            0.3153153153153153
+          ]
+        },
+        "propPrecision": {
+          "mean": 0.8710220318237454,
+          "min": 0.7906976744186046,
+          "max": 0.9473684210526315,
+          "values": [
+            0.7906976744186046,
+            0.9473684210526315,
+            0.875
+          ]
+        },
+        "rulesF1": {
+          "mean": 0.7847222222222222,
+          "min": 0.43749999999999994,
+          "max": 1,
+          "values": [
+            0.43749999999999994,
+            0.9166666666666666,
+            1
+          ]
+        },
+        "actionsF1": {
+          "mean": 0.9841269841269842,
+          "min": 0.9523809523809523,
+          "max": 1,
+          "values": [
+            0.9523809523809523,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    "final": {
+      "brick-hvac": {
+        "n": 5,
+        "composite": {
+          "mean": 0.7911404014760332,
+          "min": 0.6836131840796019,
+          "max": 0.8983074796058715,
+          "values": [
+            0.7080368906455862,
+            0.8252499558381912,
+            0.8983074796058715,
+            0.6836131840796019,
+            0.8404944972109151
+          ]
+        },
+        "classF1": {
+          "mean": 0.883731960739419,
+          "min": 0.835820895522388,
+          "max": 0.945945945945946,
+          "values": [
+            0.8695652173913044,
+            0.945945945945946,
+            0.9315068493150686,
+            0.835820895522388,
+            0.835820895522388
+          ]
+        },
+        "relF1": {
+          "mean": 0.6875421413624738,
+          "min": 0.4545454545454545,
+          "max": 0.9393939393939393,
+          "values": [
+            0.4545454545454545,
+            0.676470588235294,
+            0.8985507246376812,
+            0.46875000000000006,
+            0.9393939393939393
+          ]
+        },
+        "propF1": {
+          "mean": 0.8021471023262068,
+          "min": 0.7462686567164178,
+          "max": 0.8648648648648648,
+          "values": [
+            0.8,
+            0.8533333333333334,
+            0.8648648648648648,
+            0.7462686567164178,
+            0.7462686567164178
+          ]
+        },
+        "classRecall": {
+          "mean": 0.7948717948717949,
+          "min": 0.717948717948718,
+          "max": 0.8974358974358975,
+          "values": [
+            0.7692307692307693,
+            0.8974358974358975,
+            0.8717948717948718,
+            0.717948717948718,
+            0.717948717948718
+          ]
+        },
+        "classPrecision": {
+          "mean": 1,
+          "min": 1,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "relRecall": {
+          "mean": 0.6571428571428571,
+          "min": 0.42857142857142855,
+          "max": 0.8857142857142857,
+          "values": [
+            0.42857142857142855,
+            0.6571428571428571,
+            0.8857142857142857,
+            0.42857142857142855,
+            0.8857142857142857
+          ]
+        },
+        "relPrecision": {
+          "mean": 0.721969349980866,
+          "min": 0.4838709677419355,
+          "max": 1,
+          "values": [
+            0.4838709677419355,
+            0.696969696969697,
+            0.9117647058823529,
+            0.5172413793103449,
+            1
+          ]
+        },
+        "propRecall": {
+          "mean": 0.6761904761904762,
+          "min": 0.5952380952380952,
+          "max": 0.7619047619047619,
+          "values": [
+            0.6666666666666666,
+            0.7619047619047619,
+            0.7619047619047619,
+            0.5952380952380952,
+            0.5952380952380952
+          ]
+        },
+        "propPrecision": {
+          "mean": 0.9939393939393939,
+          "min": 0.9696969696969697,
+          "max": 1,
+          "values": [
+            1,
+            0.9696969696969697,
+            1,
+            1,
+            1
+          ]
+        },
+        "rulesF1": {
+          "mean": 0.0879120879120879,
+          "min": 0,
+          "max": 0.2857142857142857,
+          "values": [
+            0.15384615384615383,
+            0,
+            0,
+            0,
+            0.2857142857142857
+          ]
+        },
+        "actionsF1": {
+          "mean": 0.96,
+          "min": 0.8000000000000002,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            1,
+            1,
+            0.8000000000000002
+          ]
+        }
+      },
+      "iof-maintenance": {
+        "n": 5,
+        "composite": {
+          "mean": 0.8505188021165399,
+          "min": 0.7416190894451765,
+          "max": 0.9487179487179488,
+          "values": [
+            0.9487179487179488,
+            0.896190906353508,
+            0.8882882882882882,
+            0.7416190894451765,
+            0.7777777777777778
+          ]
+        },
+        "classF1": {
+          "mean": 0.864831520929082,
+          "min": 0.7272727272727274,
+          "max": 0.975609756097561,
+          "values": [
+            0.9230769230769231,
+            0.975609756097561,
+            0.8648648648648648,
+            0.7272727272727274,
+            0.8333333333333334
+          ]
+        },
+        "relF1": {
+          "mean": 0.7589471076427599,
+          "min": 0.5,
+          "max": 0.962962962962963,
+          "values": [
+            0.9230769230769231,
+            0.962962962962963,
+            0.8,
+            0.608695652173913,
+            0.5
+          ]
+        },
+        "propF1": {
+          "mean": 0.9277777777777778,
+          "min": 0.7499999999999999,
+          "max": 1,
+          "values": [
+            1,
+            0.7499999999999999,
+            1,
+            0.888888888888889,
+            1
+          ]
+        },
+        "classRecall": {
+          "mean": 0.8100000000000002,
+          "min": 0.6,
+          "max": 1,
+          "values": [
+            0.9,
+            1,
+            0.8,
+            0.6,
+            0.75
+          ]
+        },
+        "classPrecision": {
+          "mean": 0.9403005534197485,
+          "min": 0.9230769230769231,
+          "max": 0.9523809523809523,
+          "values": [
+            0.9473684210526315,
+            0.9523809523809523,
+            0.9411764705882353,
+            0.9230769230769231,
+            0.9375
+          ]
+        },
+        "relRecall": {
+          "mean": 0.7538461538461538,
+          "min": 0.5384615384615384,
+          "max": 1,
+          "values": [
+            0.9230769230769231,
+            1,
+            0.7692307692307693,
+            0.5384615384615384,
+            0.5384615384615384
+          ]
+        },
+        "relPrecision": {
+          "mean": 0.7703296703296705,
+          "min": 0.4666666666666667,
+          "max": 0.9285714285714286,
+          "values": [
+            0.9230769230769231,
+            0.9285714285714286,
+            0.8333333333333334,
+            0.7,
+            0.4666666666666667
+          ]
+        },
+        "propRecall": {
+          "mean": 0.8800000000000001,
+          "min": 0.6,
+          "max": 1,
+          "values": [
+            1,
+            0.6,
+            1,
+            0.8,
+            1
+          ]
+        },
+        "propPrecision": {
+          "mean": 1,
+          "min": 1,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "rulesF1": {
+          "mean": 0.6897435897435897,
+          "min": 0.6153846153846153,
+          "max": 0.8333333333333333,
+          "values": [
+            0.8333333333333333,
+            0.6666666666666666,
+            0.6153846153846153,
+            0.6666666666666666,
+            0.6666666666666666
+          ]
+        },
+        "actionsF1": {
+          "mean": 0.7666666666666667,
+          "min": 0.33333333333333337,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            0.33333333333333337,
+            0.5,
+            1
+          ]
+        }
+      },
+      "iof-supply-chain": {
+        "n": 5,
+        "composite": {
+          "mean": 0.7522951672796874,
+          "min": 0.6459739091318039,
+          "max": 0.8139433551198257,
+          "values": [
+            0.754851684263449,
+            0.7623931623931623,
+            0.6459739091318039,
+            0.8139433551198257,
+            0.7843137254901961
+          ]
+        },
+        "classF1": {
+          "mean": 0.6733762006827022,
+          "min": 0.5789473684210527,
+          "max": 0.7529411764705882,
+          "values": [
+            0.641025641025641,
+            0.641025641025641,
+            0.5789473684210527,
+            0.7529411764705882,
+            0.7529411764705882
+          ]
+        },
+        "relF1": {
+          "mean": 0.8101759678230266,
+          "min": 0.6923076923076923,
+          "max": 0.888888888888889,
+          "values": [
+            0.8235294117647058,
+            0.846153846153846,
+            0.6923076923076923,
+            0.888888888888889,
+            0.8
+          ]
+        },
+        "propF1": {
+          "mean": 0.7733333333333332,
+          "min": 0.6666666666666666,
+          "max": 0.8,
+          "values": [
+            0.8,
+            0.8,
+            0.6666666666666666,
+            0.8,
+            0.8
+          ]
+        },
+        "classRecall": {
+          "mean": 0.5132075471698113,
+          "min": 0.41509433962264153,
+          "max": 0.6037735849056604,
+          "values": [
+            0.4716981132075472,
+            0.4716981132075472,
+            0.41509433962264153,
+            0.6037735849056604,
+            0.6037735849056604
+          ]
+        },
+        "classPrecision": {
+          "mean": 0.9913043478260869,
+          "min": 0.9565217391304348,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            0.9565217391304348,
+            1,
+            1
+          ]
+        },
+        "relRecall": {
+          "mean": 0.7133333333333333,
+          "min": 0.6,
+          "max": 0.8,
+          "values": [
+            0.7,
+            0.7333333333333333,
+            0.6,
+            0.8,
+            0.7333333333333333
+          ]
+        },
+        "relPrecision": {
+          "mean": 0.9396363636363636,
+          "min": 0.8181818181818182,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            0.8181818181818182,
+            1,
+            0.88
+          ]
+        },
+        "propRecall": {
+          "mean": 0.6666666666666666,
+          "min": 0.6666666666666666,
+          "max": 0.6666666666666666,
+          "values": [
+            0.6666666666666666,
+            0.6666666666666666,
+            0.6666666666666666,
+            0.6666666666666666,
+            0.6666666666666666
+          ]
+        },
+        "propPrecision": {
+          "mean": 0.9333333333333332,
+          "min": 0.6666666666666666,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            0.6666666666666666,
+            1,
+            1
+          ]
+        },
+        "rulesF1": {
+          "mean": 0.8533333333333335,
+          "min": 0.8000000000000002,
+          "max": 0.888888888888889,
+          "values": [
+            0.888888888888889,
+            0.888888888888889,
+            0.8000000000000002,
+            0.8000000000000002,
+            0.888888888888889
+          ]
+        },
+        "actionsF1": {
+          "mean": 0.9142857142857143,
+          "min": 0.5714285714285715,
+          "max": 1,
+          "values": [
+            1,
+            0.5714285714285715,
+            1,
+            1,
+            1
+          ]
+        }
+      },
+      "fibo-loans": {
+        "n": 5,
+        "composite": {
+          "mean": 0.7099948575475147,
+          "min": 0.64524976049787,
+          "max": 0.8661729436544695,
+          "values": [
+            0.6618106779065683,
+            0.6857300451941212,
+            0.6910108604845447,
+            0.64524976049787,
+            0.8661729436544695
+          ]
+        },
+        "classF1": {
+          "mean": 0.6580841477836968,
+          "min": 0.575,
+          "max": 0.7872340425531915,
+          "values": [
+            0.575,
+            0.6588235294117647,
+            0.6428571428571429,
+            0.6265060240963854,
+            0.7872340425531915
+          ]
+        },
+        "relF1": {
+          "mean": 0.8120774715847757,
+          "min": 0.7368421052631579,
+          "max": 0.9508196721311476,
+          "values": [
+            0.8076923076923077,
+            0.7931034482758621,
+            0.7368421052631579,
+            0.7719298245614036,
+            0.9508196721311476
+          ]
+        },
+        "propF1": {
+          "mean": 0.6598229532740716,
+          "min": 0.5373134328358209,
+          "max": 0.8604651162790697,
+          "values": [
+            0.6027397260273972,
+            0.6052631578947368,
+            0.6933333333333334,
+            0.5373134328358209,
+            0.8604651162790697
+          ]
+        },
+        "classRecall": {
+          "mean": 0.4947368421052632,
+          "min": 0.40350877192982454,
+          "max": 0.6491228070175439,
+          "values": [
+            0.40350877192982454,
+            0.49122807017543857,
+            0.47368421052631576,
+            0.45614035087719296,
+            0.6491228070175439
+          ]
+        },
+        "classPrecision": {
+          "mean": 1,
+          "min": 1,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "relRecall": {
+          "mean": 0.7483870967741936,
+          "min": 0.6774193548387096,
+          "max": 0.9354838709677419,
+          "values": [
+            0.6774193548387096,
+            0.7419354838709677,
+            0.6774193548387096,
+            0.7096774193548387,
+            0.9354838709677419
+          ]
+        },
+        "relPrecision": {
+          "mean": 0.8944729344729344,
+          "min": 0.8076923076923077,
+          "max": 1,
+          "values": [
+            1,
+            0.8518518518518519,
+            0.8076923076923077,
+            0.8461538461538461,
+            0.9666666666666667
+          ]
+        },
+        "propRecall": {
+          "mean": 0.5142857142857142,
+          "min": 0.3673469387755102,
+          "max": 0.7551020408163265,
+          "values": [
+            0.4489795918367347,
+            0.46938775510204084,
+            0.5306122448979592,
+            0.3673469387755102,
+            0.7551020408163265
+          ]
+        },
+        "propPrecision": {
+          "mean": 0.9537037037037038,
+          "min": 0.8518518518518519,
+          "max": 1,
+          "values": [
+            0.9166666666666666,
+            0.8518518518518519,
+            1,
+            1,
+            1
+          ]
+        },
+        "rulesF1": {
+          "mean": 0.23593073593073594,
+          "min": 0,
+          "max": 0.7272727272727273,
+          "values": [
+            0.7272727272727273,
+            0.16666666666666666,
+            0,
+            0.2857142857142857,
+            0
+          ]
+        },
+        "actionsF1": {
+          "mean": 0.96,
+          "min": 0.8000000000000002,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            1,
+            1,
+            0.8000000000000002
+          ]
+        }
+      },
+      "itops": {
+        "n": 3,
+        "composite": {
+          "mean": 0.5766837329298764,
+          "min": 0.46619299286160265,
+          "max": 0.6574671870793064,
+          "values": [
+            0.46619299286160265,
+            0.6574671870793064,
+            0.6063910188487204
+          ]
+        },
+        "classF1": {
+          "mean": 0.6491325255456988,
+          "min": 0.5531914893617021,
+          "max": 0.7407407407407407,
+          "values": [
+            0.5531914893617021,
+            0.7407407407407407,
+            0.6534653465346535
+          ]
+        },
+        "relF1": {
+          "mean": 0.5901588117540535,
+          "min": 0.4755244755244756,
+          "max": 0.6746987951807228,
+          "values": [
+            0.4755244755244756,
+            0.6746987951807228,
+            0.6202531645569621
+          ]
+        },
+        "propF1": {
+          "mean": 0.4907598614898771,
+          "min": 0.36986301369863017,
+          "max": 0.5569620253164558,
+          "values": [
+            0.36986301369863017,
+            0.5569620253164558,
+            0.5454545454545454
+          ]
+        },
+        "classRecall": {
+          "mean": 0.4852941176470588,
+          "min": 0.38235294117647056,
+          "max": 0.5882352941176471,
+          "values": [
+            0.38235294117647056,
+            0.5882352941176471,
+            0.4852941176470588
+          ]
+        },
+        "classPrecision": {
+          "mean": 1,
+          "min": 1,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            1
+          ]
+        },
+        "relRecall": {
+          "mean": 0.4290123456790123,
+          "min": 0.3148148148148148,
+          "max": 0.5185185185185185,
+          "values": [
+            0.3148148148148148,
+            0.5185185185185185,
+            0.4537037037037037
+          ]
+        },
+        "relPrecision": {
+          "mean": 0.9723152709359605,
+          "min": 0.9655172413793104,
+          "max": 0.98,
+          "values": [
+            0.9714285714285714,
+            0.9655172413793104,
+            0.98
+          ]
+        },
+        "propRecall": {
+          "mean": 0.33933933933933935,
+          "min": 0.24324324324324326,
+          "max": 0.3963963963963964,
+          "values": [
+            0.24324324324324326,
+            0.3963963963963964,
+            0.3783783783783784
+          ]
+        },
+        "propPrecision": {
+          "mean": 0.8947809900803468,
+          "min": 0.7714285714285715,
+          "max": 0.9767441860465116,
+          "values": [
+            0.7714285714285715,
+            0.9361702127659575,
+            0.9767441860465116
+          ]
+        },
+        "rulesF1": {
+          "mean": 0.8124098124098125,
+          "min": 0.761904761904762,
+          "max": 0.8571428571428572,
+          "values": [
+            0.8571428571428572,
+            0.8181818181818182,
+            0.761904761904762
+          ]
+        },
+        "actionsF1": {
+          "mean": 0.9682539682539683,
+          "min": 0.9523809523809523,
+          "max": 1,
+          "values": [
+            0.9523809523809523,
+            1,
+            0.9523809523809523
+          ]
+        }
+      }
+    }
+  },
+  "incomplete": {
+    "v1": [],
+    "final": []
+  },
+  "reproduces": true,
+  "primary": {
+    "metric": "composite",
+    "estimate": 0.08582105141119342,
+    "lo": 0.034706158603102374,
+    "hi": 0.13693594421928446,
+    "se": 0.024786622525503458,
+    "df": 24.380176267952056,
+    "t": 2.0621967658360028,
+    "k": 4
+  },
+  "keySecondary": {
+    "metric": "relF1",
+    "estimate": 0.17257490328186428,
+    "lo": 0.0703981695539897,
+    "hi": 0.27475163700973887,
+    "se": 0.04914877893555909,
+    "df": 21.114529394621137,
+    "t": 2.0789272071609863,
+    "k": 4
+  },
+  "descriptive": {
+    "classF1": {
+      "estimate": 0.019594474114967786,
+      "lo": -0.02647923227898634,
+      "hi": 0.06566818050892191,
+      "se": 0.022398966676805878,
+      "df": 25.63450392790218,
+      "t": 2.0569567810314853,
+      "k": 4
+    },
+    "propF1": {
+      "estimate": 0.06529377683674836,
+      "lo": -0.013614363344409117,
+      "hi": 0.14420191701790586,
+      "se": 0.03763549983628407,
+      "df": 18.527684687206865,
+      "t": 2.0966412170533415,
+      "k": 4
+    },
+    "primaryCleanRunsOnly": "all runs clean: identical to the primary",
+    "brick-hvac": {
+      "composite": {
+        "estimate": 0.1604309225052859,
+        "lo": 0.013341786082501833,
+        "hi": 0.30752005892807,
+        "se": 0.06347492521436351,
+        "df": 7.782328920757465,
+        "t": 2.317279396959412,
+        "k": 1
+      },
+      "relF1": {
+        "estimate": 0.19616630427001447,
+        "lo": -0.12337740145161741,
+        "hi": 0.5157100099916463,
+        "se": 0.1383359429351346,
+        "df": 7.922999542663222,
+        "t": 2.3099109236669255,
+        "k": 1
+      }
+    },
+    "iof-maintenance": {
+      "composite": {
+        "estimate": 0.10125004824567219,
+        "lo": -0.005075535219728769,
+        "hi": 0.20757563171107313,
+        "se": 0.04221081716366564,
+        "df": 5.3645560104638275,
+        "t": 2.5189179127506733,
+        "k": 1
+      },
+      "relF1": {
+        "estimate": 0.14320764404122732,
+        "lo": -0.1103647044560237,
+        "hi": 0.39677999253847834,
+        "se": 0.10694074046886813,
+        "df": 6.906230732638636,
+        "t": 2.371148239534299,
+        "k": 1
+      }
+    },
+    "iof-supply-chain": {
+      "composite": {
+        "estimate": 0.06823489835154717,
+        "lo": -0.010585797456143645,
+        "hi": 0.14705559415923797,
+        "se": 0.03243381149771232,
+        "df": 6.174986149940901,
+        "t": 2.430201452371712,
+        "k": 1
+      },
+      "relF1": {
+        "estimate": 0.2468203303839046,
+        "lo": 0.12864958800610657,
+        "hi": 0.3649910727617026,
+        "se": 0.050996378282903265,
+        "df": 7.783104297874352,
+        "t": 2.3172379364323454,
+        "k": 1
+      }
+    },
+    "fibo-loans": {
+      "composite": {
+        "estimate": 0.013368336542268433,
+        "lo": -0.11236383152137056,
+        "hi": 0.13910050460590742,
+        "se": 0.054472517425635275,
+        "df": 7.956977885660208,
+        "t": 2.3081761961026652,
+        "k": 1
+      },
+      "relF1": {
+        "estimate": 0.10410533443231074,
+        "lo": -0.07453869093673554,
+        "hi": 0.282749359801357,
+        "se": 0.0739990125335989,
+        "df": 6.355190847292975,
+        "t": 2.4141406655654194,
+        "k": 1
+      }
+    },
+    "itops": {
+      "composite": {
+        "estimate": -0.028978171674864828,
+        "lo": -0.23483723111063728,
+        "hi": 0.17688088776090763,
+        "se": 0.07232694848184411,
+        "df": 3.7647352434921566,
+        "t": 2.8462290163872774,
+        "k": 1
+      },
+      "classF1": {
+        "estimate": -0.04794333588659827,
+        "lo": -0.2433416455458689,
+        "hi": 0.14745497377267236,
+        "se": 0.06038850658743676,
+        "df": 2.9148571547395674,
+        "t": 3.2356870653251315,
+        "k": 1
+      },
+      "relF1": {
+        "estimate": -0.013753792842545631,
+        "lo": -0.226090146620035,
+        "hi": 0.19858256093494372,
+        "se": 0.0738914475724846,
+        "df": 3.681982136044891,
+        "t": 2.8736255785109064,
+        "k": 1
+      },
+      "propF1": {
+        "estimate": -0.025237386295450193,
+        "lo": -0.26958110781420885,
+        "hi": 0.21910633522330847,
+        "se": 0.08791361494954385,
+        "df": 3.989383185237915,
+        "t": 2.7793615546237582,
+        "k": 1
+      }
+    }
+  },
+  "reading": {
+    "primary": "a",
+    "keySecondary": "a"
+  },
+  "macro": {
+    "v1-same-model": {
+      "composite": 0.6901662556937503,
+      "classF1": 0.7504114834187572,
+      "relF1": 0.5946107688213946,
+      "propF1": 0.7254765148410989
+    },
+    "final": {
+      "composite": 0.7759873071049438,
+      "classF1": 0.770005957533725,
+      "relF1": 0.7671856721032589,
+      "propF1": 0.7907702916778474
+    }
+  }
+}

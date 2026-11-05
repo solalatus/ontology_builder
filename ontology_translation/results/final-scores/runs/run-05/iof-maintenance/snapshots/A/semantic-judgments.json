@@ -1,0 +1,91 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToFail",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToExhibitUndesirableBehavior",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e10",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_4",
+          "recoveredId": "e11",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": [
+        {
+          "id": "MaintenanceState.stateCategory",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- An asset is an item, not an operating state.\n2: NO MATCH -- An asset is an item, not a degraded state.\n3: NO MATCH -- An asset is an item, not a failed state.\n4: NO MATCH -- An asset is an item, not a disposition to fail.\n5: NO MATCH -- An asset is an item, not a disposition to exhibit undesirable behavior.",
+      "relationships": "1: MATCH 4 -- “Includes” expresses the process having a maintenance activity.\n2: MATCH 5 -- “Includes” expresses the process having a supporting maintenance activity.",
+      "valueFidelity": "1: 100 -- Identical set of states."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e10",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- No candidate represents an operating state.\n2: NO MATCH -- FailureProcess is a change, not a degraded state.\n3: NO MATCH -- FailureProcess is distinct from the failed state it produces.",
+      "relationships": "1: MATCH 2 -- “Includes” expresses the same process-to-activity relationship as “has Activity.”"
+    }
+  }
+}

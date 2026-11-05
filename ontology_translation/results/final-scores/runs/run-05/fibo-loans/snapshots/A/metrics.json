@@ -1,0 +1,562 @@
+{
+  "label": "A",
+  "turn": 107,
+  "stage": "interview",
+  "elapsedSec": 1292,
+  "counts": {
+    "classes": 37,
+    "relationships": 30,
+    "properties": 37,
+    "allowedValueLists": 0,
+    "rules": 4,
+    "actions": 5,
+    "droppedEdges": 0
+  },
+  "metrics": {
+    "classes": {
+      "recall": 0.6491228070175439,
+      "precision": 1,
+      "f1": 0.7872340425531915,
+      "matched": 37,
+      "groundTruthTotal": 57,
+      "recoveredTotal": 37
+    },
+    "relationships": {
+      "recall": 0.9354838709677419,
+      "precision": 0.9666666666666667,
+      "f1": 0.9508196721311476,
+      "matched": 29,
+      "groundTruthTotal": 31,
+      "recoveredTotal": 30
+    },
+    "properties": {
+      "recall": 0.7551020408163265,
+      "precision": 1,
+      "f1": 0.8604651162790697,
+      "matched": 37,
+      "groundTruthTotal": 49,
+      "recoveredTotal": 37
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.8661729436544695,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.875,
+      "precision": 0.5675675675675675,
+      "f1": 0.6885245901639344,
+      "matched": 21,
+      "groundTruthTotal": 24,
+      "recoveredTotal": 37
+    },
+    "relationships": {
+      "recall": 1,
+      "precision": 0.5666666666666667,
+      "f1": 0.7234042553191489,
+      "matched": 17,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 30
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.2972972972972973,
+      "f1": 0.4583333333333333,
+      "matched": 11,
+      "groundTruthTotal": 11,
+      "recoveredTotal": 37
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6234207262721388,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": {
+    "classes": {
+      "recall": 0.6491228070175439,
+      "precision": 1,
+      "f1": 0.7872340425531915,
+      "matched": 37,
+      "groundTruthTotal": 57,
+      "recoveredTotal": 37
+    },
+    "relationships": {
+      "recall": 0.967741935483871,
+      "precision": 1,
+      "f1": 0.9836065573770492,
+      "matched": 30,
+      "groundTruthTotal": 31,
+      "recoveredTotal": 30
+    },
+    "properties": {
+      "recall": 0.7551020408163265,
+      "precision": 1,
+      "f1": 0.8604651162790697,
+      "matched": 37,
+      "groundTruthTotal": 49,
+      "recoveredTotal": 37
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.8771019054031036,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 1,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OpenEndCredit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ClosedEndCredit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FloatingInterestRate",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ManagedInterestRate",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DebtTerms",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Amortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FullAmortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PartialAmortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "NegativeAmortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ExplicitContractEventSchedule",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CreditEnhancementAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CreditEnhancementBeneficiary",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PrincipalPayment",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestPayment",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestCalculation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestRateReset",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "RevolvingLineOfCredit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CommittedCreditFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "UncommittedCreditFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Accrual",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_30",
+          "recoveredId": "e20",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "Loan.assumable",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.initiallyPayable",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.totalClosingCosts",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.totalPointsAndFees",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.loanBalance",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AmortizationSchedule.anticipatedNumberOfPayments",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "LoanPaymentSchedule.anticipatedNumberOfPayments",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestPaymentSchedule.anticipatedNumberOfPayments",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PrincipalPaymentSchedule.anticipatedNumberOfPayments",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_30",
+          "recoveredId": "e20"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.6491228070175439,
+        "precision": 1,
+        "f1": 0.7872340425531915,
+        "matched": 37,
+        "groundTruthTotal": 57,
+        "recoveredTotal": 37
+      },
+      "relationships": {
+        "recall": 0.9354838709677419,
+        "precision": 0.9666666666666667,
+        "f1": 0.9508196721311476,
+        "matched": 29,
+        "groundTruthTotal": 31,
+        "recoveredTotal": 30
+      },
+      "properties": {
+        "recall": 0.7551020408163265,
+        "precision": 1,
+        "f1": 0.8604651162790697,
+        "matched": 37,
+        "groundTruthTotal": 49,
+        "recoveredTotal": 37
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.8661729436544695,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 1 -- “has a schedule” is the same relationship."
+    }
+  },
+  "semanticScopedMetrics": {
+    "classes": {
+      "recall": 0.875,
+      "precision": 0.5675675675675675,
+      "f1": 0.6885245901639344,
+      "matched": 21,
+      "groundTruthTotal": 24,
+      "recoveredTotal": 37
+    },
+    "relationships": {
+      "recall": 1,
+      "precision": 0.5666666666666667,
+      "f1": 0.7234042553191489,
+      "matched": 17,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 30
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.2972972972972973,
+      "f1": 0.4583333333333333,
+      "matched": 11,
+      "groundTruthTotal": 11,
+      "recoveredTotal": 37
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6234207262721388,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 1,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Amortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "NegativeAmortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestRateReset",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.875,
+        "precision": 0.5675675675675675,
+        "f1": 0.6885245901639344,
+        "matched": 21,
+        "groundTruthTotal": 24,
+        "recoveredTotal": 37
+      },
+      "relationships": {
+        "recall": 1,
+        "precision": 0.5666666666666667,
+        "f1": 0.7234042553191489,
+        "matched": 17,
+        "groundTruthTotal": 17,
+        "recoveredTotal": 30
+      },
+      "properties": {
+        "recall": 1,
+        "precision": 0.2972972972972973,
+        "f1": 0.4583333333333333,
+        "matched": 11,
+        "groundTruthTotal": 11,
+        "recoveredTotal": 37
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.6234207262721388,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- An amortization schedule records amortization; it is not amortization itself.\n2: NO MATCH -- No candidate represents negative amortization.\n3: NO MATCH -- The candidate rate-setting event is explicitly initial, not a reset."
+    }
+  },
+  "ruleMetrics": {
+    "recall": 0,
+    "precision": 0,
+    "f1": 0,
+    "matched": 0,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 4
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 0.8,
+      "precision": 0.8,
+      "f1": 0.8000000000000002,
+      "matched": 4,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "inputClassAccuracy": 1,
+    "inputClassChecked": 4,
+    "preconditionRecovery": 0,
+    "effectRecovery": 0.16565436279875936,
+    "verificationRecovery": 0.258364004416636
+  },
+  "semanticRuleActionMetrics": {
+    "rules": {
+      "recall": 0.42857142857142855,
+      "precision": 0.75,
+      "f1": 0.5454545454545454,
+      "matched": 3,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 4
+    },
+    "actions": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5,
+      "components": {
+        "identification": {
+          "recall": 0.8,
+          "precision": 0.8,
+          "f1": 0.8000000000000002,
+          "matched": 4,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 5
+        },
+        "inputClassAccuracy": 1,
+        "inputClassChecked": 4,
+        "preconditionRecovery": 0,
+        "effectRecovery": 0.16565436279875936,
+        "verificationRecovery": 0.258364004416636
+      }
+    },
+    "judgeCallCount": 2,
+    "judgments": {
+      "rules": [
+        {
+          "goldId": "loanRequiresBorrowerAndLender",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "interestBearingLoanNeedsInterestTerms",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "securedLoanNeedsCollateral",
+          "recoveredId": "securedLoanHasCollateralLink",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "paymentHistoryContainsPayments",
+          "recoveredId": "paymentRecordComplete",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "variableRateLoanNeedsResetTerms",
+          "recoveredId": "variableRateSetupConfirmed",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "prepaymentPenaltyRequiresPrepaymentTerms",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "amortizingLoanNeedsRepaymentSchedule",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "actions": [
+        {
+          "goldId": "reviewPrepaymentTerms",
+          "recoveredId": "checkPrepaymentPenaltyTiming",
+          "verdict": "MATCH"
+        }
+      ]
+    },
+    "resolvedMatches": {
+      "rules": [
+        {
+          "goldId": "securedLoanNeedsCollateral",
+          "recoveredId": "securedLoanHasCollateralLink"
+        },
+        {
+          "goldId": "paymentHistoryContainsPayments",
+          "recoveredId": "paymentRecordComplete"
+        },
+        {
+          "goldId": "variableRateLoanNeedsResetTerms",
+          "recoveredId": "variableRateSetupConfirmed"
+        }
+      ],
+      "actions": [
+        {
+          "goldId": "reviewPrepaymentTerms",
+          "recoveredId": "checkPrepaymentPenaltyTiming"
+        }
+      ]
+    },
+    "heuristic": {
+      "rules": {
+        "recall": 0,
+        "precision": 0,
+        "f1": 0,
+        "matched": 0,
+        "groundTruthTotal": 7,
+        "recoveredTotal": 4
+      },
+      "actions": {
+        "identification": {
+          "recall": 0.8,
+          "precision": 0.8,
+          "f1": 0.8000000000000002,
+          "matched": 4,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 5
+        },
+        "inputClassAccuracy": 1,
+        "inputClassChecked": 4,
+        "preconditionRecovery": 0,
+        "effectRecovery": 0.16565436279875936,
+        "verificationRecovery": 0.258364004416636
+      }
+    },
+    "rawResponses": {
+      "rules": "1: NO MATCH -- Candidate 1 also requires interest-rate and interest-payment terms.\n2: NO MATCH -- Candidate 1 also requires borrower and lender links.\n3: MATCH 2 -- A secured loan must have its own collateral link.\n4: MATCH 4 -- The loan’s payment history must contain an individual payment transaction.\n5: MATCH 3 -- A variable-rate loan must have its own reset schedule.\n6: NO MATCH -- No candidate requires a recorded prepayment penalty term.\n7: NO MATCH -- No candidate requires an amortization schedule and principal repayment terms.",
+      "actions": "1: MATCH 1 -- Both check whether the loan’s prepayment penalty timing is confirmed."
+    }
+  },
+  "offlineRescoreAgrees": true
+}

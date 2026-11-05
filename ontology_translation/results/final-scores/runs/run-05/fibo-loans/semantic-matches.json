@@ -1,0 +1,19 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_30",
+        "recoveredId": "e20"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": []
+  }
+}
