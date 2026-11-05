@@ -1,0 +1,1022 @@
+competency_questions: []
+classes:
+  Incident:
+    meaning: "A managed record of an unplanned interruption, degradation, or security condition."
+    aliases:
+      - incidens
+      - hibajegy
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - contained
+          - recovering
+          - monitoring
+          - resolved
+          - closed
+          - cancelled
+      severity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      majorIncident:
+        type: boolean
+      declarationTime:
+        type: date
+      category:
+        type: text
+        allowed:
+          - availability
+          - performance
+          - capacity
+          - network
+          - application
+          - database
+          - infrastructure
+          - data-integrity
+          - cybersecurity
+          - third-party
+          - change-induced
+          - other
+      classification:
+        type: text
+      resolutionTime:
+        type: date
+      detectedTime:
+        type: date
+      openedTime:
+        type: date
+      closedTime:
+        type: date
+  BusinessService:
+    meaning: A capability the bank delivers to customers or the business.
+    aliases:
+      - üzleti szolgáltatás
+    properties:
+      healthState:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+          - recovering
+          - unknown
+      criticalityTier:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+  CustomerChannel:
+    meaning: A way customers access a business service.
+    aliases:
+      - ügyfélcsatorna
+    properties: {}
+  ITService:
+    meaning: A managed technology capability supporting a business service.
+    aliases:
+      - informatikai szolgáltatás
+      - informatics service
+    properties:
+      healthState:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+          - recovering
+          - unknown
+      criticalityTier:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+  ConfigurationItem:
+    meaning: A managed component identified for impact analysis and isolation.
+    aliases:
+      - CI
+      - konfigurációs elem
+    properties:
+      criticalityTier:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+  ThirdPartyService:
+    meaning: An externally provided service on which an IT service may depend.
+    aliases:
+      - outsourced service
+      - külső szolgáltatás
+    properties: {}
+  Event:
+    meaning: A time-stamped observation of a state change or other noteworthy occurrence.
+    aliases:
+      - esemény
+    properties:
+      observedAt:
+        type: date
+      eventType:
+        type: text
+      detectionSource:
+        type: text
+  Alert:
+    meaning: A signal requiring triage or acknowledgement.
+    aliases:
+      - riasztás
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - suppressed
+          - escalated
+          - closed
+      raisedAt:
+        type: date
+      summary:
+        type: text
+      detectionSource:
+        type: text
+      severity:
+        type: text
+      occurrenceCount:
+        type: number
+  ServiceOwner:
+    meaning: The person accountable for an IT service across its lifecycle.
+    aliases:
+      - szolgáltatásgazda
+    properties: {}
+  ResolverGroup:
+    meaning: A team assigned to diagnose and restore a service or technology area.
+    aliases:
+      - megoldócsoport
+      - support group
+    properties: {}
+  OnCallEngineer:
+    meaning: A member of a resolver group handling time-critical technical response.
+    aliases:
+      - ügyeletes mérnök
+      - on-call
+    properties: {}
+  IncidentCommander:
+    meaning: A member of the incident response team who commands a major incident.
+    aliases:
+      - incident manager
+      - incidensparancsnok
+      - MIM lead
+    properties: {}
+  NetworkOperations:
+    meaning: The function that operates monitoring for network and infrastructure services.
+    aliases:
+      - network operations centre
+      - NOC
+      - hálózatüzemeltetési központ
+    properties: {}
+  SecurityOperations:
+    meaning: The function that monitors and investigates security events.
+    aliases:
+      - security operations centre
+      - SOC
+      - biztonsági műveleti központ
+    properties: {}
+  IncidentResponseTeam:
+    meaning: The function that coordinates significant incident response.
+    aliases:
+      - IRT
+      - incidenskezelő csapat
+    properties: {}
+  ServiceDesk:
+    meaning: "The function that receives, records, triages, and routes user-reported incidents."
+    aliases:
+      - help desk
+      - ügyfélszolgálati IT pult
+      - hibabejelentő
+    properties: {}
+  Runbook:
+    meaning: "A maintained procedure for diagnosis, response, recovery, or verification."
+    aliases:
+      - üzemeltetési eljárás
+      - playbook
+    properties: {}
+  Workaround:
+    meaning: A temporary way to reduce or bypass an impact.
+    aliases:
+      - kerülőmegoldás
+    properties: {}
+  BackupSet:
+    meaning: Recoverable data protecting particular configuration items.
+    aliases:
+      - mentéskészlet
+      - backup
+    properties:
+      status:
+        type: text
+        allowed:
+          - scheduled
+          - running
+          - successful
+          - failed
+          - expired
+          - corrupted
+          - verified
+      lastSuccessfulBackup:
+        type: date
+      lastVerification:
+        type: date
+  RecoveryPlan:
+    meaning: A plan for restoring an IT service and its dependencies.
+    aliases:
+      - helyreállítási terv
+      - DR plan
+    properties:
+      recoveryTimeObjective:
+        type: number
+      recoveryPointObjective:
+        type: number
+      lastReviewDate:
+        type: date
+  Environment:
+    meaning: The deployment context of an IT service or configuration item.
+    aliases:
+      - környezet
+    properties:
+      environmentType:
+        type: text
+        allowed:
+          - production
+          - disaster-recovery
+          - pre-production
+          - test
+          - development
+          - management
+  Change:
+    meaning: A controlled modification that may be examined for a possible connection to an incident.
+    aliases:
+      - változás
+      - módosítás
+    properties:
+      riskLevel:
+        type: text
+        allowed:
+          - low
+          - medium
+          - high
+          - critical
+      implementationPlan:
+        type: text
+      backoutPlan:
+        type: text
+      status:
+        type: text
+        allowed:
+          - draft
+          - assessed
+          - approved
+          - scheduled
+          - implementing
+          - implemented
+          - failed
+          - rolled-back
+          - closed
+          - cancelled
+  Deployment:
+    meaning: A timed technical execution that installs or activates a modification and records its outcome.
+    aliases:
+      - telepítés
+      - élesítés
+    properties:
+      status:
+        type: text
+        allowed:
+          - planned
+          - running
+          - succeeded
+          - failed
+          - rolled-back
+          - cancelled
+      startTime:
+        type: date
+      completionTime:
+        type: date
+  PostIncidentReview:
+    meaning: A review of an earlier incident that records findings and can produce corrective actions.
+    aliases:
+      - PIR
+      - RCA review
+      - incidens utóelemzés
+    properties:
+      heldOn:
+        type: date
+      findings:
+        type: text
+  CorrectiveAction:
+    meaning: A separately tracked action arising from an incident review with its own owner and status.
+    aliases:
+      - remediation action
+      - helyesbítő intézkedés
+    properties:
+      description:
+        type: text
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - blocked
+          - implemented
+          - verified
+          - closed
+          - cancelled
+      dueDate:
+        type: date
+  Release:
+    meaning: A grouping of approved changes introduced together and delivered by a deployment.
+    aliases:
+      - kiadás
+    properties: {}
+  MaterialityAssessment:
+    meaning: An evaluation of an incident recording a reporting conclusion and its rationale.
+    aliases:
+      - reportability assessment
+      - lényegességi értékelés
+    properties:
+      assessedAt:
+        type: date
+      result:
+        type: text
+        allowed:
+          - not reportable
+          - potentially reportable
+          - reportable
+          - undetermined
+      rationale:
+        type: text
+      reportingDueTime:
+        type: date
+  RegulatoryNotification:
+    meaning: "A formal incident submission to a regulator whose approval, submission, and outcome are tracked."
+    aliases:
+      - supervisory notification
+      - felügyeleti bejelentés
+    properties:
+      dueTime:
+        type: date
+      submissionTime:
+        type: date
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+  Regulator:
+    meaning: The competent authority that receives a regulatory notification.
+    aliases:
+      - supervisory authority
+      - felügyeleti hatóság
+    properties: {}
+  EvidenceItem:
+    meaning: "An item documenting an incident whose integrity matters to investigation, reporting, or closure."
+    aliases:
+      - evidence
+      - bizonyíték
+    properties:
+      collectedAt:
+        type: date
+      integrityStatus:
+        type: text
+        allowed:
+          - collected
+          - hashed
+          - verified
+          - sealed
+          - compromised
+      cryptographicHash:
+        type: text
+  StakeholderCommunication:
+    meaning: A controlled message about an incident addressed to its recipients.
+    aliases:
+      - értesítés
+      - tájékoztatás
+    properties:
+      audience:
+        type: text
+      messageSummary:
+        type: text
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      sentAt:
+        type: date
+  Person:
+    meaning: "An identifiable individual who performs a recorded action, including acknowledging an alert."
+    aliases: []
+    properties: {}
+  MonitoringTool:
+    meaning: A tool that collects operational information and executes monitoring rules.
+    aliases:
+      - monitoring platform
+      - felügyeleti eszköz
+    properties: {}
+  KnownError:
+    meaning: A diagnosed problem documented with a cause or workaround.
+    aliases:
+      - ismert hiba
+    properties: {}
+  MonitoringRule:
+    meaning: A rule evaluating metrics that can generate alerts and is executed by a monitoring tool.
+    aliases:
+      - alert rule
+      - riasztási szabály
+    properties: {}
+  Problem:
+    meaning: An underlying or potential cause that may group incidents without establishing a proven root cause.
+    aliases:
+      - probléma
+    properties: {}
+  Vendor:
+    meaning: An external provider of a third-party service that may receive an incident escalation.
+    aliases:
+      - supplier
+      - szállító
+      - beszállító
+    properties: {}
+  Stakeholder:
+    meaning: A party whose interests are affected and to whom an incident communication can be addressed.
+    aliases:
+      - érintett
+    properties: {}
+  Application:
+    meaning: An identifiable application implementing an IT service and using technical components.
+    aliases:
+      - alkalmazás
+      - app
+    properties: {}
+  Database:
+    meaning: An identifiable database used by an application.
+    aliases:
+      - adatbázis
+      - DB
+    properties: {}
+  InfrastructureComponent:
+    meaning: An identifiable infrastructure component on which an IT service or application runs.
+    aliases:
+      - infrastruktúra-elem
+    properties: {}
+  OrganizationalUnit:
+    meaning: An identifiable organizational unit accountable for following a corrective action through.
+    aliases:
+      - szervezeti egység
+    properties: {}
+relationships:
+  - name: impactsItservice
+    from: Incident
+    to: ITService
+    meaning: A confirmed impact of an incident on an IT service.
+    aliases:
+      - The IT service is impacted by the incident
+  - name: impactsBusinessService
+    from: Incident
+    to: BusinessService
+    meaning: A confirmed impact of an incident on a business service.
+    aliases:
+      - The business service is impacted by the incident
+  - name: affectsConfigurationItem
+    from: Incident
+    to: ConfigurationItem
+    meaning: A configuration item identified as affected by an incident.
+    aliases:
+      - The configuration item is affected by the incident
+  - name: dependsOnItservice
+    from: BusinessService
+    to: ITService
+    meaning: An IT service supporting delivery of the business service.
+    aliases:
+      - The business service relies on the IT service
+  - name: deliveredThrough
+    from: BusinessService
+    to: CustomerChannel
+    meaning: A customer channel through which the business service is delivered.
+    aliases:
+      - Customers access the business service through that channel
+  - name: dependsOnThirdPartyService
+    from: ITService
+    to: ThirdPartyService
+    meaning: An externally provided service on which the IT service depends.
+    aliases:
+      - The IT service relies on that externally provided service
+  - name: implementedBy
+    from: ITService
+    to: Application
+    meaning: An application implementing the IT service.
+    aliases:
+      - That application provides the software functionality for the IT service
+  - name: runsOnInfrastructure
+    from: ITService
+    to: InfrastructureComponent
+    meaning: An infrastructure component on which the IT service runs.
+    aliases:
+      - "The infrastructure component hosts the IT service's workload"
+  - name: usesDatabase
+    from: Application
+    to: Database
+    meaning: A database used by the application.
+    aliases:
+      - The application accesses that database
+  - name: applicationRunsOn
+    from: Application
+    to: InfrastructureComponent
+    meaning: An infrastructure component on which the application runs.
+    aliases:
+      - "The component hosts the application's workload"
+  - name: triggeredByAlert
+    from: Incident
+    to: Alert
+    meaning: An alert whose triage led to the incident being opened.
+    aliases:
+      - The alert prompted the incident record
+  - name: builtFromEvents
+    from: Incident
+    to: Event
+    meaning: An event included among observations correlated to establish the incident; no single event proves it.
+    aliases:
+      - The incident was correlated from that event
+  - name: indicatesEvent
+    from: Alert
+    to: Event
+    meaning: An event indicated by the alert.
+    aliases:
+      - The alert points to that observed event
+  - name: concernsItservice
+    from: Alert
+    to: ITService
+    meaning: An IT service that the alert concerns.
+    aliases:
+      - The alert is about that IT service
+  - name: concernsConfigurationItem
+    from: Alert
+    to: ConfigurationItem
+    meaning: A configuration item that the alert concerns.
+    aliases:
+      - The alert is about that configuration item
+  - name: observedOn
+    from: Event
+    to: ConfigurationItem
+    meaning: "A configuration item on which the event is observed, without claiming it caused the event."
+    aliases:
+      - The observation was recorded on that item
+  - name: relatesToItservice
+    from: Event
+    to: ITService
+    meaning: An IT service to which the event relates.
+    aliases:
+      - The event is associated with that IT service
+  - name: generatedByRule
+    from: Alert
+    to: MonitoringRule
+    meaning: "The monitoring rule that generated the alert, when it has a monitoring origin."
+    aliases:
+      - That monitoring rule produced the alert
+  - name: evaluatedBy
+    from: MonitoringRule
+    to: MonitoringTool
+    meaning: "The monitoring tool that carries out the rule's evaluation."
+    aliases: []
+  - name: operatesMonitoringTool
+    from: NetworkOperations
+    to: MonitoringTool
+    meaning: The monitoring tool operated by network operations.
+    aliases:
+      - Network operations runs that monitoring platform
+  - name: executedByTool
+    from: MonitoringRule
+    to: MonitoringTool
+    meaning: The monitoring tool that executes the monitoring rule; the rule evaluates metrics.
+    aliases:
+      - The monitoring tool ran the rule
+  - name: monitorsSecurityEvent
+    from: SecurityOperations
+    to: Event
+    meaning: "A specifically identified security-relevant event monitored by security operations, not every event."
+    aliases:
+      - Security operations watches that security-relevant event
+  - name: assignedTo
+    from: Incident
+    to: ResolverGroup
+    meaning: The resolver group assigned to diagnose and restore the incident.
+    aliases:
+      - That resolver group has the incident assignment
+  - name: handledByOnCallEngineer
+    from: Incident
+    to: OnCallEngineer
+    meaning: "The on-call engineer actually handling the incident's time-critical technical work."
+    aliases:
+      - "That on-call engineer is handling the incident's technical response"
+  - name: memberOfResolverGroup
+    from: OnCallEngineer
+    to: ResolverGroup
+    meaning: The resolver group of which the on-call engineer is a member.
+    aliases:
+      - The engineer belongs to that resolver group
+  - name: ownsItservice
+    from: ServiceOwner
+    to: ITService
+    meaning: The IT service for which the service owner is accountable across its lifecycle.
+    aliases:
+      - The service owner is accountable for that IT service across its lifecycle
+  - name: commandsMajorIncident
+    from: IncidentCommander
+    to: Incident
+    meaning: A specifically declared major incident commanded by this incident commander.
+    aliases:
+      - The commander leads the major-incident response and its decision cadence
+  - name: coordinatedByCommander
+    from: Incident
+    to: IncidentCommander
+    meaning: The commander who personally coordinates this declared major incident.
+    aliases:
+      - The commander coordinates the response to that incident
+  - name: coordinatesMajorIncident
+    from: IncidentResponseTeam
+    to: Incident
+    meaning: A specifically declared major incident coordinated by the incident response team.
+    aliases:
+      - The response team coordinates the wider major-incident effort
+  - name: recordsIncident
+    from: ServiceDesk
+    to: Incident
+    meaning: An incident recorded by the service desk when it handles intake.
+    aliases:
+      - The service desk logged the incident
+  - name: memberOfResponseTeam
+    from: IncidentCommander
+    to: IncidentResponseTeam
+    meaning: The incident response team of which the commander is a member.
+    aliases:
+      - The commander belongs to the incident response team
+  - name: handledWithRunbook
+    from: Incident
+    to: Runbook
+    meaning: "A runbook used to guide handling of the incident, without asserting that every step was executed."
+    aliases:
+      - The team used that runbook to guide the incident response
+  - name: hasWorkaround
+    from: KnownError
+    to: Workaround
+    meaning: A temporary measure documented for the known error.
+    aliases:
+      - A temporary way around the known error is documented
+  - name: documentedInRunbook
+    from: Workaround
+    to: Runbook
+    meaning: The runbook in which the workaround is documented.
+    aliases:
+      - The runbook describes how to apply the workaround
+  - name: recoversItservice
+    from: RecoveryPlan
+    to: ITService
+    meaning: An IT service the recovery plan is intended to recover.
+    aliases:
+      - The plan sets out how to bring that IT service back
+  - name: usesBackupSet
+    from: RecoveryPlan
+    to: BackupSet
+    meaning: A backup set used by the recovery plan where applicable.
+    aliases:
+      - The plan calls for that backup set
+  - name: recoveredWithPlan
+    from: Incident
+    to: RecoveryPlan
+    meaning: The recovery plan used in recovering from the incident.
+    aliases:
+      - That recovery plan was used in restoring service during the incident
+  - name: protectsConfigurationItem
+    from: BackupSet
+    to: ConfigurationItem
+    meaning: A configuration item whose data the backup set protects.
+    aliases:
+      - That item is covered by the backup set
+  - name: deployedIn
+    from: ITService
+    to: Environment
+    meaning: The environment in which the IT service is deployed.
+    aliases:
+      - The IT service runs in that deployment environment
+  - name: belongsToEnvironment
+    from: ConfigurationItem
+    to: Environment
+    meaning: The environment to which the configuration item belongs.
+    aliases:
+      - That item is assigned to that environment
+  - name: implementedByRelease
+    from: Change
+    to: Release
+    meaning: The release through which the change is implemented.
+    aliases:
+      - The release carries that approved change
+  - name: deliveredByDeployment
+    from: Release
+    to: Deployment
+    meaning: The deployment that delivers the release.
+    aliases:
+      - The deployment puts the release into effect
+  - name: modifiesConfigurationItem
+    from: Change
+    to: ConfigurationItem
+    meaning: A configuration item modified by the change.
+    aliases:
+      - That item is changed under the change record
+  - name: affectsItservice
+    from: Change
+    to: ITService
+    meaning: An IT service affected by the change.
+    aliases:
+      - "The IT service is within the change's scope"
+  - name: targetsEnvironment
+    from: Deployment
+    to: Environment
+    meaning: The environment targeted by the deployment.
+    aliases:
+      - The deployment is directed at that environment
+  - name: deploysApplication
+    from: Deployment
+    to: Application
+    meaning: An application deployed during the deployment.
+    aliases:
+      - The deployment installs or activates that application
+  - name: reviewsIncident
+    from: PostIncidentReview
+    to: Incident
+    meaning: The earlier incident examined by the post-incident review.
+    aliases:
+      - The incident was examined in that review
+  - name: producesCorrectiveAction
+    from: PostIncidentReview
+    to: CorrectiveAction
+    meaning: A corrective action produced by the review.
+    aliases:
+      - That follow-up action came out of the review
+  - name: implementedByChange
+    from: CorrectiveAction
+    to: Change
+    meaning: A change implementing the corrective action where applicable.
+    aliases:
+      - That change carries out the corrective action
+  - name: linkedToProblem
+    from: Incident
+    to: Problem
+    meaning: A problem linked to the incident without asserting its cause has been proven.
+    aliases:
+      - The incident is associated with that problem record
+  - name: documentedByKnownError
+    from: Problem
+    to: KnownError
+    meaning: A known error documenting a diagnosed problem.
+    aliases:
+      - A known-error record documents the diagnosed problem
+  - name: identifiesProblem
+    from: PostIncidentReview
+    to: Problem
+    meaning: A problem identified by the review.
+    aliases:
+      - The review surfaced an underlying or potential cause for investigation
+  - name: ownedByUnit
+    from: CorrectiveAction
+    to: OrganizationalUnit
+    meaning: The organizational unit accountable for completing the corrective action.
+    aliases:
+      - That unit is accountable for following the corrective action through
+  - name: evaluatedByAssessment
+    from: Incident
+    to: MaterialityAssessment
+    meaning: The materiality assessment evaluating the incident.
+    aliases:
+      - "The assessment considers that incident's significance and reporting implications"
+  - name: canTriggerNotification
+    from: MaterialityAssessment
+    to: RegulatoryNotification
+    meaning: A regulatory notification initiated following the assessment when reporting is required.
+    aliases:
+      - A reportable assessment gives rise to a notification
+  - name: reportsIncident
+    from: RegulatoryNotification
+    to: Incident
+    meaning: The incident reported in the regulatory notification.
+    aliases:
+      - The submission concerns that incident
+  - name: sentToRegulator
+    from: RegulatoryNotification
+    to: Regulator
+    meaning: The regulator intended to receive the notification; this link does not establish that it was submitted or delivered.
+    aliases:
+      - The competent authority is the intended recipient of the submission
+  - name: supportedByEvidence
+    from: Incident
+    to: EvidenceItem
+    meaning: An evidence item supporting the incident record.
+    aliases:
+      - That evidence item documents the incident
+  - name: includesEvidence
+    from: RegulatoryNotification
+    to: EvidenceItem
+    meaning: An evidence item included with the regulatory notification.
+    aliases:
+      - That evidence item supports the submission
+  - name: isAboutIncident
+    from: StakeholderCommunication
+    to: Incident
+    meaning: The incident the stakeholder communication is about.
+    aliases:
+      - The message concerns that incident
+  - name: addressedToStakeholder
+    from: StakeholderCommunication
+    to: Stakeholder
+    meaning: A stakeholder to whom the communication is addressed.
+    aliases:
+      - "That stakeholder is the message's intended recipient"
+  - name: providedByVendor
+    from: ThirdPartyService
+    to: Vendor
+    meaning: The vendor providing the third-party service.
+    aliases:
+      - That vendor supplies the external service
+  - name: escalatedToVendor
+    from: Incident
+    to: Vendor
+    meaning: A vendor to whom the incident was actually escalated.
+    aliases:
+      - The vendor has been brought into the incident response through an escalation
+  - name: justifiedByIncident
+    from: Change
+    to: Incident
+    meaning: The active incident that justifies executing this change through the emergency path; the link alone does not authorise execution.
+    aliases:
+      - The active incident is the reason for taking the emergency-change path
+rules:
+  canAcknowledgeAlert:
+    conditions:
+      - Alert status is new.
+      - "The acting operator's authorisation for the responsible resolver group is confirmed in access-control records; on-call status alone is not sufficient."
+  canAssignIncident:
+    conditions:
+      - Incident status is neither closed nor cancelled.
+      - Approved resolver-group support or routing information confirms that the proposed group supports an affected IT service or configuration item.
+  canDeclareMajorIncident:
+    conditions:
+      - "Incident status is new, acknowledged, investigating, contained, recovering, or monitoring."
+      - Incident severity is sev1-critical or sev2-high.
+      - At least one impacted IT service is identified.
+      - An incident commander is assigned.
+      - "The bank's approved major-incident declaration criteria are satisfied using documented supporting facts; missing facts are flagged rather than guessed."
+  canContainIncident:
+    conditions:
+      - Incident status is acknowledged or investigating.
+      - Containment scope and expected side effects are recorded before execution.
+      - The steps to execute are approved under the applicable procedure where approval is required.
+  canIsolateConfigurationItem:
+    conditions:
+      - The configuration item is linked as affected by the incident.
+      - "If the item was found through an application, database, or infrastructure-component record, its identity is verified against the approved configuration inventory; if the match is unreliable, stop."
+      - The impact of isolating the item is assessed.
+      - A rollback or reconnection method is available.
+      - Any approval required for the proposed step under the applicable procedure is confirmed.
+  canFailOverService:
+    conditions:
+      - The recovery plan is applicable to the IT service being failed over.
+      - The proposed target recovery environment is confirmed available under the governing procedure; environment type alone is not proof.
+      - "The proposed data-recovery point is confirmed acceptable using the approved basis, not an uninterpreted numeric objective."
+  canRestoreBackup:
+    conditions:
+      - The selected backup set status is successful or verified.
+      - The selected backup set protects the configuration item to be restored.
+      - "If the target was found through an application, database, or infrastructure-component record, its configuration-item identity is verified against the approved configuration inventory; if the match is unreliable, stop."
+      - The proposed restore point is approved.
+      - The target environment is approved.
+  canExecuteEmergencyChange:
+    conditions:
+      - The change is explicitly designated for the emergency path in the controlled change workflow.
+      - The change is justified by a linked incident confirmed active under the governing emergency-change procedure.
+      - The affected configuration items are identified.
+      - An implementation plan and a backout plan are documented.
+      - The risk has been explicitly accepted in the controlled workflow; change status or an incident link alone is insufficient.
+  canSendStakeholderUpdate:
+    conditions:
+      - "The audience, message, owner, and approval state are recorded in the controlled communication workflow."
+      - The controlled communication workflow confirms this update is authorised to send; no universal approved-status value is assumed.
+      - The content is consistent with the latest verified incident state.
+  canSubmitRegulatoryNotification:
+    conditions:
+      - The linked materiality assessment result is reportable.
+      - The notification identifies the incident being reported and the intended regulator.
+      - All required information and supporting evidence are complete under the approved reporting procedure.
+      - Notification status is approved.
+      - "Submission can occur before the notification's due time, as established by the approved procedure."
+  canCloseIncident:
+    conditions:
+      - Incident status is resolved or monitoring.
+      - Resolution and restoration evidence is recorded and sufficient under the closure workflow.
+      - Each impacted service is healthy or its residual condition is documented and accepted through the closure workflow; missing or unknown health is not proof of restoration.
+      - Required stakeholder communications are confirmed complete through the communication workflow.
+      - "If the incident is major or explicitly designated cybersecurity, a post-incident review is scheduled or completed in the review or closure workflow."
+  isOutstandingCorrectiveActionForService:
+    conditions:
+      - "Corrective action status is open, in-progress, or blocked; implemented is reported separately as awaiting verification, while verified needs a check against the approved workflow before reporting remaining work."
+      - "Relevance to the IT service is established from the corrective action description, review findings, earlier incident's recorded service impacts, and where applicable the implementing change's scope."
+      - "If relevance is unclear, check the approved review or action workflow with the owning organizational unit and label relevance unconfirmed rather than reporting the action as outstanding for that service."
+  canRecommendOnCallEngineer:
+    conditions:
+      - The appropriate resolver group is established from approved support or routing information for an affected service or configuration item.
+      - "The bank's approved on-call rota or dispatch process identifies the engineer currently available for that group."
+      - "If the rota or dispatch information does not establish the current engineer, report the recommendation as unresolved rather than infer it from group membership or a previous incident handler."
+actions:
+  acknowledgeAlert:
+    input: Alert
+    preconditions:
+      - canAcknowledgeAlert
+    effect: Set alert status to acknowledged and record the acknowledgement time; retain the acting person in the operational audit.
+    verification: Read back the acknowledged alert status and confirm the acting person and acknowledgement time in the operational audit record.
+  assignIncident:
+    input: Incident
+    preconditions:
+      - canAssignIncident
+    effect: "Record the incident's resolver group and retain the basis for selecting it."
+    verification: "Read back the incident's resolver-group assignment."
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - canDeclareMajorIncident
+    effect: "Record the major-incident designation, declaration time, and assigned commander; start the coordination and communication cadence."
+    verification: "Read back the major-incident designation, commander, declaration time, and communication record."
+  containIncident:
+    input: Incident
+    preconditions:
+      - canContainIncident
+    effect: Execute approved containment steps and retain their outcome; mark the incident contained only after verification of containment indicators and remaining service impact.
+    verification: Check and retain containment indicators and remaining service impact before confirming incident status is contained.
+  isolateAffectedConfigurationItem:
+    input: Incident
+    preconditions:
+      - canIsolateConfigurationItem
+    effect: Isolate the configuration item linked to the incident from the defined networks or dependencies; retain the action outcome and reconnection basis with action evidence.
+    verification: Confirm the linked item is isolated from the defined networks or dependencies and check and retain remaining-service health.
+  failOverService:
+    input: Incident
+    preconditions:
+      - canFailOverService
+    effect: Move the affected IT service workload to the available recovery environment using the applicable recovery plan; retain the actual target and data-recovery-point decision basis with action evidence.
+    verification: Verify and retain service health and critical business transactions in the target environment.
+  restoreFromBackup:
+    input: BackupSet
+    preconditions:
+      - canRestoreBackup
+    effect: "Restore data from the selected backup set to the approved target and restore point; retain the selected backup, target, and restore outcome in action evidence."
+    verification: Validate and retain data-integrity and application-functionality checks for the restored target.
+  executeEmergencyChange:
+    input: Change
+    preconditions:
+      - canExecuteEmergencyChange
+    effect: "Implement the explicitly designated emergency change justified by the active incident, update its controlled-workflow status, and retain implementation evidence."
+    verification: "Run technical checks, verify service health, and retain the results and implementation evidence; do not infer success from change status alone."
+  sendStakeholderUpdate:
+    input: Incident
+    preconditions:
+      - canSendStakeholderUpdate
+    effect: "Send the controlled stakeholder communication about the incident, record its sent time, and archive the final message."
+    verification: "Confirm the communication's delivery status and that the final sent message is archived; a sent timestamp alone is insufficient."
+  submitRegulatoryNotification:
+    input: RegulatoryNotification
+    preconditions:
+      - canSubmitRegulatoryNotification
+    effect: "Submit the approved notification before its due time, set notification status to submitted, record submission time, and retain the submission receipt."
+    verification: Confirm the submission receipt and subsequently confirm acceptance or record rejection and required remediation; submitted is not accepted.
+  closeIncident:
+    input: Incident
+    preconditions:
+      - canCloseIncident
+    effect: Set incident status to closed and record the closure time after all closure checks pass.
+    verification: "Read back closed status and closure time; verify impacted service health or documented acceptance of residual conditions, retained resolution and restoration evidence, completed required communications, and a scheduled or completed review for major or cybersecurity incidents."

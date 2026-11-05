@@ -1,0 +1,408 @@
+{
+  "classes": [
+    {
+      "goldId": "Loan",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "CreditAgreement",
+      "recoveredId": "n28",
+      "weight": 1
+    },
+    {
+      "goldId": "CreditFacility",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "Borrower",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "Lender",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "Servicer",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "AccruedInterest",
+      "recoveredId": "n24",
+      "weight": 1
+    },
+    {
+      "goldId": "DayCountConvention",
+      "recoveredId": "n25",
+      "weight": 1
+    },
+    {
+      "goldId": "InterestPaymentTerms",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "PrincipalRepaymentTerms",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "PrepaymentTerms",
+      "recoveredId": "n18",
+      "weight": 1
+    },
+    {
+      "goldId": "AmortizationSchedule",
+      "recoveredId": "n19",
+      "weight": 1
+    },
+    {
+      "goldId": "LoanPaymentSchedule",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "InterestPaymentSchedule",
+      "recoveredId": "n21",
+      "weight": 1
+    },
+    {
+      "goldId": "PrincipalPaymentSchedule",
+      "recoveredId": "n20",
+      "weight": 1
+    },
+    {
+      "goldId": "InterestCalculationSchedule",
+      "recoveredId": "n29",
+      "weight": 1
+    },
+    {
+      "goldId": "Collateral",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "SecurityAgreement",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "PaymentHistory",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "BorrowingCapacity",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "LoanToValueRatio",
+      "recoveredId": "n26",
+      "weight": 1
+    },
+    {
+      "goldId": "SubFacility",
+      "recoveredId": "n16",
+      "weight": 1
+    },
+    {
+      "goldId": "FixedInterestRate",
+      "recoveredId": "n9",
+      "weight": 0.6666666666666666
+    },
+    {
+      "goldId": "InterestRateResetSchedule",
+      "recoveredId": "n10",
+      "weight": 0.75
+    },
+    {
+      "goldId": "IndividualPaymentTransaction",
+      "recoveredId": "n15",
+      "weight": 0.6666666666666666
+    },
+    {
+      "goldId": "CombinedLoanToValueRatio",
+      "recoveredId": "n27",
+      "weight": 0.6
+    },
+    {
+      "goldId": "CollateralValueAsOfDate",
+      "recoveredId": "n8",
+      "weight": 0.75
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_0",
+      "edgeId": "e1",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_1",
+      "edgeId": "e2",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_2",
+      "edgeId": "e6",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_3",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_4",
+      "edgeId": "e4",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_5",
+      "edgeId": "e5",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_8",
+      "edgeId": "e14",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_13",
+      "edgeId": "e26",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_15",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_25",
+      "edgeId": "e8",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_17",
+      "edgeId": "e10",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_19",
+      "edgeId": "e21",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_20",
+      "edgeId": "e22",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_21",
+      "edgeId": "e24",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_22",
+      "edgeId": "e23",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_23",
+      "edgeId": "e25",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_24",
+      "edgeId": "e15",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_27",
+      "edgeId": "e28",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "Loan.maturityDate",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "maturityDate"
+    },
+    {
+      "goldId": "Loan.interestRateCap",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "interestRateCap"
+    },
+    {
+      "goldId": "Loan.interestOnly",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "interestOnly"
+    },
+    {
+      "goldId": "Loan.balloonPayment",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "balloonPayment"
+    },
+    {
+      "goldId": "Loan.negativeAmortization",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "negativeAmortization"
+    },
+    {
+      "goldId": "Loan.principalAmount",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "principalAmount"
+    },
+    {
+      "goldId": "CreditAgreement.maturityDate",
+      "hostNodeId": "n28",
+      "matchedPropertyName": "maturityDate"
+    },
+    {
+      "goldId": "CreditFacility.availableAmount",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "availableAmount"
+    },
+    {
+      "goldId": "CreditFacility.creditLimit",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "creditLimit"
+    },
+    {
+      "goldId": "CreditFacility.amountOfCreditExtended",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "amountOfCreditExtended"
+    },
+    {
+      "goldId": "CreditFacility.maximumAdvanceAmount",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "maximumAdvanceAmount"
+    },
+    {
+      "goldId": "AccruedInterest.asOfDate",
+      "hostNodeId": "n24",
+      "matchedPropertyName": "asOfDate"
+    },
+    {
+      "goldId": "FixedInterestRate.rate",
+      "hostNodeId": "n9",
+      "matchedPropertyName": "rate"
+    },
+    {
+      "goldId": "InterestPaymentTerms.compoundingFrequency",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "compoundingFrequency"
+    },
+    {
+      "goldId": "PrincipalRepaymentTerms.initialPrincipalPaymentDate",
+      "hostNodeId": "n12",
+      "matchedPropertyName": "initialPrincipalPaymentDate"
+    },
+    {
+      "goldId": "PrincipalRepaymentTerms.principalRepaymentDate",
+      "hostNodeId": "n12",
+      "matchedPropertyName": "principalRepaymentDate"
+    },
+    {
+      "goldId": "LoanToValueRatio.ratio",
+      "hostNodeId": "n26",
+      "matchedPropertyName": "ratio"
+    },
+    {
+      "goldId": "CombinedLoanToValueRatio.ratio",
+      "hostNodeId": "n27",
+      "matchedPropertyName": "ratio"
+    },
+    {
+      "goldId": "CollateralValueAsOfDate.asOfDate",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "asOfDate"
+    },
+    {
+      "goldId": "Loan.initialExchangeDate",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "initialFundingDate"
+    },
+    {
+      "goldId": "Loan.firstRateChangeTermMonths",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "monthsUntilFirstRateChange"
+    },
+    {
+      "goldId": "Loan.loanBalance",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "currentBalance"
+    },
+    {
+      "goldId": "CreditAgreement.debtAmount",
+      "hostNodeId": "n28",
+      "matchedPropertyName": "agreedDebtAmount"
+    },
+    {
+      "goldId": "CreditAgreement.initialExchangeDate",
+      "hostNodeId": "n28",
+      "matchedPropertyName": "initialFundingDate"
+    },
+    {
+      "goldId": "AccruedInterest.amount",
+      "hostNodeId": "n24",
+      "matchedPropertyName": "unpaidAmount"
+    },
+    {
+      "goldId": "InterestPaymentTerms.initialInterestAccrualDate",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "initialAccrualDate"
+    },
+    {
+      "goldId": "InterestPaymentTerms.initialInterestPaymentDate",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "initialPaymentDate"
+    },
+    {
+      "goldId": "InterestPaymentTerms.finalInterestPaymentDate",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "finalPaymentDate"
+    },
+    {
+      "goldId": "InterestPaymentTerms.interestPaymentFrequency",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "paymentFrequency"
+    },
+    {
+      "goldId": "InterestPaymentTerms.interestPaymentDay",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "paymentDay"
+    },
+    {
+      "goldId": "PrincipalRepaymentTerms.principalPaymentFrequency",
+      "hostNodeId": "n12",
+      "matchedPropertyName": "paymentFrequency"
+    },
+    {
+      "goldId": "PrincipalRepaymentTerms.principalPaymentDay",
+      "hostNodeId": "n12",
+      "matchedPropertyName": "paymentDay"
+    },
+    {
+      "goldId": "PrepaymentTerms.prePaymentPenaltyTermMonths",
+      "hostNodeId": "n18",
+      "matchedPropertyName": "penaltyPeriodMonths"
+    },
+    {
+      "goldId": "BorrowingCapacity.amount",
+      "hostNodeId": "n17",
+      "matchedPropertyName": "assessedAmount"
+    },
+    {
+      "goldId": "CollateralValueAsOfDate.value",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "appraisedValue"
+    }
+  ]
+}

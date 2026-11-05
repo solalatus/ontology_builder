@@ -1,0 +1,421 @@
+competency_questions: []
+classes:
+  Loan:
+    meaning: "A specific debt the borrower is to repay under agreed terms, with its record carrying figures and links to obligations, schedules, and payment history."
+    aliases: []
+    properties:
+      principalAmount:
+        type: number
+      currentBalance:
+        type: number
+      maturityDate:
+        type: date
+      initialFundingDate:
+        type: date
+      interestRateCap:
+        type: number
+      monthsUntilFirstRateChange:
+        type: number
+        unit: months
+      interestOnly:
+        type: boolean
+      balloonPayment:
+        type: boolean
+      negativeAmortization:
+        type: boolean
+      recordedLoanKinds:
+        type: text
+  CreditFacility:
+    meaning: "Credit the borrower can draw over time without reapplying each time, with facility-level limit and availability figures; repeat drawing after repayment requires a revolving facility."
+    aliases:
+      - master commitment
+    properties:
+      creditLimit:
+        type: number
+      availableAmount:
+        type: number
+      amountOfCreditExtended:
+        type: number
+      maximumAdvanceAmount:
+        type: number
+      facilityKind:
+        type: text
+      commitmentKind:
+        type: text
+        allowed:
+          - committed
+          - uncommitted
+  Borrower:
+    meaning: "The party obligated to repay under the agreement's terms, including applicable principal, interest, and fees."
+    aliases: []
+    properties: {}
+  Lender:
+    meaning: The party extending credit under the loan or agreement.
+    aliases: []
+    properties: {}
+  Servicer:
+    meaning: "The party servicing a loan and collecting principal and interest payments on its lender's behalf, without necessarily having originated it."
+    aliases: []
+    properties: {}
+  Collateral:
+    meaning: Something pledged as security for an obligation.
+    aliases: []
+    properties: {}
+  SecurityAgreement:
+    meaning: An agreement setting out rights over collateral used to secure an obligation.
+    aliases: []
+    properties: {}
+  Appraisal:
+    meaning: "A dated collateral value whose appraised amount and as-of date are kept together, not necessarily an appraisal report."
+    aliases:
+      - dated collateral value
+    properties:
+      appraisedValue:
+        type: number
+      asOfDate:
+        type: date
+  InterestRate:
+    meaning: "A loan's applicable numerical rate, fixed or variable; floating and managed are more specific kinds of variable rate."
+    aliases: []
+    properties:
+      rate:
+        type: number
+      rateKind:
+        type: text
+  RateResetSchedule:
+    meaning: "A loan's contract-specific schedule covering dates on which a rate reset and corresponding actual rate are recalculated, without assuming how the dates are stored."
+    aliases: []
+    properties: {}
+  InterestPaymentTerms:
+    meaning: Terms governing payment of an interest obligation and identifying the day-count convention used as its accrual basis.
+    aliases: []
+    properties:
+      initialAccrualDate:
+        type: date
+      initialPaymentDate:
+        type: date
+      finalPaymentDate:
+        type: date
+      paymentFrequency:
+        type: text
+      paymentDay:
+        type: text
+      compoundingFrequency:
+        type: text
+  PrincipalRepaymentTerms:
+    meaning: "Terms governing payment of a loan's principal obligation."
+    aliases: []
+    properties:
+      initialPrincipalPaymentDate:
+        type: date
+      principalRepaymentDate:
+        type: date
+      paymentFrequency:
+        type: text
+      paymentDay:
+        type: text
+  PaymentSchedule:
+    meaning: "A loan payment schedule giving expected payment dates, whether regular or explicitly dated, distinct from the specific principal and interest schedules."
+    aliases:
+      - loan payment schedule
+    properties: {}
+  PaymentHistory:
+    meaning: "A loan's record of payments actually made, containing individual payment transactions."
+    aliases: []
+    properties: {}
+  PaymentTransaction:
+    meaning: "An individual actual payment toward the debt, rather than a scheduled amount due; its amount, date, and allocation fields are not established here."
+    aliases: []
+    properties: {}
+  SubFacility:
+    meaning: "An identifiable portion of its parent credit facility extended for a purpose, whose commitment may differ from the facility's."
+    aliases: []
+    properties:
+      commitmentKind:
+        type: text
+        allowed:
+          - committed
+          - uncommitted
+  BorrowingCapacityAssessment:
+    meaning: "An assessed upper bound on what the lender believes a borrower can repay when due at a point in time, not the facility's available amount."
+    aliases:
+      - borrowing capacity
+    properties:
+      assessedAmount:
+        type: number
+  PrepaymentTerms:
+    meaning: "A specialized kind of principal repayment terms governing repayment before maturity, including any applicable penalty period, not necessarily a second terms record."
+    aliases: []
+    properties:
+      penaltyPeriodMonths:
+        type: number
+        unit: months
+  AmortizationSchedule:
+    meaning: A schedule of periodic payments and how the debt balance is expected to change over time.
+    aliases: []
+    properties: {}
+  PrincipalPaymentSchedule:
+    meaning: A schedule giving the dates principal payments are due.
+    aliases: []
+    properties: {}
+  InterestPaymentSchedule:
+    meaning: A schedule giving the dates interest payments are due.
+    aliases: []
+    properties: {}
+  PrincipalObligation:
+    meaning: "The principal amount of a loan's debt that must be repaid, separate from interest."
+    aliases: []
+    properties: {}
+  InterestObligation:
+    meaning: "A loan's obligation to pay interest, distinct from its principal obligation."
+    aliases: []
+    properties: {}
+  AccruedInterest:
+    meaning: "An amount of interest incurred but unpaid as of a specified date, without an established association to a particular loan."
+    aliases: []
+    properties:
+      unpaidAmount:
+        type: number
+      asOfDate:
+        type: date
+  DayCountConvention:
+    meaning: The accrual basis identified by interest payment terms for calculating interest.
+    aliases: []
+    properties: {}
+  LoanToValueMeasure:
+    meaning: "The ratio of a loan's principal to its securing asset's appraised value."
+    aliases:
+      - LTV
+    properties:
+      ratio:
+        type: number
+        unit: percent
+  CombinedLoanToValueMeasure:
+    meaning: The ratio of total debt secured by the relevant asset or assets to their appraised value.
+    aliases: []
+    properties:
+      ratio:
+        type: number
+        unit: percent
+  CreditAgreement:
+    meaning: "An agreement record identifying borrower and lender that can carry agreed debt amount, maturity date, and initial funding date."
+    aliases: []
+    properties:
+      agreedDebtAmount:
+        type: number
+      maturityDate:
+        type: date
+      initialFundingDate:
+        type: date
+      creditKind:
+        type: text
+        allowed:
+          - open-end
+          - closed-end
+  InterestCalculationSchedule:
+    meaning: "A schedule giving the dates interest is calculated, which need not be payment dates."
+    aliases: []
+    properties: {}
+relationships:
+  - name: hasBorrower
+    from: Loan
+    to: Borrower
+    meaning: Identifies the borrower of this loan.
+    aliases: []
+  - name: hasLender
+    from: Loan
+    to: Lender
+    meaning: Identifies the lender of this loan.
+    aliases: []
+  - name: isServicedBy
+    from: Loan
+    to: Servicer
+    meaning: "Identifies the party collecting payments for this loan on its lender's behalf, without asserting a separate servicer-to-lender link."
+    aliases: []
+  - name: hasBorrower
+    from: CreditFacility
+    to: Borrower
+    meaning: "Identifies the facility's borrower."
+    aliases: []
+  - name: hasLender
+    from: CreditFacility
+    to: Lender
+    meaning: "Identifies the facility's lender."
+    aliases: []
+  - name: hasBorrower
+    from: CreditAgreement
+    to: Borrower
+    meaning: "Identifies the agreement's borrower."
+    aliases: []
+  - name: hasLender
+    from: CreditAgreement
+    to: Lender
+    meaning: "Identifies the agreement's lender."
+    aliases: []
+  - name: hasSubFacility
+    from: CreditFacility
+    to: SubFacility
+    meaning: "Identifies the sub-facilities recorded as portions of this facility, without requiring every sub-facility record to have a parent link."
+    aliases: []
+  - name: pledgesCollateral
+    from: Loan
+    to: Collateral
+    meaning: Legacy wording for securedByCollateral on the same loan and collateral; do not count as a second connection or additional evidence.
+    aliases: []
+  - name: securesCollateral
+    from: SecurityAgreement
+    to: Collateral
+    meaning: Identifies collateral over which the security agreement grants rights; sharing collateral with a loan identifies a potentially relevant agreement but does not establish that it supports that loan.
+    aliases: []
+  - name: hasAppraisal
+    from: Collateral
+    to: Appraisal
+    meaning: "Identifies the collateral's dated appraised value."
+    aliases: []
+  - name: hasLoanToValueMeasure
+    from: Loan
+    to: LoanToValueMeasure
+    meaning: "Identifies a collateralized loan's loan-to-value ratio without establishing which appraisal supplied the value."
+    aliases: []
+  - name: hasCombinedLoanToValueMeasure
+    from: Loan
+    to: CombinedLoanToValueMeasure
+    meaning: "Identifies a collateralized loan's combined loan-to-value ratio without establishing which appraisal supplied the value."
+    aliases: []
+  - name: hasInterestRate
+    from: Loan
+    to: InterestRate
+    meaning: Identifies the interest rate applicable to this loan.
+    aliases: []
+  - name: hasRateResetSchedule
+    from: Loan
+    to: RateResetSchedule
+    meaning: "Identifies this loan's recorded rate-reset schedule, checked when its interest rate is variable."
+    aliases: []
+  - name: hasDayCountConvention
+    from: InterestPaymentTerms
+    to: DayCountConvention
+    meaning: Identifies the distinct convention the interest payment terms use as their accrual basis.
+    aliases: []
+  - name: hasPrincipalObligation
+    from: Loan
+    to: PrincipalObligation
+    meaning: "Identifies this loan's principal debt to repay."
+    aliases: []
+  - name: hasInterestObligation
+    from: Loan
+    to: InterestObligation
+    meaning: Identifies the interest obligation of this loan.
+    aliases: []
+  - name: governsPrincipalObligation
+    from: PrincipalRepaymentTerms
+    to: PrincipalObligation
+    meaning: Identifies the particular principal obligation whose payment these terms govern.
+    aliases: []
+  - name: governsInterestObligation
+    from: InterestPaymentTerms
+    to: InterestObligation
+    meaning: "Identifies the particular interest obligation whose payment these terms govern, so the terms must match the loan's own obligation."
+    aliases: []
+  - name: hasPaymentSchedule
+    from: Loan
+    to: PaymentSchedule
+    meaning: "Identifies this loan's general loan payment schedule."
+    aliases: []
+  - name: hasAmortizationSchedule
+    from: Loan
+    to: AmortizationSchedule
+    meaning: "Identifies this loan's schedule of expected payments and changing balance when applicable; a general payment schedule is not a substitute."
+    aliases: []
+  - name: hasPrincipalPaymentSchedule
+    from: Loan
+    to: PrincipalPaymentSchedule
+    meaning: "Identifies the loan's principal-payment due dates through its principal payment schedule."
+    aliases: []
+  - name: hasInterestPaymentSchedule
+    from: Loan
+    to: InterestPaymentSchedule
+    meaning: "Identifies the loan's interest-payment due dates through its interest payment schedule."
+    aliases: []
+  - name: hasInterestCalculationSchedule
+    from: Loan
+    to: InterestCalculationSchedule
+    meaning: "Identifies the loan's interest-calculation dates, which need not match its payment due dates."
+    aliases: []
+  - name: hasPaymentHistory
+    from: Loan
+    to: PaymentHistory
+    meaning: "Identifies the history of payments actually made on this loan, without asserting unconfirmed transaction details."
+    aliases: []
+  - name: containsPaymentTransaction
+    from: PaymentHistory
+    to: PaymentTransaction
+    meaning: Identifies the individual actual payments recorded in this history.
+    aliases: []
+  - name: hasBorrowingCapacityAssessment
+    from: Borrower
+    to: BorrowingCapacityAssessment
+    meaning: "Identifies the borrower's assessed capacity to repay, not a facility's undrawn availability."
+    aliases: []
+  - name: governsPrincipalObligation
+    from: PrepaymentTerms
+    to: PrincipalObligation
+    meaning: "Expresses the same terms-to-principal connection when applicable principal repayment terms concern prepayment, not a second terms record."
+    aliases: []
+  - name: securedByCollateral
+    from: Loan
+    to: Collateral
+    meaning: "Identifies the collateral securing a recorded secured loan, without implying the loan itself pledges it."
+    aliases: []
+rules:
+  loanSetupVerified:
+    conditions:
+      - The examined loan has both its own borrower link and its own lender link.
+      - "If interest-bearing setup is established, the loan has an applicable fixed or variable rate and interest payment terms governing that loan's own interest obligation."
+      - No conflicting evidence prevents confirmation of the portion being verified; unknown applicability of the interest portion is not confirmation of it.
+  securedLoanSupportVerified:
+    conditions:
+      - "The examined loan is recorded as secured, including a guaranteed loan with established secured classification."
+      - "The examined loan has a collateral link, counted once even if the legacy wording also appears."
+      - No conflicting evidence prevents confirmation; unknown secured classification cannot be confirmed.
+  variableRateSetupVerified:
+    conditions:
+      - "The examined loan has an applicable interest rate established as variable, including floating or managed when established."
+      - The examined loan has its own rate-reset schedule link.
+      - No conflicting evidence prevents confirmation; an unknown rate kind cannot be confirmed as variable.
+  paymentRecordCompletenessVerified:
+    conditions:
+      - The examined loan has a linked payment history.
+      - That linked history contains individual payment transactions.
+      - No conflicting evidence prevents confirmation; an empty history cannot be confirmed complete.
+  prepaymentPenaltyTimingVerified:
+    conditions:
+      - "The terms governing the examined loan's own principal obligation establish that a penalty-timing review applies."
+      - Those applicable prepayment terms record a prepayment-penalty period in months.
+      - No conflicting evidence prevents confirmation; missing timing or an unknown review trigger cannot be confirmed.
+actions:
+  checkLoanSetup:
+    input: Loan
+    preconditions: []
+    effect: "Save a loan-specific evidence-backed finding for borrower and lender independently and, where applicable, interest rate and terms governing this loan's interest obligation; confirm only the portions meeting loanSetupVerified, otherwise report specific gaps, uncertain applicability, or conflicts without changing records."
+    verification: "Compare the finding to the loan's borrower and lender links and, where applicable, its rate and interest-obligation-to-terms path; confirm the saved finding names this loan, cites the evidence checked, and accurately reports gaps, uncertainty, and conflicts."
+  checkSecuredLoanSupport:
+    input: Loan
+    preconditions: []
+    effect: "Save a loan-specific evidence-backed finding about recorded secured classification and the single collateral connection; confirm secured-loan support only when securedLoanSupportVerified holds, otherwise report the missing link, unknown classification, or conflict without assessing the guaranty or security agreement."
+    verification: "Compare the finding to the loan's recorded secured kind and collateral link; confirm the saved finding names this loan, cites the evidence checked once, and accurately reports gaps, uncertainty, and conflicts."
+  checkVariableRateSetup:
+    input: Loan
+    preconditions: []
+    effect: "Save a loan-specific evidence-backed finding about its interest rate and reset-schedule link; confirm variable-rate setup only when variableRateSetupVerified holds, otherwise report the missing schedule, unknown rate kind, or conflict."
+    verification: "Compare the finding to this loan's applicable interest rate and its reset-schedule link; confirm the saved finding names this loan, cites what was checked, and accurately reports gaps, uncertainty, and conflicts."
+  checkPaymentRecordCompleteness:
+    input: Loan
+    preconditions: []
+    effect: "Save a loan-specific evidence-backed finding about the loan's linked payment history and its individual transactions; confirm completeness only when paymentRecordCompletenessVerified holds, otherwise report the specific missing link, entries, or conflict."
+    verification: "Compare the finding to this loan's payment-history link and the history's individual transactions; confirm the saved finding names this loan, cites the entries checked, and accurately reports gaps or conflicts."
+  checkPrepaymentPenaltyTiming:
+    input: Loan
+    preconditions: []
+    effect: "Save a loan-specific evidence-backed finding about this loan's governing principal terms and any applicable penalty period; confirm timing only when prepaymentPenaltyTimingVerified holds, otherwise report missing timing, unknown applicability, or conflict, without inferring no penalty."
+    verification: "Compare the finding to the terms governing this loan's principal obligation, their basis for penalty-timing review, and the applicable prepayment penalty period in months; confirm the saved finding names this loan, cites evidence checked, and accurately reports gaps, uncertainty, and conflicts."

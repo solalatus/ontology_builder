@@ -1,0 +1,10 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship-pair",
+    "identity": "commandsMajorIncident (IncidentCommander → Incident) / coordinatedByCommander (Incident → IncidentCommander)",
+    "field": "pair",
+    "pattern": "RECIPROCAL_PAIR",
+    "detail": "commandsMajorIncident (IncidentCommander → Incident) and coordinatedByCommander (Incident → IncidentCommander) connect the same two classes in opposite directions -- confirm these are two genuinely distinct facts, not the same fact stated twice"
+  }
+]
