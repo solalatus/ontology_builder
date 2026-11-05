@@ -1,0 +1,15 @@
+{
+ "domain": "iof-supply-chain",
+ "runId": "run-03",
+ "model": "gpt-6-sol",
+ "startedAt": "2026-11-05T00:48:21.508Z",
+ "elapsedSec": 1213,
+ "phase": "done",
+ "turnsUsed": 93,
+ "stoppedReason": "stages_complete",
+ "costUsd": 1.829,
+ "appCalls": 143,
+ "promptTokens": 5451322,
+ "cachedShare": 0.978,
+ "reasoningTokens": 25477
+}

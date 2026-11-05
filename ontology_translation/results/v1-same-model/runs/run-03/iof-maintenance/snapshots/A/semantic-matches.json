@@ -1,0 +1,24 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "MaintenanceState.stateCategory",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "QualifiedMaintenancePerson",
+        "recoveredId": "n12"
+      }
+    ],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

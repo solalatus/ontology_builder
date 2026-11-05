@@ -1,0 +1,500 @@
+{
+  "domain": "iof-maintenance",
+  "runId": "run-03",
+  "runUuid": "76ae4586-35bb-46f0-b446-0e15d064011a",
+  "metrics": {
+    "classes": {
+      "recall": 0.6,
+      "precision": 0.8571428571428571,
+      "f1": 0.7058823529411764,
+      "matched": 12,
+      "groundTruthTotal": 20,
+      "recoveredTotal": 14
+    },
+    "relationships": {
+      "recall": 0.5384615384615384,
+      "precision": 0.5,
+      "f1": 0.5185185185185186,
+      "matched": 7,
+      "groundTruthTotal": 13,
+      "recoveredTotal": 14
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.8333333333333334,
+      "f1": 0.9090909090909091,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 6
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 1,
+    "controlledValuePropertyMatchedCount": 1,
+    "recoveryEffectiveness": 0.7111639268502014,
+    "recoveryEffectivenessWithFidelity": 0.783372945137651
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.7333333333333333,
+      "precision": 0.7857142857142857,
+      "f1": 0.7586206896551724,
+      "matched": 11,
+      "groundTruthTotal": 15,
+      "recoveredTotal": 14
+    },
+    "relationships": {
+      "recall": 0.75,
+      "precision": 0.42857142857142855,
+      "f1": 0.5454545454545454,
+      "matched": 6,
+      "groundTruthTotal": 8,
+      "recoveredTotal": 14
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.3333333333333333,
+      "f1": 0.5,
+      "matched": 2,
+      "groundTruthTotal": 2,
+      "recoveredTotal": 6
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6013584117032392,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": {
+    "classes": {
+      "recall": 0.65,
+      "precision": 0.9285714285714286,
+      "f1": 0.7647058823529412,
+      "matched": 13,
+      "groundTruthTotal": 20,
+      "recoveredTotal": 14
+    },
+    "relationships": {
+      "recall": 0.5384615384615384,
+      "precision": 0.5,
+      "f1": 0.5185185185185186,
+      "matched": 7,
+      "groundTruthTotal": 13,
+      "recoveredTotal": 14
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.8333333333333334,
+      "f1": 0.9090909090909091,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 6
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 1,
+    "controlledValuePropertyMatchedCount": 1,
+    "recoveryEffectiveness": 0.7307717699874563,
+    "recoveryEffectivenessWithFidelity": 0.7980788274905922,
+    "judgeCallCount": 2,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailureProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToFail",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToExhibitUndesirableBehavior",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupportingMaintenanceActivity",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "QualifiedMaintenancePerson",
+          "recoveredId": "n12",
+          "verdict": "MATCH"
+        }
+      ],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": [
+        {
+          "id": "MaintenanceState.stateCategory",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "resolvedMatches": {
+      "classes": [
+        {
+          "goldId": "QualifiedMaintenancePerson",
+          "recoveredId": "n12"
+        }
+      ],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": [
+        {
+          "id": "MaintenanceState.stateCategory",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.6,
+        "precision": 0.8571428571428571,
+        "f1": 0.7058823529411764,
+        "matched": 12,
+        "groundTruthTotal": 20,
+        "recoveredTotal": 14
+      },
+      "relationships": {
+        "recall": 0.5384615384615384,
+        "precision": 0.5,
+        "f1": 0.5185185185185186,
+        "matched": 7,
+        "groundTruthTotal": 13,
+        "recoveredTotal": 14
+      },
+      "properties": {
+        "recall": 1,
+        "precision": 0.8333333333333334,
+        "f1": 0.9090909090909091,
+        "matched": 5,
+        "groundTruthTotal": 5,
+        "recoveredTotal": 6
+      },
+      "controlledValueFidelity": 1,
+      "controlledValuePropertyGoldTotal": 1,
+      "controlledValuePropertyMatchedCount": 1,
+      "recoveryEffectiveness": 0.7111639268502014,
+      "recoveryEffectivenessWithFidelity": 0.783372945137651
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- An asset is not an operating state.\n2: NO MATCH -- An asset is not a degraded state.\n3: NO MATCH -- An asset is not a failed state.\n4: NO MATCH -- Neither candidate is a failure process.\n5: NO MATCH -- Neither candidate is a disposition to fail.\n6: NO MATCH -- Neither candidate is a disposition to exhibit undesirable behavior.\n7: NO MATCH -- A maintenance worker is not a maintenance activity.\n8: MATCH 2 -- A MaintenanceTech meeting an activity’s qualification requirement is a qualified maintenance person.",
+      "valueFidelity": "1: 100 -- Identical states and distinctions."
+    }
+  },
+  "semanticScopedMetrics": {
+    "classes": {
+      "recall": 0.8,
+      "precision": 0.8571428571428571,
+      "f1": 0.8275862068965518,
+      "matched": 12,
+      "groundTruthTotal": 15,
+      "recoveredTotal": 14
+    },
+    "relationships": {
+      "recall": 0.75,
+      "precision": 0.42857142857142855,
+      "f1": 0.5454545454545454,
+      "matched": 6,
+      "groundTruthTotal": 8,
+      "recoveredTotal": 14
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.3333333333333333,
+      "f1": 0.5,
+      "matched": 2,
+      "groundTruthTotal": 2,
+      "recoveredTotal": 6
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6243469174503657,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 1,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "QualifiedMaintenancePerson",
+          "recoveredId": "n12",
+          "verdict": "MATCH"
+        }
+      ],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [
+        {
+          "goldId": "QualifiedMaintenancePerson",
+          "recoveredId": "n12"
+        }
+      ],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.7333333333333333,
+        "precision": 0.7857142857142857,
+        "f1": 0.7586206896551724,
+        "matched": 11,
+        "groundTruthTotal": 15,
+        "recoveredTotal": 14
+      },
+      "relationships": {
+        "recall": 0.75,
+        "precision": 0.42857142857142855,
+        "f1": 0.5454545454545454,
+        "matched": 6,
+        "groundTruthTotal": 8,
+        "recoveredTotal": 14
+      },
+      "properties": {
+        "recall": 1,
+        "precision": 0.3333333333333333,
+        "f1": 0.5,
+        "matched": 2,
+        "groundTruthTotal": 2,
+        "recoveredTotal": 6
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.6013584117032392,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- An asset is an item, not its operating state.\n2: NO MATCH -- A failure effect is a consequence, not a degraded state.\n3: NO MATCH -- A failure effect is a consequence, not a failed state.\n4: MATCH 3 -- A MaintenanceTech meeting the qualification requirement is a qualified maintenance person."
+    }
+  },
+  "ruleMetrics": {
+    "recall": 0.8571428571428571,
+    "precision": 0.8571428571428571,
+    "f1": 0.8571428571428571,
+    "matched": 6,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 7
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 0.6,
+      "precision": 0.6,
+      "f1": 0.6,
+      "matched": 3,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "inputClassAccuracy": 1,
+    "inputClassChecked": 3,
+    "preconditionRecovery": 0.6530864197530865,
+    "effectRecovery": 0.6071428571428571,
+    "verificationRecovery": 0.4895324283559577
+  },
+  "semanticRuleActionMetrics": {
+    "rules": {
+      "recall": 0.8571428571428571,
+      "precision": 0.8571428571428571,
+      "f1": 0.8571428571428571,
+      "matched": 6,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 7
+    },
+    "actions": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5,
+      "components": {
+        "identification": {
+          "recall": 0.6,
+          "precision": 0.6,
+          "f1": 0.6,
+          "matched": 3,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 5
+        },
+        "inputClassAccuracy": 1,
+        "inputClassChecked": 3,
+        "preconditionRecovery": 0.6530864197530865,
+        "effectRecovery": 0.6071428571428571,
+        "verificationRecovery": 0.4895324283559577
+      }
+    },
+    "judgeCallCount": 2,
+    "judgments": {
+      "rules": [
+        {
+          "goldId": "canClassifyOperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "actions": [
+        {
+          "goldId": "classifyItemAsFailed",
+          "recoveredId": "a1",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "assignQualifiedMaintenancePerson",
+          "recoveredId": "a3",
+          "verdict": "MATCH"
+        }
+      ]
+    },
+    "resolvedMatches": {
+      "rules": [],
+      "actions": [
+        {
+          "goldId": "classifyItemAsFailed",
+          "recoveredId": "a1"
+        },
+        {
+          "goldId": "assignQualifiedMaintenancePerson",
+          "recoveredId": "a3"
+        }
+      ]
+    },
+    "heuristic": {
+      "rules": {
+        "recall": 0.8571428571428571,
+        "precision": 0.8571428571428571,
+        "f1": 0.8571428571428571,
+        "matched": 6,
+        "groundTruthTotal": 7,
+        "recoveredTotal": 7
+      },
+      "actions": {
+        "identification": {
+          "recall": 0.6,
+          "precision": 0.6,
+          "f1": 0.6,
+          "matched": 3,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 5
+        },
+        "inputClassAccuracy": 1,
+        "inputClassChecked": 3,
+        "preconditionRecovery": 0.6530864197530865,
+        "effectRecovery": 0.6071428571428571,
+        "verificationRecovery": 0.4895324283559577
+      }
+    },
+    "rawResponses": {
+      "rules": "1: NO MATCH -- The candidate excludes reduced-but-acceptable performance that the reference condition includes.",
+      "actions": "1: MATCH 1 -- Both record the affected item or asset as failed.\n2: MATCH 2 -- Both assign a maintenance person to the activity."
+    }
+  },
+  "operationalStats": {
+    "appAgentApiCalls": 118,
+    "applyToolCalls": 40,
+    "getGraphStateCalls": 7,
+    "removeToolCalls": 0,
+    "renameToolCalls": 0,
+    "toolApplied": 40,
+    "toolSkipped": 1,
+    "toolNothing": 0,
+    "toolError": 0,
+    "errorCounts": {},
+    "totalErrorTurns": 0,
+    "compactionEvents": 0,
+    "leakEventsCount": 0,
+    "unresolvedLeakEvents": 0,
+    "maxConsecutiveTurnsWithNoToolActivity": 5,
+    "degraded": false,
+    "totalTokens": 3199525,
+    "promptTokens": 3164844,
+    "completionTokens": 34681,
+    "cachedTokens": 3109166,
+    "cachedShare": 0.982407347723932,
+    "reasoningTokens": 15978,
+    "tokenCallCount": 190,
+    "conversationCostUsd": 1.0799992000000003,
+    "appCost": {
+      "calls": 117,
+      "promptTokens": 2283250,
+      "cachedTokens": 2249951,
+      "completionTokens": 23716,
+      "reasoningTokens": 12323,
+      "cachedShare": 0.9854159640862805,
+      "costUsd": 0.7537482
+    },
+    "appCostByKind": {
+      "interview": {
+        "calls": 117,
+        "promptTokens": 2283250,
+        "cachedTokens": 2249951,
+        "completionTokens": 23716,
+        "reasoningTokens": 12323,
+        "cachedShare": 0.9854159640862805,
+        "costUsd": 0.7537482
+      }
+    },
+    "harnessCost": {
+      "calls": 73,
+      "promptTokens": 881594,
+      "cachedTokens": 859215,
+      "completionTokens": 10965,
+      "reasoningTokens": 3655,
+      "cachedShare": 0.9746152991059377,
+      "costUsd": 0.326251
+    }
+  },
+  "snapshots": [
+    {
+      "label": "A",
+      "turn": 70,
+      "counts": {
+        "classes": 14,
+        "relationships": 14,
+        "properties": 6,
+        "allowedValueLists": 1,
+        "rules": 7,
+        "actions": 5,
+        "droppedEdges": 0
+      },
+      "offlineRescoreAgrees": true,
+      "composite": 0.7111639268502014,
+      "scopedComposite": 0.6013584117032392,
+      "semanticComposite": 0.7111639268502014
+    }
+  ]
+}

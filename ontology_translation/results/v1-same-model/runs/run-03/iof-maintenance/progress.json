@@ -1,0 +1,15 @@
+{
+ "domain": "iof-maintenance",
+ "runId": "run-03",
+ "model": "gpt-6-sol",
+ "startedAt": "2026-11-05T00:34:28.963Z",
+ "elapsedSec": 832,
+ "phase": "done",
+ "turnsUsed": 70,
+ "stoppedReason": "stages_complete",
+ "costUsd": 1.158,
+ "appCalls": 117,
+ "promptTokens": 3192026,
+ "cachedShare": 0.974,
+ "reasoningTokens": 17460
+}
