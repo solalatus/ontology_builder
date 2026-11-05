@@ -1,0 +1,27 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [],
+    "properties": [
+      {
+        "goldId": "PrepaymentTerms.prePaymentPenaltyTermMonths",
+        "matchedPropertyName": "prepaymentPenaltyPeriodMonths"
+      },
+      {
+        "goldId": "LoanToValueRatio.ratio",
+        "matchedPropertyName": "percentage"
+      },
+      {
+        "goldId": "CombinedLoanToValueRatio.ratio",
+        "matchedPropertyName": "percentage"
+      }
+    ],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

@@ -1,0 +1,421 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "AirPlenum",
+          "recoveredId": "n7",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "AirQualitySensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TemperatureSetpoint",
+          "recoveredId": "n12",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "TemperatureDeadbandSetpoint",
+          "recoveredId": "n33",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "PackagedHeatPump",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CondensingUnit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Humidifier",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "IsolationValve",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SpaceHeater",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DryCooler",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": "e15",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_1",
+          "recoveredId": "e16",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e17",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e19",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_4",
+          "recoveredId": "e18",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_5",
+          "recoveredId": "e20",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_6",
+          "recoveredId": "e23",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_7",
+          "recoveredId": "e30",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_8",
+          "recoveredId": "e24",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_9",
+          "recoveredId": "e25",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_10",
+          "recoveredId": "e26",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_12",
+          "recoveredId": "e31",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_15",
+          "recoveredId": "e10",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_21",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e1",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e2",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": "e3",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_31",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_34",
+          "recoveredId": "e28",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_35",
+          "recoveredId": "e29",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "TemperatureSensor.value",
+          "matchedPropertyName": "reading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AirTemperatureSensor.value",
+          "matchedPropertyName": "reading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "CO2Sensor.value",
+          "matchedPropertyName": "reading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "OutsideAirCO2Sensor.value",
+          "matchedPropertyName": "reading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "ReturnAirCO2Sensor.value",
+          "matchedPropertyName": "reading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "OccupancySensor.occupied",
+          "matchedPropertyName": "occupancy",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "Chiller.coolingCapacity",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Building.yearBuilt",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Floor.levelNumber",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Space.maxOccupancy",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CO2DifferentialSensor.value",
+          "matchedPropertyName": "reading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "WaterTemperatureSensor.value",
+          "matchedPropertyName": "reading",
+          "verdict": "MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.mode",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Filter.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Fan.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Boiler.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Chiller.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "CoolingTower.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "HeatExchanger.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Pump.status",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: MATCH 1 -- Both denote an air plenum.\n2: NO MATCH -- No candidate is an air quality sensor.\n3: MATCH 2 -- Both denote a desired temperature value for control.\n4: MATCH 4 -- Both denote a temperature deadband setpoint.\n5: NO MATCH -- No candidate is a packaged heat pump.\n6: NO MATCH -- No candidate is a condensing unit.\n7: NO MATCH -- No candidate is a humidifier.\n8: NO MATCH -- No candidate is an isolation valve.\n9: NO MATCH -- No candidate is a space heater.\n10: NO MATCH -- No candidate is a dry cooler.",
+      "relationships": "1: MATCH 7 -- Having a fan expresses the part relationship.\n2: MATCH 8 -- Having a filter expresses the part relationship.\n3: MATCH 9 -- Having a damper expresses the part relationship.\n4: MATCH 11 -- Having a cooling valve expresses the part relationship.\n5: MATCH 10 -- Having a heating valve expresses the part relationship.\n6: MATCH 12 -- Having an economizer expresses the part relationship.\n7: MATCH 13 -- Both link the unit to its air temperature sensor point.\n8: MATCH 19 -- Both link the unit to its CO2 sensor point.\n9: MATCH 14 -- Both link the unit to its air temperature setpoint.\n10: MATCH 15 -- Both link the unit to its cooling temperature setpoint.\n11: MATCH 16 -- Both link the unit to its heating temperature setpoint.\n12: MATCH 20 -- Both link the thermostat to its temperature sensor point.\n13: MATCH 6 -- Both link the zone to its occupancy sensor point.\n14: NO MATCH -- No candidate locates the sensor in a building.\n15: MATCH 1 -- A building containing a floor expresses the part relationship.\n16: MATCH 2 -- A floor containing a space expresses the part relationship.\n17: MATCH 3 -- Including a zone expresses the building–zone part relationship.\n18: NO MATCH -- Assignment to a zone does not necessarily mean serving it.\n19: MATCH 17 -- Both link the unit to its outside-air CO2 sensor point.\n20: MATCH 18 -- Both link the unit to its return-air CO2 sensor point.",
+      "properties": "1: MATCH \"reading\" -- Both denote the measured temperature.\n2: NO MATCH -- A reading is a measurement, not the sensor's status.\n3: MATCH \"reading\" -- Both denote the measured air temperature.\n4: MATCH \"reading\" -- Both denote the measured CO2 level.\n5: MATCH \"reading\" -- Both denote the measured outside-air CO2 level.\n6: MATCH \"reading\" -- Both denote the measured return-air CO2 level.\n7: MATCH \"occupancy\" -- Both denote the sensed occupied state.\n8: MATCH \"reading\" -- Both denote the measured CO2 differential.\n9: MATCH \"reading\" -- Both denote the measured water temperature.",
+      "valueFidelity": "1: 100 -- Identical set of states.\n2: 100 -- Identical set of modes.\n3: 100 -- Identical set of states.\n4: 100 -- Identical set of states.\n5: 100 -- “Replacement due” has the same meaning as “replacement_due.”\n6: 100 -- Identical set of states.\n7: 100 -- Identical set of states.\n8: 100 -- Identical set of states.\n9: 100 -- Identical set of states.\n10: 100 -- Identical set of occupancy states.\n11: 100 -- Identical set of states.\n12: 100 -- Identical set of states.\n13: 100 -- Identical set of states."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "AirPlenum",
+          "recoveredId": "n7",
+          "verdict": "MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_5",
+          "recoveredId": "e20",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_7",
+          "recoveredId": "e30",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_9",
+          "recoveredId": "e25",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_10",
+          "recoveredId": "e26",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_12",
+          "recoveredId": "e31",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_13",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_15",
+          "recoveredId": "e10",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e1",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e2",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": "e3",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_31",
+          "recoveredId": "e7",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "TemperatureSensor.value",
+          "matchedPropertyName": "reading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CO2Sensor.value",
+          "matchedPropertyName": "reading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "OccupancySensor.occupied",
+          "matchedPropertyName": "occupancy",
+          "verdict": "MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.mode",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Boiler.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Chiller.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Pump.status",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: MATCH 1 -- Both refer to an air-path space used for air distribution, return, or exhaust.",
+      "relationships": "1: MATCH 7 -- Having an economizer expresses the AHU part relationship.\n2: MATCH 11 -- The CO2 sensor is a point of the AHU.\n3: MATCH 9 -- Both identify the AHU’s cooling temperature setpoint.\n4: MATCH 10 -- Both identify the AHU’s heating temperature setpoint.\n5: MATCH 12 -- The temperature sensor is a point of the thermostat.\n6: NO MATCH -- No candidate links the thermostat to a temperature setpoint.\n7: MATCH 6 -- Both link the zone to its occupancy sensor.\n8: MATCH 1 -- A building containing a floor expresses the part relationship.\n9: MATCH 2 -- A floor containing a space expresses the part relationship.\n10: MATCH 3 -- A building including a controlled zone expresses the part relationship.\n11: MATCH 4 -- Assigning a thermostat to a zone expresses which zone it serves.",
+      "properties": "1: MATCH \"reading\" -- Both denote the measured temperature.\n2: NO MATCH -- A reading is not the sensor's status.\n3: MATCH \"reading\" -- Both denote the measured CO2 level.\n4: MATCH \"occupancy\" -- Both denote whether the space is occupied.",
+      "valueFidelity": "1: 100 -- Identical distinctions.\n2: 100 -- Identical distinctions.\n3: 100 -- Identical distinctions.\n4: 100 -- Identical distinctions.\n5: 100 -- Identical distinctions.\n6: 100 -- Identical distinctions.\n7: 100 -- Identical distinctions.\n8: 100 -- Identical distinctions.\n9: 100 -- Identical distinctions."
+    }
+  }
+}

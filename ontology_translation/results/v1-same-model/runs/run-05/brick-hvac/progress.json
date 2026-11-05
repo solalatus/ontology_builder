@@ -1,0 +1,15 @@
+{
+ "domain": "brick-hvac",
+ "runId": "run-05",
+ "model": "gpt-6-sol",
+ "startedAt": "2026-11-05T02:53:55.629Z",
+ "elapsedSec": 1056,
+ "phase": "done",
+ "turnsUsed": 97,
+ "stoppedReason": "stages_complete",
+ "costUsd": 1.869,
+ "appCalls": 157,
+ "promptTokens": 5617777,
+ "cachedShare": 0.978,
+ "reasoningTokens": 20559
+}

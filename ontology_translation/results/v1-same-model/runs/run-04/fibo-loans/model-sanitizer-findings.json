@@ -1,0 +1,70 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "InterestRateArrangement",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasInterestRateResetSchedule (Loan → InterestRateResetSchedule)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasInterestRateResetSchedule",
+      "from": "Loan",
+      "to": "InterestRateResetSchedule",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "collateralizedBy (Loan → Collateral)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "collateralizedBy",
+      "from": "Loan",
+      "to": "Collateral",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasPaymentTransaction (PaymentHistory → PaymentTransaction)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasPaymentTransaction",
+      "from": "PaymentHistory",
+      "to": "PaymentTransaction",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasIndividualPaymentTransaction (PaymentHistory → IndividualPaymentTransaction)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasIndividualPaymentTransaction",
+      "from": "PaymentHistory",
+      "to": "IndividualPaymentTransaction",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]

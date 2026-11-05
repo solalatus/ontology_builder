@@ -1,0 +1,18 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "ThermostatTemperatureSensor",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship-pair",
+    "identity": "hasOccupancySensor (Space → OccupancySensor) / locatedInSpace (OccupancySensor → Space)",
+    "field": "pair",
+    "pattern": "RECIPROCAL_PAIR",
+    "detail": "hasOccupancySensor (Space → OccupancySensor) and locatedInSpace (OccupancySensor → Space) connect the same two classes in opposite directions -- confirm these are two genuinely distinct facts, not the same fact stated twice"
+  }
+]
