@@ -1,0 +1,327 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "CO2Sensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AirQualitySensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PackagedHeatPump",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CO2DifferentialSensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CondensingUnit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CoolingTower",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "HeatExchanger",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Humidifier",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "IsolationValve",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Pump",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SpaceHeater",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "WaterTemperatureSensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DryCooler",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_21",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_31",
+          "recoveredId": "e9",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "AirPlenum.airflowState",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TemperatureSensor.value",
+          "matchedPropertyName": "temperatureReading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AirTemperatureSensor.value",
+          "matchedPropertyName": "temperatureReading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "OutsideAirCO2Sensor.value",
+          "matchedPropertyName": "co2Reading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "ReturnAirCO2Sensor.value",
+          "matchedPropertyName": "co2Reading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "TemperatureSetpoint.value",
+          "matchedPropertyName": "targetTemperature",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "AirTemperatureSetpoint.value",
+          "matchedPropertyName": "targetTemperature",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "CoolingTemperatureSetpoint.value",
+          "matchedPropertyName": "targetTemperature",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "HeatingTemperatureSetpoint.value",
+          "matchedPropertyName": "targetTemperature",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "TemperatureDeadbandSetpoint.value",
+          "matchedPropertyName": "bandSize",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "OccupancySensor.occupied",
+          "matchedPropertyName": "reportedOccupancy",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "Thermostat.mode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Filter.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Boiler.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Chiller.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Chiller.coolingCapacity",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Building.yearBuilt",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Floor.levelNumber",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Space.maxOccupancy",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Fan.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- A thermostat temperature sensor does not measure CO2.\n2: NO MATCH -- Neither candidate is an air quality sensor.\n3: NO MATCH -- Neither candidate is a packaged heat pump.\n4: NO MATCH -- Neither candidate measures CO2 differential.\n5: NO MATCH -- Neither candidate is a condensing unit.\n6: NO MATCH -- Neither candidate is a cooling tower.\n7: NO MATCH -- Neither candidate is a heat exchanger.\n8: NO MATCH -- Neither candidate is a humidifier.\n9: NO MATCH -- Neither candidate is an isolation valve.\n10: NO MATCH -- Neither candidate is a pump.\n11: NO MATCH -- Neither candidate is a space heater.\n12: NO MATCH -- A thermostat temperature sensor is not specifically a water temperature sensor.\n13: NO MATCH -- Neither candidate is a dry cooler.",
+      "relationships": "1: NO MATCH -- No candidate links the sensor to its building location.\n2: NO MATCH -- No candidate describes a zone as part of a building.\n3: MATCH 1 -- Controlling a zone is the thermostat’s service relationship to that zone.",
+      "properties": "1: MATCH \"temperatureReading\" -- Both are the sensor’s measured temperature.\n2: NO MATCH -- A temperature reading is not the sensor’s status.\n3: MATCH \"temperatureReading\" -- Both are the measured air temperature.\n4: MATCH \"co2Reading\" -- Both are the measured outside-air CO2 level.\n5: MATCH \"co2Reading\" -- Both are the measured return-air CO2 level.\n6: MATCH \"targetTemperature\" -- Both are the temperature setpoint value.\n7: MATCH \"targetTemperature\" -- Both are the air-temperature setpoint value.\n8: MATCH \"targetTemperature\" -- Both are the cooling setpoint value.\n9: MATCH \"targetTemperature\" -- Both are the heating setpoint value.\n10: MATCH \"bandSize\" -- Both are the deadband setpoint value.\n11: MATCH \"reportedOccupancy\" -- Both indicate whether occupancy is detected.\n12: NO MATCH -- Filter condition does not clearly specify the same field as status.",
+      "valueFidelity": "1: 100 -- Identical distinctions.\n2: 100 -- Identical distinctions.\n3: 100 -- Same distinctions in a different order.\n4: 100 -- Identical distinctions.\n5: 100 -- Identical distinctions.\n6: 100 -- Identical distinctions."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "CO2Sensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Pump",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_31",
+          "recoveredId": "e9",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "TemperatureSensor.value",
+          "matchedPropertyName": "temperatureReading",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TemperatureSetpoint.value",
+          "matchedPropertyName": "targetTemperature",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "CoolingTemperatureSetpoint.value",
+          "matchedPropertyName": "targetTemperature",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "HeatingTemperatureSetpoint.value",
+          "matchedPropertyName": "targetTemperature",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "OccupancySensor.occupied",
+          "matchedPropertyName": "reportedOccupancy",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "Thermostat.mode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Boiler.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Chiller.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- Outside-air and return-air CO₂ sensors are narrower classes than CO₂ Sensor.\n2: NO MATCH -- No candidate is a pump.",
+      "relationships": "1: NO MATCH -- No candidate expresses a building having a zone as a part.\n2: MATCH 1 -- Controlling a zone is the stated sense of serving it.",
+      "properties": "1: MATCH \"temperatureReading\" -- Both represent the temperature sensor’s measured value.\n2: NO MATCH -- A temperature reading is not the sensor’s status.\n3: MATCH \"targetTemperature\" -- Both represent the temperature setpoint value.\n4: MATCH \"targetTemperature\" -- Both represent the cooling temperature setpoint value.\n5: MATCH \"targetTemperature\" -- Both represent the heating temperature setpoint value.\n6: MATCH \"reportedOccupancy\" -- Both represent the occupancy sensor’s reported occupied state.",
+      "valueFidelity": "1: 100 -- Identical distinctions.\n2: 100 -- Identical distinctions.\n3: 100 -- Same distinctions in a different order.\n4: 100 -- Identical distinctions.\n5: 100 -- Identical distinctions."
+    }
+  }
+}

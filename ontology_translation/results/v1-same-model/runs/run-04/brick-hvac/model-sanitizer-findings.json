@@ -1,0 +1,150 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "ThermostatTemperatureSensor",
+    "field": "meaning",
+    "pattern": "SUPERSEDED",
+    "detail": "meaning contains editorial language (\"superseded\") that reads as a leftover note rather than a real definition: \"SUPERSEDED: Do not use this kind; identify the thermostat's sensor as a TemperatureSensor associated with a Thermostat instead.\""
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "ThermostatTemperatureSetpoint",
+    "field": "meaning",
+    "pattern": "SUPERSEDED",
+    "detail": "meaning contains editorial language (\"superseded\") that reads as a leftover note rather than a real definition: \"SUPERSEDED: Do not use this kind; use a TemperatureSetpoint associated with a Thermostat instead.\""
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasTemperatureSetpoint (Thermostat → ThermostatTemperatureSetpoint)",
+    "field": "meaning",
+    "pattern": "SUPERSEDED",
+    "detail": "meaning contains editorial language (\"superseded\") that reads as a leftover note rather than a real definition: \"SUPERSEDED: Do not use this link; use the Thermostat-to-TemperatureSetpoint point association instead.\"",
+    "relationship": {
+      "name": "hasTemperatureSetpoint",
+      "from": "Thermostat",
+      "to": "ThermostatTemperatureSetpoint",
+      "meaning": "SUPERSEDED: Do not use this link; use the Thermostat-to-TemperatureSetpoint point association instead.",
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasTemperatureSensor (Thermostat → ThermostatTemperatureSensor)",
+    "field": "meaning",
+    "pattern": "SUPERSEDED",
+    "detail": "meaning contains editorial language (\"superseded\") that reads as a leftover note rather than a real definition: \"SUPERSEDED: Use hasTemperatureSensorPoint from Thermostat to TemperatureSensor instead.\"",
+    "relationship": {
+      "name": "hasTemperatureSensor",
+      "from": "Thermostat",
+      "to": "ThermostatTemperatureSensor",
+      "meaning": "SUPERSEDED: Use hasTemperatureSensorPoint from Thermostat to TemperatureSensor instead.",
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasTemperatureSensor (Thermostat → TemperatureSensor)",
+    "field": "meaning",
+    "pattern": "SUPERSEDED",
+    "detail": "meaning contains editorial language (\"superseded\") that reads as a leftover note rather than a real definition: \"SUPERSEDED: Use hasTemperatureSensorPoint from Thermostat to TemperatureSensor instead.\"",
+    "relationship": {
+      "name": "hasTemperatureSensor",
+      "from": "Thermostat",
+      "to": "TemperatureSensor",
+      "meaning": "SUPERSEDED: Use hasTemperatureSensorPoint from Thermostat to TemperatureSensor instead.",
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "associatedWithThermostat (TemperatureSensor → Thermostat)",
+    "field": "meaning",
+    "pattern": "SUPERSEDED",
+    "detail": "meaning contains editorial language (\"superseded\") that reads as a leftover note rather than a real definition: \"SUPERSEDED: Use Thermostat-to-TemperatureSensor hasTemperatureSensorPoint instead; do not treat this reverse link as separately recorded.\"",
+    "relationship": {
+      "name": "associatedWithThermostat",
+      "from": "TemperatureSensor",
+      "to": "Thermostat",
+      "meaning": "SUPERSEDED: Use Thermostat-to-TemperatureSensor hasTemperatureSensorPoint instead; do not treat this reverse link as separately recorded.",
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasOutsideAirCo2SensorPoint (AirHandler → OutsideAirCO2Sensor)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasOutsideAirCo2SensorPoint",
+      "from": "AirHandler",
+      "to": "OutsideAirCO2Sensor",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasReturnAirCo2SensorPoint (AirHandler → ReturnAirCO2Sensor)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasReturnAirCo2SensorPoint",
+      "from": "AirHandler",
+      "to": "ReturnAirCO2Sensor",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasOutsideAirCo2SensorPoint (AirHandler → OutsideAirCO2Sensor)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasOutsideAirCo2SensorPoint",
+      "from": "AirHandler",
+      "to": "OutsideAirCO2Sensor",
+      "meaning": null,
+      "aliases": [
+        "has point"
+      ]
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasReturnAirCo2SensorPoint (AirHandler → ReturnAirCO2Sensor)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasReturnAirCo2SensorPoint",
+      "from": "AirHandler",
+      "to": "ReturnAirCO2Sensor",
+      "meaning": null,
+      "aliases": [
+        "has point"
+      ]
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship-pair",
+    "identity": "hasOccupancySensorPoint (Space → OccupancySensor) / locatedInSpace (OccupancySensor → Space)",
+    "field": "pair",
+    "pattern": "RECIPROCAL_PAIR",
+    "detail": "hasOccupancySensorPoint (Space → OccupancySensor) and locatedInSpace (OccupancySensor → Space) connect the same two classes in opposite directions -- confirm these are two genuinely distinct facts, not the same fact stated twice"
+  }
+]
