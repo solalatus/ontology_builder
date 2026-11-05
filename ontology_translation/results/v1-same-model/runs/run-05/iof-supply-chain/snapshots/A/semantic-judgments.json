@@ -1,0 +1,280 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Consignee",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Shipper",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Distributor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Retailer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Wholesaler",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FreightContainer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Trailer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Wagon",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TraceableResourceUnit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Traceability",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DistributionCenter",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Factory",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "GeospatialLocation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ShippingRoute",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupplyChainTransportProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "WarehousingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PackagingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ConsigningProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FreightForwardingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InventoryManagementProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupplyChainProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "LogisticsProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TransportationService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PackagingService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ManufacturingService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BillOfLading",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_4",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_6",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_8",
+          "recoveredId": "e16",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_10",
+          "recoveredId": "e11",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_19",
+          "recoveredId": "e20",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_20",
+          "recoveredId": "e21",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_21",
+          "recoveredId": "e22",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e23",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "FreightForwarder.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "relationships": "1: NO MATCH -- Involving a carrier does not establish it as the process’s agent.\n2: NO MATCH -- Involving a forwarder does not establish it as the service’s agent.\n3: MATCH 5 -- “Takes place at” means “occurs at.”\n4: MATCH 2 -- “Takes place at” means “occurs at.”\n5: MATCH 7 -- The recorded shipment is the event’s tracked subject.\n6: MATCH 8 -- The recorded lot is the event’s tracked subject.\n7: MATCH 9 -- The recorded logistic unit is the event’s tracked subject.\n8: MATCH 10 -- The recorded load is the event’s tracked subject."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "FreightContainer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TraceableResourceUnit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Traceability",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_4",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_6",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_8",
+          "recoveredId": "e16",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_10",
+          "recoveredId": "e11",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_19",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_20",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_21",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- Neither candidate is a freight container.\n2: NO MATCH -- Neither candidate is a traceable resource unit.\n3: NO MATCH -- Neither candidate is traceability.\n4: NO MATCH -- Storage work is not a storage facility.\n5: NO MATCH -- A general logistics service is not specifically a storage service.",
+      "relationships": "1: NO MATCH -- Involving a carrier does not specify that it is the agent.\n2: NO MATCH -- Involving a forwarder does not specify that it is the agent.\n3: MATCH 5 -- “Takes place at” means “occurs at.”\n4: MATCH 2 -- “Takes place at” means “occurs at.”\n5: NO MATCH -- Recording a shipment is not the same as tracking it.\n6: NO MATCH -- Recording a lot is not the same as tracking it.\n7: NO MATCH -- Recording a logistic unit is not the same as tracking it.\n8: NO MATCH -- Recording a load is not the same as tracking it."
+    }
+  }
+}
