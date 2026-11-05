@@ -1,0 +1,198 @@
+2026-11-04T20:45:37.664Z START runs brick-hvac/run-01 (spent so far $0.00 of $1000)
+2026-11-04T21:02:28.455Z   appearsFinished: the classifier model rejected temperature; continuing without it (brick-hvac/run-01: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-04T21:03:20.968Z brick-hvac/run-01: snapshot A at turn 87 ($1.90 so far)
+2026-11-04T21:03:20.977Z brick-hvac/run-01: [stages] {"type":"snapshot","label":"A","turn":87}
+2026-11-04T21:04:32.531Z brick-hvac/run-01: snapshot A composite(full)=0.603 (scoped)=0.515 semantic=0.860
+2026-11-04T21:04:32.576Z brick-hvac/run-01: done. 87 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.603 (scoped)=0.515
+2026-11-04T21:04:32.745Z END brick-hvac/run-01: exit=0 status=complete stopped=stages_complete cost=$2.04 turns=87
+2026-11-04T21:04:32.746Z START runs iof-maintenance/run-01 (spent so far $2.04 of $1000)
+2026-11-04T21:15:58.009Z   appearsFinished: the classifier model rejected temperature; continuing without it (iof-maintenance/run-01: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-04T21:16:03.210Z iof-maintenance/run-01: snapshot A at turn 76 ($1.11 so far)
+2026-11-04T21:16:03.213Z iof-maintenance/run-01: [stages] {"type":"snapshot","label":"A","turn":76}
+2026-11-04T21:16:24.933Z iof-maintenance/run-01: snapshot A composite(full)=0.756 (scoped)=0.672 semantic=0.756
+2026-11-04T21:16:24.973Z iof-maintenance/run-01: done. 76 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.756 (scoped)=0.672
+2026-11-04T21:16:25.082Z END iof-maintenance/run-01: exit=0 status=complete stopped=stages_complete cost=$1.18 turns=76
+2026-11-04T21:16:25.082Z START runs iof-supply-chain/run-01 (spent so far $3.21 of $1000)
+2026-11-04T21:29:27.905Z   appearsFinished: the classifier model rejected temperature; continuing without it (iof-supply-chain/run-01: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported)
+2026-11-04T21:29:32.699Z iof-supply-chain/run-01: snapshot A at turn 86 ($1.26 so far)
+2026-11-04T21:29:32.703Z iof-supply-chain/run-01: [stages] {"type":"snapshot","label":"A","turn":86}
+2026-11-04T21:30:11.946Z iof-supply-chain/run-01: snapshot A composite(full)=0.736 (scoped)=0.879 semantic=0.736
+2026-11-04T21:30:11.987Z iof-supply-chain/run-01: done. 86 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.736 (scoped)=0.879
+2026-11-04T21:30:12.142Z END iof-supply-chain/run-01: exit=0 status=complete stopped=stages_complete cost=$1.34 turns=86
+2026-11-04T21:30:12.143Z START runs fibo-loans/run-01 (spent so far $4.56 of $1000)
+2026-11-04T21:45:35.739Z   appearsFinished: the classifier model rejected temperature; continuing without it (fibo-loans/run-01: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-04T21:45:39.397Z fibo-loans/run-01: snapshot A at turn 78 ($1.42 so far)
+2026-11-04T21:45:39.401Z fibo-loans/run-01: [stages] {"type":"snapshot","label":"A","turn":78}
+2026-11-04T21:46:16.146Z fibo-loans/run-01: snapshot A composite(full)=0.774 (scoped)=0.590 semantic=0.804
+2026-11-04T21:46:16.192Z fibo-loans/run-01: done. 78 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.774 (scoped)=0.590
+2026-11-04T21:46:16.339Z END fibo-loans/run-01: exit=0 status=complete stopped=stages_complete cost=$1.50 turns=78
+2026-11-04T21:46:16.340Z START runs itops/run-01 (spent so far $6.06 of $1000)
+2026-11-04T22:00:03.486Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:01:49.661Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:05:54.118Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:08:20.520Z START runs brick-hvac/run-01 (spent so far $8.47 of $1000)
+2026-11-04T22:08:21.367Z brick-hvac/run-01: already complete -- skipping (pass --force to redo it)
+2026-11-04T22:08:21.378Z END brick-hvac/run-01: exit=0 status=complete stopped=stages_complete cost=$2.04 turns=87
+2026-11-04T22:08:21.379Z START runs iof-maintenance/run-01 (spent so far $8.47 of $1000)
+2026-11-04T22:08:21.496Z iof-maintenance/run-01: already complete -- skipping (pass --force to redo it)
+2026-11-04T22:08:21.504Z END iof-maintenance/run-01: exit=0 status=complete stopped=stages_complete cost=$1.18 turns=76
+2026-11-04T22:08:21.505Z START runs iof-supply-chain/run-01 (spent so far $8.47 of $1000)
+2026-11-04T22:08:21.707Z iof-supply-chain/run-01: already complete -- skipping (pass --force to redo it)
+2026-11-04T22:08:21.718Z END iof-supply-chain/run-01: exit=0 status=complete stopped=stages_complete cost=$1.34 turns=86
+2026-11-04T22:08:21.719Z START runs fibo-loans/run-01 (spent so far $8.47 of $1000)
+2026-11-04T22:08:21.924Z fibo-loans/run-01: already complete -- skipping (pass --force to redo it)
+2026-11-04T22:08:21.932Z END fibo-loans/run-01: exit=0 status=complete stopped=stages_complete cost=$1.50 turns=78
+2026-11-04T22:08:21.933Z START runs itops/run-01 (spent so far $8.47 of $1000)
+2026-11-04T22:22:57.450Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:25:03.043Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:27:10.855Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:31:04.324Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:32:55.582Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:34:39.890Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:36:02.741Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:38:25.335Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:40:39.943Z   itops/run-01: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T22:43:19.958Z   appearsFinished: the classifier model rejected temperature; continuing without it (itops/run-01: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-04T22:43:23.195Z itops/run-01: snapshot A at turn 147 ($4.03 so far)
+2026-11-04T22:43:23.202Z itops/run-01: [stages] {"type":"snapshot","label":"A","turn":147}
+2026-11-04T22:44:38.879Z itops/run-01: snapshot A composite(full)=0.544 (scoped)=0.664 semantic=0.544
+2026-11-04T22:44:38.960Z itops/run-01: done. 147 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.544 (scoped)=0.664
+2026-11-04T22:44:39.104Z END itops/run-01: exit=0 status=complete stopped=stages_complete cost=$4.18 turns=147
+2026-11-04T22:44:39.105Z START runs brick-hvac/run-02 (spent so far $12.66 of $1000)
+2026-11-04T23:01:42.445Z   appearsFinished: the classifier model rejected temperature; continuing without it (brick-hvac/run-02: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-04T23:01:50.550Z brick-hvac/run-02: snapshot A at turn 94 ($2.00 so far)
+2026-11-04T23:01:50.557Z brick-hvac/run-02: [stages] {"type":"snapshot","label":"A","turn":94}
+2026-11-04T23:02:45.590Z brick-hvac/run-02: snapshot A composite(full)=0.818 (scoped)=0.504 semantic=0.934
+2026-11-04T23:02:45.640Z brick-hvac/run-02: done. 94 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.818 (scoped)=0.504
+2026-11-04T23:02:45.755Z END brick-hvac/run-02: exit=0 status=complete stopped=stages_complete cost=$2.13 turns=94
+2026-11-04T23:02:45.756Z START runs iof-maintenance/run-02 (spent so far $14.78 of $1000)
+2026-11-04T23:13:30.116Z   appearsFinished: the classifier model rejected temperature; continuing without it (iof-maintenance/run-02: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-04T23:13:46.070Z iof-maintenance/run-02: snapshot A at turn 72 ($1.10 so far)
+2026-11-04T23:13:46.072Z iof-maintenance/run-02: [stages] {"type":"snapshot","label":"A","turn":72}
+2026-11-04T23:14:20.388Z iof-maintenance/run-02: snapshot A composite(full)=0.718 (scoped)=0.674 semantic=0.773
+2026-11-04T23:14:20.419Z iof-maintenance/run-02: done. 72 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.718 (scoped)=0.674
+2026-11-04T23:14:20.530Z END iof-maintenance/run-02: exit=0 status=complete stopped=stages_complete cost=$1.17 turns=72
+2026-11-04T23:14:20.531Z START runs iof-supply-chain/run-02 (spent so far $15.96 of $1000)
+2026-11-04T23:24:51.919Z   appearsFinished: the classifier model rejected temperature; continuing without it (iof-supply-chain/run-02: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported)
+2026-11-04T23:24:55.595Z iof-supply-chain/run-02: snapshot A at turn 73 ($1.11 so far)
+2026-11-04T23:24:55.598Z iof-supply-chain/run-02: [stages] {"type":"snapshot","label":"A","turn":73}
+2026-11-04T23:25:51.134Z iof-supply-chain/run-02: snapshot A composite(full)=0.692 (scoped)=0.805 semantic=0.761
+2026-11-04T23:25:51.168Z iof-supply-chain/run-02: done. 73 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.692 (scoped)=0.805
+2026-11-04T23:25:51.260Z END iof-supply-chain/run-02: exit=0 status=complete stopped=stages_complete cost=$1.19 turns=73
+2026-11-04T23:25:51.261Z START runs fibo-loans/run-02 (spent so far $17.15 of $1000)
+2026-11-04T23:42:50.742Z   appearsFinished: the classifier model rejected temperature; continuing without it (fibo-loans/run-02: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-04T23:42:58.526Z fibo-loans/run-02: snapshot A at turn 95 ($1.72 so far)
+2026-11-04T23:42:58.531Z fibo-loans/run-02: [stages] {"type":"snapshot","label":"A","turn":95}
+2026-11-04T23:45:11.019Z fibo-loans/run-02: snapshot A composite(full)=0.665 (scoped)=0.525 semantic=0.687
+2026-11-04T23:45:11.058Z fibo-loans/run-02: done. 95 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.665 (scoped)=0.525
+2026-11-04T23:45:11.164Z END fibo-loans/run-02: exit=0 status=complete stopped=stages_complete cost=$1.85 turns=95
+2026-11-04T23:45:11.165Z START runs itops/run-02 (spent so far $19.00 of $1000)
+2026-11-04T23:55:10.033Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T23:56:30.157Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T23:58:18.202Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-04T23:59:34.176Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-05T00:00:52.477Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-05T00:02:52.894Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-05T00:04:16.656Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-05T00:05:30.545Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-05T00:06:59.529Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-05T00:08:31.977Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-05T00:09:53.556Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-05T00:11:42.808Z   appearsFinished: the classifier model rejected temperature; continuing without it (itops/run-02: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-05T00:11:47.116Z itops/run-02: snapshot A at turn 104 ($3.19 so far)
+2026-11-05T00:11:47.126Z itops/run-02: [stages] {"type":"snapshot","label":"A","turn":104}
+2026-11-05T00:13:26.472Z itops/run-02: snapshot A composite(full)=0.691 (scoped)=0.591 semantic=0.695
+2026-11-05T00:13:26.529Z itops/run-02: done. 104 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.691 (scoped)=0.591
+2026-11-05T00:13:26.662Z END itops/run-02: exit=0 status=complete stopped=stages_complete cost=$3.33 turns=104
+2026-11-05T00:13:26.663Z START runs brick-hvac/run-03 (spent so far $22.33 of $1000)
+2026-11-05T00:33:02.515Z   appearsFinished: the classifier model rejected temperature; continuing without it (brick-hvac/run-03: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-05T00:33:24.876Z brick-hvac/run-03: snapshot A at turn 104 ($1.88 so far)
+2026-11-05T00:33:24.881Z brick-hvac/run-03: [stages] {"type":"snapshot","label":"A","turn":104}
+2026-11-05T00:34:28.637Z brick-hvac/run-03: snapshot A composite(full)=0.588 (scoped)=0.454 semantic=0.875
+2026-11-05T00:34:28.681Z brick-hvac/run-03: done. 104 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.588 (scoped)=0.454
+2026-11-05T00:34:28.824Z END brick-hvac/run-03: exit=0 status=complete stopped=stages_complete cost=$2.02 turns=104
+2026-11-05T00:34:28.828Z START runs iof-maintenance/run-03 (spent so far $24.35 of $1000)
+2026-11-05T00:47:03.949Z   appearsFinished: the classifier model rejected temperature; continuing without it (iof-maintenance/run-03: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-05T00:47:30.045Z iof-maintenance/run-03: snapshot A at turn 70 ($1.08 so far)
+2026-11-05T00:47:30.048Z iof-maintenance/run-03: [stages] {"type":"snapshot","label":"A","turn":70}
+2026-11-05T00:48:21.220Z iof-maintenance/run-03: snapshot A composite(full)=0.711 (scoped)=0.601 semantic=0.711
+2026-11-05T00:48:21.255Z iof-maintenance/run-03: done. 70 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.711 (scoped)=0.601
+2026-11-05T00:48:21.397Z END iof-maintenance/run-03: exit=0 status=complete stopped=stages_complete cost=$1.16 turns=70
+2026-11-05T00:48:21.399Z START runs iof-supply-chain/run-03 (spent so far $25.51 of $1000)
+2026-11-05T01:06:39.449Z   appearsFinished: the classifier model rejected temperature; continuing without it (iof-supply-chain/run-03: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported)
+2026-11-05T01:06:43.203Z iof-supply-chain/run-03: snapshot A at turn 93 ($1.72 so far)
+2026-11-05T01:06:43.209Z iof-supply-chain/run-03: [stages] {"type":"snapshot","label":"A","turn":93}
+2026-11-05T01:08:34.404Z iof-supply-chain/run-03: snapshot A composite(full)=0.674 (scoped)=0.808 semantic=0.752
+2026-11-05T01:08:34.460Z iof-supply-chain/run-03: done. 93 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.674 (scoped)=0.808
+2026-11-05T01:08:34.597Z END iof-supply-chain/run-03: exit=0 status=complete stopped=stages_complete cost=$1.83 turns=93
+2026-11-05T01:08:34.599Z START runs fibo-loans/run-03 (spent so far $27.33 of $1000)
+2026-11-05T01:27:00.023Z   appearsFinished: the classifier model rejected temperature; continuing without it (fibo-loans/run-03: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-05T01:27:03.984Z fibo-loans/run-03: snapshot A at turn 93 ($1.49 so far)
+2026-11-05T01:27:03.989Z fibo-loans/run-03: [stages] {"type":"snapshot","label":"A","turn":93}
+2026-11-05T01:28:08.638Z fibo-loans/run-03: snapshot A composite(full)=0.656 (scoped)=0.613 semantic=0.698
+2026-11-05T01:28:08.685Z fibo-loans/run-03: done. 93 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.656 (scoped)=0.613
+2026-11-05T01:28:08.793Z END fibo-loans/run-03: exit=0 status=complete stopped=stages_complete cost=$1.60 turns=93
+2026-11-05T01:28:08.794Z START runs itops/run-03 (spent so far $28.94 of $1000)
+2026-11-05T01:49:24.217Z   appearsFinished: the classifier model rejected temperature; continuing without it (itops/run-03: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-05T01:49:27.897Z itops/run-03: snapshot A at turn 103 ($2.32 so far)
+2026-11-05T01:49:27.903Z itops/run-03: [stages] {"type":"snapshot","label":"A","turn":103}
+2026-11-05T01:50:44.568Z itops/run-03: snapshot A composite(full)=0.582 (scoped)=0.650 semantic=0.586
+2026-11-05T01:50:44.620Z itops/run-03: done. 103 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.582 (scoped)=0.650
+2026-11-05T01:50:44.755Z END itops/run-03: exit=0 status=complete stopped=stages_complete cost=$2.45 turns=103
+2026-11-05T01:50:44.757Z START runs brick-hvac/run-04 (spent so far $31.39 of $1000)
+2026-11-05T02:06:27.465Z   appearsFinished: the classifier model rejected temperature; continuing without it (brick-hvac/run-04: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-05T02:06:30.984Z brick-hvac/run-04: snapshot A at turn 79 ($1.65 so far)
+2026-11-05T02:06:30.991Z brick-hvac/run-04: [stages] {"type":"snapshot","label":"A","turn":79}
+2026-11-05T02:07:39.795Z brick-hvac/run-04: snapshot A composite(full)=0.608 (scoped)=0.507 semantic=0.721
+2026-11-05T02:07:39.839Z brick-hvac/run-04: done. 79 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.608 (scoped)=0.507
+2026-11-05T02:07:39.989Z END brick-hvac/run-04: exit=0 status=complete stopped=stages_complete cost=$1.77 turns=79
+2026-11-05T02:07:39.990Z START runs iof-maintenance/run-04 (spent so far $33.16 of $1000)
+2026-11-05T02:22:04.041Z   appearsFinished: the classifier model rejected temperature; continuing without it (iof-maintenance/run-04: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-05T02:22:08.043Z iof-maintenance/run-04: snapshot A at turn 76 ($1.13 so far)
+2026-11-05T02:22:08.046Z iof-maintenance/run-04: [stages] {"type":"snapshot","label":"A","turn":76}
+2026-11-05T02:22:32.338Z iof-maintenance/run-04: snapshot A composite(full)=0.760 (scoped)=0.585 semantic=0.760
+2026-11-05T02:22:32.370Z iof-maintenance/run-04: done. 76 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.760 (scoped)=0.585
+2026-11-05T02:22:32.496Z END iof-maintenance/run-04: exit=0 status=complete stopped=stages_complete cost=$1.20 turns=76
+2026-11-05T02:22:32.498Z START runs iof-supply-chain/run-04 (spent so far $34.35 of $1000)
+2026-11-05T02:35:37.932Z   appearsFinished: the classifier model rejected temperature; continuing without it (iof-supply-chain/run-04: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported)
+2026-11-05T02:35:43.497Z iof-supply-chain/run-04: snapshot A at turn 73 ($1.16 so far)
+2026-11-05T02:35:43.500Z iof-supply-chain/run-04: [stages] {"type":"snapshot","label":"A","turn":73}
+2026-11-05T02:37:12.361Z iof-supply-chain/run-04: snapshot A composite(full)=0.677 (scoped)=0.808 semantic=0.677
+2026-11-05T02:37:12.407Z iof-supply-chain/run-04: done. 73 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.677 (scoped)=0.808
+2026-11-05T02:37:12.548Z END iof-supply-chain/run-04: exit=0 status=complete stopped=stages_complete cost=$1.26 turns=73
+2026-11-05T02:37:12.550Z START runs fibo-loans/run-04 (spent so far $35.62 of $1000)
+2026-11-05T02:52:14.435Z   appearsFinished: the classifier model rejected temperature; continuing without it (fibo-loans/run-04: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-05T02:52:52.094Z fibo-loans/run-04: snapshot A at turn 89 ($1.78 so far)
+2026-11-05T02:52:52.099Z fibo-loans/run-04: [stages] {"type":"snapshot","label":"A","turn":89}
+2026-11-05T02:53:55.386Z fibo-loans/run-04: snapshot A composite(full)=0.791 (scoped)=0.626 semantic=0.815
+2026-11-05T02:53:55.425Z fibo-loans/run-04: done. 89 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.791 (scoped)=0.626
+2026-11-05T02:53:55.524Z END fibo-loans/run-04: exit=0 status=complete stopped=stages_complete cost=$1.88 turns=89
+2026-11-05T02:53:55.527Z START runs brick-hvac/run-05 (spent so far $37.50 of $1000)
+2026-11-05T03:10:11.042Z   appearsFinished: the classifier model rejected temperature; continuing without it (brick-hvac/run-05: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-05T03:10:16.574Z brick-hvac/run-05: snapshot A at turn 97 ($1.73 so far)
+2026-11-05T03:10:16.583Z brick-hvac/run-05: [stages] {"type":"snapshot","label":"A","turn":97}
+2026-11-05T03:11:31.969Z brick-hvac/run-05: snapshot A composite(full)=0.536 (scoped)=0.492 semantic=0.818
+2026-11-05T03:11:32.013Z brick-hvac/run-05: done. 97 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.536 (scoped)=0.492
+2026-11-05T03:11:32.153Z END brick-hvac/run-05: exit=0 status=complete stopped=stages_complete cost=$1.87 turns=97
+2026-11-05T03:11:32.155Z START runs iof-maintenance/run-05 (spent so far $39.37 of $1000)
+2026-11-05T03:23:20.891Z   appearsFinished: the classifier model rejected temperature; continuing without it (iof-maintenance/run-05: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-05T03:23:23.855Z iof-maintenance/run-05: snapshot A at turn 65 ($1.03 so far)
+2026-11-05T03:23:23.859Z iof-maintenance/run-05: [stages] {"type":"snapshot","label":"A","turn":65}
+2026-11-05T03:23:51.539Z iof-maintenance/run-05: snapshot A composite(full)=0.802 (scoped)=0.643 semantic=0.802
+2026-11-05T03:23:51.573Z iof-maintenance/run-05: done. 65 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.802 (scoped)=0.643
+2026-11-05T03:23:51.758Z END iof-maintenance/run-05: exit=0 status=complete stopped=stages_complete cost=$1.10 turns=65
+2026-11-05T03:23:51.760Z START runs iof-supply-chain/run-05 (spent so far $40.46 of $1000)
+2026-11-05T03:38:13.935Z   appearsFinished: the classifier model rejected temperature; continuing without it (iof-supply-chain/run-05: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported)
+2026-11-05T03:38:33.909Z iof-supply-chain/run-05: snapshot A at turn 88 ($1.48 so far)
+2026-11-05T03:38:33.913Z iof-supply-chain/run-05: [stages] {"type":"snapshot","label":"A","turn":88}
+2026-11-05T03:39:21.424Z iof-supply-chain/run-05: snapshot A composite(full)=0.641 (scoped)=0.807 semantic=0.715
+2026-11-05T03:39:21.468Z iof-supply-chain/run-05: done. 88 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.641 (scoped)=0.807
+2026-11-05T03:39:21.603Z END iof-supply-chain/run-05: exit=0 status=complete stopped=stages_complete cost=$1.58 turns=88
+2026-11-05T03:39:21.606Z START runs fibo-loans/run-05 (spent so far $42.04 of $1000)
+2026-11-05T03:54:56.574Z   appearsFinished: the classifier model rejected temperature; continuing without it (fibo-loans/run-05: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-05T03:55:02.428Z fibo-loans/run-05: snapshot A at turn 86 ($1.43 so far)
+2026-11-05T03:55:02.432Z fibo-loans/run-05: [stages] {"type":"snapshot","label":"A","turn":86}
+2026-11-05T03:56:11.494Z fibo-loans/run-05: snapshot A composite(full)=0.597 (scoped)=0.552 semantic=0.628
+2026-11-05T03:56:11.531Z fibo-loans/run-05: done. 86 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.597 (scoped)=0.552
+2026-11-05T03:56:11.658Z END fibo-loans/run-05: exit=0 status=complete stopped=stages_complete cost=$1.55 turns=86
+2026-11-05T03:56:11.660Z BLOCK DONE runs: $43.59 spent under ontology_translation/results/v1-same-model/
