@@ -71,3 +71,7 @@ Its 95 % interval is domain-stratified: Var(D) = (1/16) Σ_d (s²_final,d / n_fi
 The outcome decides wording only. It never removes a result from the article.
 
 **Comparison cells:** the final arm is the `final` cells of `../run-intervals/results.json` (run-01..03, built from `../final-scores/`; brick-hvac and fibo-loans from `../default-change-187/treatment/`) plus the run-04 and run-05 top-up, each scored the same way (snapshot A, `snapshotRow` of `analyze-paired-stages.mjs`). The report checks that it reproduces the committed run-01..03 values exactly. `run-intervals/` and `final-scores/summary.json` are not changed.
+
+## Follow-up block (separate design note)
+
+The v1 arm on the held-out ePO domain has its own design note, committed before its runs: [`EPO-DESIGN.md`](EPO-DESIGN.md). Nothing above changes.

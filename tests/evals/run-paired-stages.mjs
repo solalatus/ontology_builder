@@ -115,6 +115,14 @@ BLOCKS["v1-same-model"] = {
   runs: ["run-01", "run-02", "run-03", "run-04", "run-05"].flatMap((r, i) => [...DEV_DOMAINS, ...(i < 3 ? ["itops"] : [])].map((d) => `${d}:${r}`)),
   acceptStops: ARM_STOPS,
 };
+// E1 on the held-out domain (results/v1-same-model/EPO-DESIGN.md): the same v1
+// arm, 3 interviews on epo-ordering, compared with the committed interactive runs.
+BLOCKS["v1-same-model-epo"] = {
+  root: path.join(ROOT, "ontology_translation", "results", "v1-same-model"), dir: "epo", effort: null,
+  env: { ...FINAL_ENV, ONTOLOGY_EVAL_INTERVIEWER_GENERATION: "v1" },
+  runs: ["run-01", "run-02", "run-03"].map((r) => `epo-ordering:${r}`),
+  acceptStops: ARM_STOPS,
+};
 // E1's top-up of the final arm to 5 runs: `--block=final` unchanged, with
 // `--runs=` naming run-04/05 and `--acceptStops=arm` (the same run-end rule).
 export const FINAL_TOPUP_RUNS = ["run-04", "run-05"].flatMap((r) => DEV_DOMAINS.map((d) => `${d}:${r}`));
