@@ -32,3 +32,13 @@ test("difference of differences and the three-outcome reading", () => {
   assert.equal(threeOutcome({ estimate: 2, lo: -0.1, hi: 4 }), "b");
   assert.equal(threeOutcome({ estimate: 0, lo: -1, hi: 1 }), "c");
 });
+
+test("linear combination: weights +1/-1 reproduce plain Welch; the 2x2 interaction is the difference of differences", async () => {
+  const { welchLinear } = await import("./evals/lib/welch.mjs");
+  const a = [1, 2, 4], b = [0, 1, 1], c = [3, 4, 5], d = [1, 2, 3];
+  const x = welchLinear([{ values: a, w: 1 }, { values: b, w: -1 }]), y = welch(a, b);
+  assert.ok(Math.abs(x.estimate - y.estimate) < 1e-12 && Math.abs(x.se - y.se) < 1e-12 && Math.abs(x.df - y.df) < 1e-9);
+  const i = welchLinear([{ values: a, w: 1 }, { values: b, w: -1 }, { values: c, w: -1 }, { values: d, w: 1 }]);
+  const dd = welchDiffOfDiffs(a, b, c, d);
+  assert.ok(Math.abs(i.estimate - dd.estimate) < 1e-12 && Math.abs(i.se - dd.se) < 1e-12);
+});

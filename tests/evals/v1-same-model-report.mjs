@@ -22,7 +22,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { snapshotRow } from "./analyze-paired-stages.mjs";
 import { interviewerFirstCount, goldSize } from "./analyze-final-scores.mjs";
-import { stratifiedWelch, welch, threeOutcome, mean } from "./lib/welch.mjs";
+import { stratifiedWelch, welch, welchLinear, threeOutcome, mean } from "./lib/welch.mjs";
 import { ARM_STOPS } from "./run-paired-stages.mjs";
 import { rescoreRun } from "./rescore-saved-run.mjs";
 
@@ -131,6 +131,28 @@ export function runAll() {
     for (const m of ["composite", "relF1"]) out.epo.differences[m] = welch(inter[m].values, v1.map((x) => x.row[m]));
     out.reading.epo = threeOutcome(out.epo.differences.composite);
   }
+  // B1 of the second co-author review (WEAK-EXPERT-ITOPS-DESIGN.md): interviewer x
+  // simulated expert on itops, all with gpt-6-sol as interviewer model.
+  const dRuns = ["run-01", "run-02", "run-03"].map((r) => ({ r, s: scoreRun(path.join(OUT_DIR, "weak-expert-itops", r, "itops"), "itops") }));
+  if (dRuns.every((x) => x.s && !x.s.excluded) && out.arms.v1.itops.length >= 2) {
+    const cellVals = {
+      A: (m) => ri.cells.final.itops[m].values,
+      B: (m) => ri.cells["persona-ablation"].itops[m].values,
+      C: (m) => out.arms.v1.itops.map((x) => x.row[m]),
+      D: (m) => dRuns.map((x) => x.s.row[m]),
+    };
+    const lin = (m, ws) => welchLinear(Object.entries(ws).map(([k, w]) => ({ values: cellVals[k](m), w })));
+    out.twoByTwo = { cells: {}, effects: {}, runs: dRuns.map((x) => ({ runId: x.r, stoppedReason: x.s.stoppedReason, turns: x.s.turns, costUsd: x.s.costUsd, relayAudit: x.s.relayAudit, composite: x.s.row.composite, relF1: x.s.row.relF1 })) };
+    for (const k of ["A", "B", "C", "D"]) out.twoByTwo.cells[k] = Object.fromEntries(METRICS.map((m) => [m, cellOf(cellVals[k](m))]));
+    for (const m of ["composite", "relF1"]) {
+      out.twoByTwo.effects[m] = {
+        interviewerStrongExpert: lin(m, { A: 1, C: -1 }), interviewerWeakExpert: lin(m, { B: 1, D: -1 }),
+        expertV2: lin(m, { A: 1, B: -1 }), expertV1: lin(m, { C: 1, D: -1 }),
+        interviewerMain: lin(m, { A: 0.5, B: 0.5, C: -0.5, D: -0.5 }), expertMain: lin(m, { A: 0.5, C: 0.5, B: -0.5, D: -0.5 }),
+        interaction: lin(m, { A: 1, B: -1, C: -1, D: 1 }),
+      };
+    }
+  }
   out.macro = {};
   for (const [cn, doms] of Object.entries(out.cells)) if (DEV.every((d) => doms[d])) out.macro[cn] = Object.fromEntries(METRICS.map((m) => [m, mean(DEV.map((d) => doms[d][m].mean))]));
   return out;
@@ -178,6 +200,16 @@ export function renderReport(res) {
     L.push("", `- **Composite, final − v1 (plain Welch, 3 vs 3):** ${iv(e.differences.composite)}, df ${e.differences.composite.df.toFixed(1)}. Outcome (${o}): "${EPOW[o](e.differences.composite)}".`,
       `- Relationship F1, final − v1 (descriptive): ${iv(e.differences.relF1)}.`,
       `- v1 runs: ${e.v1.map((x) => `${x.runId} ${x.stoppedReason}, ${x.turns} turns, ${x.costUsd.toFixed(2)} USD, composite ${p1(x.row.composite)}, relay ${x.relayAudit ? `${x.relayAudit.toolRequests}/${x.relayAudit.violations.length}` : "?"}`).join("; ")}.`);
+  }
+  if (res.twoByTwo) {
+    const t = res.twoByTwo;
+    L.push("", "## Interviewer x simulated expert on itops (WEAK-EXPERT-ITOPS-DESIGN.md)", "", "Cells (gpt-6-sol interviewer model; 3 runs each): A v2 + gpt-6-sol expert (final), B v2 + gpt-4o-mini (persona ablation), C v1 + gpt-6-sol (E1), D v1 + gpt-4o-mini (this block).", "",
+      "| Cell | Composite | Rel F1 | Class F1 |", "|---|---|---|---|");
+    for (const k of ["A", "B", "C", "D"]) L.push(`| ${k} | ${cell(t.cells[k].composite)} | ${cell(t.cells[k].relF1)} | ${cell(t.cells[k].classF1)} |`);
+    const lab = { interviewerStrongExpert: "interviewer, strong expert (A − C)", interviewerWeakExpert: "interviewer, weak expert (B − D)", expertV2: "expert, v2 interviewer (A − B)", expertV1: "expert, v1 interviewer (C − D)", interviewerMain: "interviewer main effect", expertMain: "expert main effect", interaction: "interaction (A − B) − (C − D)" };
+    L.push("", "| Effect | Composite | Rel F1 |", "|---|---|---|");
+    for (const k of Object.keys(lab)) L.push(`| ${lab[k]} | ${iv(t.effects.composite[k])} | ${iv(t.effects.relF1[k])} |`);
+    L.push("", `Cell D runs: ${t.runs.map((x) => `${x.runId} ${x.stoppedReason}, ${x.turns} turns, ${typeof x.costUsd === "number" ? x.costUsd.toFixed(2) : "?"} USD, composite ${p1(x.composite)}`).join("; ")}.`);
   }
   L.push("", "## Per run", "", "| Arm | Domain | Run | Stop | Scored on | Turns | Cost USD | Composite | Rel F1 | Interviewer-first / 100 gold | v1 relay audit (tool requests / violations / skip notes) |", "|---|---|---|---|---|---|---|---|---|---|---|");
   for (const arm of ["v1", "final"]) for (const d of ALL) for (const x of res.arms[arm][d]) {

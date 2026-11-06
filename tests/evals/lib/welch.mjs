@@ -110,3 +110,19 @@ export function threeOutcome(iv) {
   if (iv.estimate > 0) return "b";
   return "c";
 }
+
+/**
+ * Welch interval for a linear combination Σ_k w_k · mean(x_k) of independent
+ * groups (e.g. the effects of a 2x2 design): Var = Σ w_k² s_k² / n_k,
+ * Welch–Satterthwaite df.
+ */
+export function welchLinear(terms, level = 0.95) {
+  let est = 0, v = 0, denom = 0;
+  for (const { values, w } of terms) {
+    est += w * mean(values);
+    const term = (w * w * variance(values)) / values.length;
+    v += term; denom += (term * term) / (values.length - 1);
+  }
+  const df = (v * v) / denom, se = Math.sqrt(v), t = tQuantile(1 - (1 - level) / 2, df);
+  return { estimate: est, lo: est - t * se, hi: est + t * se, se, df, t };
+}
