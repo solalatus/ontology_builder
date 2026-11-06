@@ -1,0 +1,139 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "ContractInformation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderAgreementLine",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_18",
+          "recoveredId": "e9",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_19",
+          "recoveredId": "e10",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_20",
+          "recoveredId": "e11",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_21",
+          "recoveredId": "e12",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "AllowanceChargeInformation.allowanceChargeReasonDescription",
+          "matchedPropertyName": "reason",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.trackingID",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.shippingMark",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.sellerOrderID",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.validityPeriod",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderLine.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 3 -- Confirming an order change is a response to it.\n2: MATCH 4 -- Rejecting an order change is a response to it.\n3: MATCH 5 -- Confirming an order cancellation is a response to it.\n4: MATCH 6 -- Rejecting an order cancellation is a response to it.\n5: NO MATCH -- Proposing changes to an order is not the same as submitting a change for it.\n6: NO MATCH -- Calling off an order is not the same as submitting a cancellation for it.",
+      "properties": "1: MATCH \"reason\" -- Both identify the reason for the allowance or charge."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_18",
+          "recoveredId": "e9",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_19",
+          "recoveredId": "e10",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_20",
+          "recoveredId": "e11",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_21",
+          "recoveredId": "e12",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 3 -- The confirmation responds to the order change by confirming it.\n2: MATCH 4 -- The rejection responds to the order change by rejecting it.\n3: MATCH 5 -- The confirmation responds to the cancellation by confirming it.\n4: MATCH 6 -- The rejection responds to the cancellation by rejecting it.\n5: NO MATCH -- Proposing changes to an order is not the same as submitting a change for it.\n6: NO MATCH -- Calling off an order is not the same as submitting a cancellation for it."
+    }
+  }
+}

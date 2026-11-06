@@ -25,3 +25,16 @@ The v1.0 prompt and its two tools, without the repair loop, inside the current a
 - v1 arm: 43.59 USD harness cost under this directory (including the interrupted attempt), 2026-11-04 21:45 to 2026-11-05 04:56 Berlin time (7 h 11 min, including about 1 min lost to the restart and the rerun of itops run-01).
 - Final top-up (8 interviews in `final-scores/runs/run-04`, `run-05`): 16.29 USD, 04:56 to 07:20 Berlin time (2 h 24 min).
 - Smoke run of the v1 arm (2 turns): 0.04 USD.
+
+## Held-out domain (`EPO-DESIGN.md`)
+
+Three v1 interviews on epo-ordering (2026-11-06, 10:16–10:58 Berlin time, all `stages_complete`, relay audit 0 violations, 4.86 USD), compared with the three committed interactive ePO runs of the final interviewer; both rescored (heuristic, full domain).
+
+| Arm | Composite | Class F1 | Relationship F1 |
+|---|---|---|---|
+| v1, same models | 89.4 [83.9–92.2] | 97.9 | 78.8 |
+| final | 96.8 [93.6–100.0] | 98.6 | 98.6 |
+
+- **Reading fixed in EPO-DESIGN.md:** composite, final − v1: **+7.4 [−2.4, +17.2]** (plain Welch, df 3.5) → outcome **(b)**: "7.4 points higher on the held-out domain; with 3 runs per arm the difference is within run-to-run spread".
+- Relationship F1 (descriptive): +19.8 [−1.0, +40.7]; class F1 is level. The same pattern as on the development domains: the generations differ in structure, not in concepts.
+- The final interviewer is at 96.8 %, near the ceiling, as stated in advance.

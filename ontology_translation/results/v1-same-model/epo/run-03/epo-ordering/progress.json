@@ -1,0 +1,15 @@
+{
+ "domain": "epo-ordering",
+ "runId": "run-03",
+ "model": "gpt-6-sol",
+ "startedAt": "2026-11-06T09:46:42.704Z",
+ "elapsedSec": 702,
+ "phase": "done",
+ "turnsUsed": 73,
+ "stoppedReason": "stages_complete",
+ "costUsd": 1.264,
+ "appCalls": 128,
+ "promptTokens": 3592309,
+ "cachedShare": 0.973,
+ "reasoningTokens": 15184
+}

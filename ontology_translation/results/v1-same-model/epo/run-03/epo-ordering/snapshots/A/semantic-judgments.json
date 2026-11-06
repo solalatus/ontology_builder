@@ -1,0 +1,78 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_1",
+          "recoveredId": "e17",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e19",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "DeliveryInformation.accessURL",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.downloadURL",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.sellerOrderID",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.validityPeriod",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderLine.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 3 -- Both link an Order Agreement to its lines.\n2: MATCH 4 -- Both link an Order Change to its lines.\n3: MATCH 2 -- Both link an Order Response to its lines.",
+      "properties": "1: NO MATCH -- Combines access and download links rather than identifying the access URL specifically.\n2: NO MATCH -- Combines access and download links rather than identifying the download URL specifically."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 1 -- Both mean an Order Response has Order Response Lines."
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_1",
+          "recoveredId": "e17",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e19",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "DeliveryInformation.accessURL",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DeliveryInformation.downloadURL",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.sellerOrderID",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.validityPeriod",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrderLine.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 3 -- “Contains order agreement line” expresses the same relationship as “has line.”\n2: MATCH 4 -- “Contains order change line” expresses the same relationship as “has line.”\n3: MATCH 2 -- “Contains order response line” expresses the same relationship as “has line.”",
+      "properties": "1: NO MATCH -- The candidate combines access and download links rather than identifying the access URL specifically.\n2: NO MATCH -- The candidate combines access and download links rather than identifying the download URL specifically."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 1 -- Both express that an Order Response has an Order Response Line."
+    }
+  }
+}

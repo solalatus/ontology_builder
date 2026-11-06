@@ -1,0 +1,27 @@
+2026-11-06T09:16:14.975Z START epo epo-ordering/run-01 (spent so far $43.59 of $1000)
+2026-11-06T09:29:06.036Z   appearsFinished: the classifier model rejected temperature; continuing without it (epo-ordering/run-01: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-06T09:29:09.466Z epo-ordering/run-01: snapshot A at turn 75 ($1.28 so far)
+2026-11-06T09:29:09.470Z epo-ordering/run-01: [stages] {"type":"snapshot","label":"A","turn":75}
+2026-11-06T09:29:40.210Z epo-ordering/run-01: snapshot A composite(full)=0.922 (scoped)=0.630 semantic=0.948
+2026-11-06T09:29:40.243Z epo-ordering/run-01: done. 75 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.922 (scoped)=0.630
+2026-11-06T09:29:40.365Z END epo-ordering/run-01: exit=0 status=complete stopped=stages_complete cost=$1.36 turns=75
+2026-11-06T09:29:40.367Z START epo epo-ordering/run-02 (spent so far $44.95 of $1000)
+2026-11-06T09:38:27.592Z   epo-ordering/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-06T09:39:38.386Z   epo-ordering/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-06T09:40:53.155Z   epo-ordering/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-06T09:43:21.381Z   epo-ordering/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-06T09:44:47.498Z   epo-ordering/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-06T09:45:59.848Z   appearsFinished: the classifier model rejected temperature; continuing without it (epo-ordering/run-02: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-06T09:46:04.296Z epo-ordering/run-02: snapshot A at turn 70 ($2.15 so far)
+2026-11-06T09:46:04.300Z epo-ordering/run-02: [stages] {"type":"snapshot","label":"A","turn":70}
+2026-11-06T09:46:42.461Z epo-ordering/run-02: snapshot A composite(full)=0.839 (scoped)=0.628 semantic=0.903
+2026-11-06T09:46:42.503Z epo-ordering/run-02: done. 70 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.839 (scoped)=0.628
+2026-11-06T09:46:42.606Z END epo-ordering/run-02: exit=0 status=complete stopped=stages_complete cost=$2.24 turns=70
+2026-11-06T09:46:42.608Z START epo epo-ordering/run-03 (spent so far $47.19 of $1000)
+2026-11-06T09:57:56.061Z   appearsFinished: the classifier model rejected temperature; continuing without it (epo-ordering/run-03: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-06T09:57:58.480Z epo-ordering/run-03: snapshot A at turn 73 ($1.19 so far)
+2026-11-06T09:57:58.485Z epo-ordering/run-03: [stages] {"type":"snapshot","label":"A","turn":73}
+2026-11-06T09:58:24.659Z epo-ordering/run-03: snapshot A composite(full)=0.921 (scoped)=0.673 semantic=0.961
+2026-11-06T09:58:24.695Z epo-ordering/run-03: done. 73 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.921 (scoped)=0.673
+2026-11-06T09:58:24.802Z END epo-ordering/run-03: exit=0 status=complete stopped=stages_complete cost=$1.26 turns=73
+2026-11-06T09:58:24.804Z BLOCK DONE epo: $48.45 spent under ontology_translation/results/v1-same-model/

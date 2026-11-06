@@ -1,0 +1,506 @@
+{
+  "domain": "epo-ordering",
+  "runId": "run-01",
+  "runUuid": "d569dee8-60e6-40c2-9ced-f70e036de902",
+  "metrics": {
+    "classes": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 25,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 25
+    },
+    "relationships": {
+      "recall": 0.84,
+      "precision": 0.7777777777777778,
+      "f1": 0.8076923076923077,
+      "matched": 21,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 27
+    },
+    "properties": {
+      "recall": 0.9210526315789473,
+      "precision": 1,
+      "f1": 0.958904109589041,
+      "matched": 35,
+      "groundTruthTotal": 38,
+      "recoveredTotal": 35
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.9221988057604497,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 1,
+      "precision": 0.68,
+      "f1": 0.8095238095238095,
+      "matched": 17,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 25
+    },
+    "relationships": {
+      "recall": 0.8235294117647058,
+      "precision": 0.5185185185185185,
+      "f1": 0.6363636363636364,
+      "matched": 14,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 27
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.2857142857142857,
+      "f1": 0.4444444444444445,
+      "matched": 10,
+      "groundTruthTotal": 10,
+      "recoveredTotal": 35
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6301106301106302,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": {
+    "classes": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 25,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 25
+    },
+    "relationships": {
+      "recall": 0.92,
+      "precision": 0.8518518518518519,
+      "f1": 0.8846153846153846,
+      "matched": 23,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 27
+    },
+    "properties": {
+      "recall": 0.9210526315789473,
+      "precision": 1,
+      "f1": 0.958904109589041,
+      "matched": 35,
+      "groundTruthTotal": 38,
+      "recoveredTotal": 35
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.9478398314014752,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 1,
+    "judgments": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_4",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_11",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_13",
+          "recoveredId": "e14",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": "e19",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "Order.accountingCost",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.sellerOrderID",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Order.validityPeriod",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_13",
+          "recoveredId": "e14"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": "e19"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 1,
+        "precision": 1,
+        "f1": 1,
+        "matched": 25,
+        "groundTruthTotal": 25,
+        "recoveredTotal": 25
+      },
+      "relationships": {
+        "recall": 0.84,
+        "precision": 0.7777777777777778,
+        "f1": 0.8076923076923077,
+        "matched": 21,
+        "groundTruthTotal": 25,
+        "recoveredTotal": 27
+      },
+      "properties": {
+        "recall": 0.9210526315789473,
+        "precision": 1,
+        "f1": 0.958904109589041,
+        "matched": 35,
+        "groundTruthTotal": 38,
+        "recoveredTotal": 35
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.9221988057604497,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {
+      "relationships": "1: NO MATCH -- Placing an order with a seller is not the same as specifying the seller.\n2: NO MATCH -- Setting out terms through an agreement is not the same as specifying the agreement.\n3: MATCH 3 -- Both say the information is specific to an order response line.\n4: MATCH 5 -- Both describe submitting a cancellation for an order."
+    }
+  },
+  "semanticScopedMetrics": {
+    "classes": {
+      "recall": 1,
+      "precision": 0.68,
+      "f1": 0.8095238095238095,
+      "matched": 17,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 25
+    },
+    "relationships": {
+      "recall": 0.8823529411764706,
+      "precision": 0.5555555555555556,
+      "f1": 0.6818181818181819,
+      "matched": 15,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 27
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.2857142857142857,
+      "f1": 0.4444444444444445,
+      "matched": 10,
+      "groundTruthTotal": 10,
+      "recoveredTotal": 35
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6452621452621453,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 1,
+    "judgments": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_4",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_11",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": "e19",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_24",
+          "recoveredId": "e19"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 1,
+        "precision": 0.68,
+        "f1": 0.8095238095238095,
+        "matched": 17,
+        "groundTruthTotal": 17,
+        "recoveredTotal": 25
+      },
+      "relationships": {
+        "recall": 0.8235294117647058,
+        "precision": 0.5185185185185185,
+        "f1": 0.6363636363636364,
+        "matched": 14,
+        "groundTruthTotal": 17,
+        "recoveredTotal": 27
+      },
+      "properties": {
+        "recall": 1,
+        "precision": 0.2857142857142857,
+        "f1": 0.4444444444444445,
+        "matched": 10,
+        "groundTruthTotal": 10,
+        "recoveredTotal": 35
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.6301106301106302,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {
+      "relationships": "1: NO MATCH -- Placing an order with a seller is not the same as specifying the seller.\n2: NO MATCH -- Setting out terms through an agreement is not the same as specifying the agreement.\n3: MATCH 3 -- Sending a cancellation for an order is equivalent to submitting it for that order."
+    }
+  },
+  "ruleMetrics": {
+    "recall": 0,
+    "precision": 0,
+    "f1": 0,
+    "matched": 0,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 7
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 7,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 7
+    },
+    "inputClassAccuracy": 1,
+    "inputClassChecked": 7,
+    "preconditionRecovery": 0.19884877027734174,
+    "effectRecovery": 0.22202380952380954,
+    "verificationRecovery": 0.24896727921938006
+  },
+  "semanticRuleActionMetrics": {
+    "rules": {
+      "recall": 0.42857142857142855,
+      "precision": 0.42857142857142855,
+      "f1": 0.42857142857142855,
+      "matched": 3,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 7
+    },
+    "actions": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 7,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 7,
+      "components": {
+        "identification": {
+          "recall": 1,
+          "precision": 1,
+          "f1": 1,
+          "matched": 7,
+          "groundTruthTotal": 7,
+          "recoveredTotal": 7
+        },
+        "inputClassAccuracy": 1,
+        "inputClassChecked": 7,
+        "preconditionRecovery": 0.19884877027734174,
+        "effectRecovery": 0.22202380952380954,
+        "verificationRecovery": 0.24896727921938006
+      }
+    },
+    "judgeCallCount": 1,
+    "judgments": {
+      "rules": [
+        {
+          "goldId": "orderRequiresSeller",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "orderLineRequiresQuantity",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "orderResponseMustReferenceOrder",
+          "recoveredId": "r1",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "orderChangeMustReferenceOrder",
+          "recoveredId": "r2",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "cancellationMustReferenceOrder",
+          "recoveredId": "r3",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "deliveryInformationShouldIdentifyConsignee",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "responseLineMustMatchOrderLine",
+          "recoveredId": "r1",
+          "verdict": "MATCH"
+        }
+      ],
+      "actions": []
+    },
+    "resolvedMatches": {
+      "rules": [
+        {
+          "goldId": "orderResponseMustReferenceOrder",
+          "recoveredId": "r1"
+        },
+        {
+          "goldId": "orderChangeMustReferenceOrder",
+          "recoveredId": "r2"
+        },
+        {
+          "goldId": "cancellationMustReferenceOrder",
+          "recoveredId": "r3"
+        }
+      ],
+      "actions": []
+    },
+    "heuristic": {
+      "rules": {
+        "recall": 0,
+        "precision": 0,
+        "f1": 0,
+        "matched": 0,
+        "groundTruthTotal": 7,
+        "recoveredTotal": 7
+      },
+      "actions": {
+        "identification": {
+          "recall": 1,
+          "precision": 1,
+          "f1": 1,
+          "matched": 7,
+          "groundTruthTotal": 7,
+          "recoveredTotal": 7
+        },
+        "inputClassAccuracy": 1,
+        "inputClassChecked": 7,
+        "preconditionRecovery": 0.19884877027734174,
+        "effectRecovery": 0.22202380952380954,
+        "verificationRecovery": 0.24896727921938006
+      }
+    },
+    "rawResponses": {
+      "rules": "1: NO MATCH -- No candidate requires an order to specify a seller.\n2: NO MATCH -- No candidate requires an order line quantity to be recorded.\n3: MATCH 1 -- The response identifies the order it answers.\n4: MATCH 2 -- The change identifies the order it is sent for.\n5: MATCH 3 -- The cancellation identifies the order it is sent for.\n6: NO MATCH -- No candidate addresses identifying a consignee.\n7: MATCH 1 -- Each response line refers to the original order line it answers."
+    }
+  },
+  "operationalStats": {
+    "appAgentApiCalls": 122,
+    "applyToolCalls": 39,
+    "getGraphStateCalls": 7,
+    "removeToolCalls": 0,
+    "renameToolCalls": 0,
+    "toolApplied": 39,
+    "toolSkipped": 0,
+    "toolNothing": 0,
+    "toolError": 0,
+    "errorCounts": {},
+    "totalErrorTurns": 0,
+    "compactionEvents": 0,
+    "leakEventsCount": 0,
+    "unresolvedLeakEvents": 0,
+    "maxConsecutiveTurnsWithNoToolActivity": 14,
+    "degraded": false,
+    "totalTokens": 3621304,
+    "promptTokens": 3585919,
+    "completionTokens": 35385,
+    "cachedTokens": 3471052,
+    "cachedShare": 0.967967207290516,
+    "reasoningTokens": 13715,
+    "tokenCallCount": 197,
+    "conversationCostUsd": 1.2777943999999999,
+    "appCost": {
+      "calls": 121,
+      "promptTokens": 2503369,
+      "cachedTokens": 2437689,
+      "completionTokens": 25473,
+      "reasoningTokens": 11433,
+      "cachedShare": 0.9737633565007795,
+      "costUsd": 0.8736278000000001
+    },
+    "appCostByKind": {
+      "interview": {
+        "calls": 121,
+        "promptTokens": 2503369,
+        "cachedTokens": 2437689,
+        "completionTokens": 25473,
+        "reasoningTokens": 11433,
+        "cachedShare": 0.9737633565007795,
+        "costUsd": 0.8736278000000001
+      }
+    },
+    "harnessCost": {
+      "calls": 76,
+      "promptTokens": 1082550,
+      "cachedTokens": 1033363,
+      "completionTokens": 9912,
+      "reasoningTokens": 2282,
+      "cachedShare": 0.9545637614890767,
+      "costUsd": 0.4041666
+    }
+  },
+  "snapshots": [
+    {
+      "label": "A",
+      "turn": 75,
+      "counts": {
+        "classes": 25,
+        "relationships": 27,
+        "properties": 35,
+        "allowedValueLists": 0,
+        "rules": 7,
+        "actions": 7,
+        "droppedEdges": 0
+      },
+      "offlineRescoreAgrees": true,
+      "composite": 0.9221988057604497,
+      "scopedComposite": 0.6301106301106302,
+      "semanticComposite": 0.9478398314014752
+    }
+  ]
+}

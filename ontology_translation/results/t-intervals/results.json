@@ -2442,6 +2442,55 @@
           ]
         }
       }
+    },
+    "epo-v1-same-model": {
+      "epo-ordering": {
+        "n": 3,
+        "composite": {
+          "n": 3,
+          "mean": 0.894056890613938,
+          "min": 0.8385873498335504,
+          "max": 0.9221988057604497,
+          "values": [
+            0.9221988057604497,
+            0.8385873498335504,
+            0.9213845162478137
+          ]
+        },
+        "classF1": {
+          "n": 3,
+          "mean": 0.9787234042553191,
+          "min": 0.9361702127659575,
+          "max": 1,
+          "values": [
+            1,
+            0.9361702127659575,
+            1
+          ]
+        },
+        "relF1": {
+          "n": 3,
+          "mean": 0.7881049855839772,
+          "min": 0.6938775510204083,
+          "max": 0.8627450980392156,
+          "values": [
+            0.8076923076923077,
+            0.6938775510204083,
+            0.8627450980392156
+          ]
+        },
+        "propF1": {
+          "n": 3,
+          "mean": 0.9153422820025173,
+          "min": 0.8857142857142857,
+          "max": 0.958904109589041,
+          "values": [
+            0.958904109589041,
+            0.8857142857142857,
+            0.9014084507042254
+          ]
+        }
+      }
     }
   },
   "differences": {
@@ -3192,6 +3241,23 @@
       "k": 1,
       "clearOfZero": true
     },
+    "epo composite: final - v1 same-model": {
+      "a": "epo-interactive",
+      "b": "epo-v1-same-model",
+      "metric": "composite",
+      "domains": [
+        "epo-ordering"
+      ],
+      "kind": "Welch",
+      "estimate": 0.07386495826029171,
+      "lo": -0.024347068631399446,
+      "hi": 0.1720769851519829,
+      "se": 0.03334345825150753,
+      "df": 3.486322088687675,
+      "t": 2.945466128644613,
+      "k": 1,
+      "clearOfZero": false
+    },
     "composite: ePO drop - itops drop": {
       "kind": "Welch, difference of differences",
       "metric": "composite",
@@ -3236,6 +3302,23 @@
       "t": 4.147825854886566,
       "k": 1,
       "clearOfZero": true
+    },
+    "epo relF1: final - v1 same-model": {
+      "a": "epo-interactive",
+      "b": "epo-v1-same-model",
+      "metric": "relF1",
+      "domains": [
+        "epo-ordering"
+      ],
+      "kind": "Welch",
+      "estimate": 0.198289572239152,
+      "lo": -0.01034421504762778,
+      "hi": 0.4069233595259318,
+      "se": 0.05018512575850215,
+      "df": 2.0748475020638044,
+      "t": 4.15728334109901,
+      "k": 1,
+      "clearOfZero": false
     },
     "relF1: ePO drop - itops drop": {
       "kind": "Welch, difference of differences",

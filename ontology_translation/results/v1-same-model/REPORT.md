@@ -28,6 +28,17 @@ Final arm run-01..03 reproduce the committed `run-intervals/results.json` values
 - fibo-loans: composite +1.3 [-11.2, +13.9], relationship F1 +10.4 [-7.5, +28.3] (plain Welch).
 - itops (3 against 3, plain Welch): composite -2.9 [-23.5, +17.7], relationship F1 -1.4 [-22.6, +19.9], class F1 -4.8 [-24.3, +14.7], property F1 -2.5 [-27.0, +21.9].
 
+## Held-out domain (EPO-DESIGN.md)
+
+| Arm | n | Composite | Class F1 | Rel F1 | Prop F1 |
+|---|---|---|---|---|---|
+| v1 same-model | 3 | 89.4 [83.9–92.2] | 97.9 [93.6–100.0] | 78.8 [69.4–86.3] | 91.5 [88.6–95.9] |
+| final (committed interactive ePO runs) | 3 | 96.8 [93.6–100.0] | 98.6 [98.0–100.0] | 98.6 [98.0–100.0] | 93.1 [84.8–100.0] |
+
+- **Composite, final − v1 (plain Welch, 3 vs 3):** +7.4 [-2.4, +17.2], df 3.5. Outcome (b): "7.4 points higher on the held-out domain; with 3 runs per arm the difference is within run-to-run spread [-2.4, +17.2]".
+- Relationship F1, final − v1 (descriptive): +19.8 [-1.0, +40.7].
+- v1 runs: run-01 stages_complete, 75 turns, 1.36 USD, composite 92.2, relay 122/0; run-02 stages_complete, 70 turns, 2.24 USD, composite 83.9, relay 157/0; run-03 stages_complete, 73 turns, 1.26 USD, composite 92.1, relay 129/0.
+
 ## Per run
 
 | Arm | Domain | Run | Stop | Scored on | Turns | Cost USD | Composite | Rel F1 | Interviewer-first / 100 gold | v1 relay audit (tool requests / violations / skip notes) |

@@ -1,0 +1,352 @@
+competency_questions: []
+classes:
+  Order:
+    meaning: "A formal request from the buying organisation to a seller for goods, services or works."
+    aliases:
+      - purchase order
+    properties:
+      paymentTerm:
+        type: text
+      totalLineAmount:
+        type: number
+      totalAllowanceAmount:
+        type: number
+      totalChargeAmount:
+        type: number
+      totalBeforeTax:
+        type: number
+      totalIncludingTax:
+        type: number
+      prepaidAmount:
+        type: number
+      roundingAmount:
+        type: number
+      amountDueForPayment:
+        type: number
+  Seller:
+    meaning: The party the order is placed with and that is responsible for providing what was ordered.
+    aliases:
+      - supplier
+    properties: {}
+  Invoicee:
+    meaning: The person or unit named on the order to receive and process the invoice.
+    aliases:
+      - invoice recipient
+    properties: {}
+  Originator:
+    meaning: The person or unit whose need prompted the purchase.
+    aliases: []
+    properties: {}
+  Consignee:
+    meaning: "The party that receives and takes possession of the delivery, sometimes on another's behalf."
+    aliases:
+      - delivery recipient
+    properties: {}
+  OrderLine:
+    meaning: "The part of an order giving details of a particular good, service or work requested."
+    aliases:
+      - purchase order line
+    properties:
+      quantity:
+        type: number
+      price:
+        type: number
+  OrderResponse:
+    meaning: "The seller's formal reply about its ability to fulfil a particular order."
+    aliases:
+      - "supplier's order reply"
+    properties:
+      fulfilmentDescription:
+        type: text
+  OrderResponseLine:
+    meaning: A part of an order response answering a particular order line.
+    aliases:
+      - response line
+    properties:
+      backorderQuantity:
+        type: number
+  OrderChange:
+    meaning: A separate document sent to propose changes to a particular order.
+    aliases: []
+    properties: {}
+  OrderChangeLine:
+    meaning: "A part of an order change giving the details of goods, services or works requested in the change."
+    aliases: []
+    properties: {}
+  OrderCancellation:
+    meaning: A separate document sent to call off a particular order.
+    aliases: []
+    properties: {}
+  OrderChangeConfirmation:
+    meaning: "The seller's separate reply acknowledging a particular order change, not evidence that delivery has occurred."
+    aliases: []
+    properties: {}
+  OrderChangeRejection:
+    meaning: "The seller's separate reply stating that a particular proposed order change was not accepted."
+    aliases: []
+    properties: {}
+  OrderCancellationConfirmation:
+    meaning: "The seller's separate reply acknowledging a particular order cancellation."
+    aliases: []
+    properties: {}
+  OrderCancellationRejection:
+    meaning: "The seller's separate reply stating that a particular order cancellation was not accepted."
+    aliases: []
+    properties: {}
+  DeliveryInformation:
+    meaning: "The details carried by an order about delivery timing, destination, consignee and applicable delivery agreement."
+    aliases: []
+    properties:
+      deliveryDeadline:
+        type: date
+      requestedDeliveryPeriod:
+        type: text
+      deliveryPeriod:
+        type: text
+      actualDeliveryDate:
+        type: date
+      placeOfDelivery:
+        type: text
+      deliveryEmail:
+        type: text
+      accessLink:
+        type: text
+      downloadLink:
+        type: text
+  OriginatorInformation:
+    meaning: The information carried by an order concerning the originator whose need prompted it.
+    aliases: []
+    properties: {}
+  DeliveryAgreement:
+    meaning: "The general delivery term, requested shipping priority and partial-delivery permission specified in delivery information."
+    aliases: []
+    properties:
+      generalDeliveryTerm:
+        type: text
+      requestedShippingPriority:
+        type: text
+      partialDeliveryAllowed:
+        type: boolean
+  AllowanceInformation:
+    meaning: "Discount details specified on an order or associated with an order line's price, which may apply to particular order lines."
+    aliases: []
+    properties:
+      discountPercentage:
+        type: number
+  AllowanceAndChargeInformation:
+    meaning: "Information about discounts, taxes, duties and fees, including an adjustment's reason, percentage and any VAT exemption explanation."
+    aliases: []
+    properties:
+      reason:
+        type: text
+      percentage:
+        type: number
+      vatExemptionReason:
+        type: text
+      vatExemptionDescription:
+        type: text
+  TaxInformation:
+    meaning: "The tax category, scheme and percentage associated with allowance and charge information."
+    aliases: []
+    properties:
+      taxCategory:
+        type: text
+      taxScheme:
+        type: text
+      percentage:
+        type: number
+  OrderResponseInformation:
+    meaning: A group of details carried by an order response that can be specific to a response line.
+    aliases: []
+    properties: {}
+relationships:
+  - name: specifiesSeller
+    from: Order
+    to: Seller
+    meaning: The order identifies the party responsible for providing what was ordered.
+    aliases: []
+  - name: hasOrderLine
+    from: Order
+    to: OrderLine
+    meaning: "The order incorporates its own order lines, which are not separate requests sent on their own."
+    aliases: []
+  - name: respondsToOrder
+    from: OrderResponse
+    to: Order
+    meaning: The order response is submitted for the particular order it answers.
+    aliases: []
+  - name: hasResponseLine
+    from: OrderResponse
+    to: OrderResponseLine
+    meaning: The order response incorporates its own order response lines.
+    aliases: []
+  - name: answersOrderLine
+    from: OrderResponseLine
+    to: OrderLine
+    meaning: The order response line is submitted for the particular order line it answers.
+    aliases: []
+  - name: proposesChangesTo
+    from: OrderChange
+    to: Order
+    meaning: The order change is submitted for the particular order it proposes to modify; this does not establish that the change took effect.
+    aliases: []
+  - name: hasChangeLine
+    from: OrderChange
+    to: OrderChangeLine
+    meaning: The order change incorporates its own order change lines.
+    aliases: []
+  - name: callsOffOrder
+    from: OrderCancellation
+    to: Order
+    meaning: The order cancellation is submitted for the particular order the buyer wants to call off; this does not establish seller acceptance.
+    aliases: []
+  - name: confirmsChange
+    from: OrderChangeConfirmation
+    to: OrderChange
+    meaning: "The seller's confirmation responds to the particular change it acknowledges, without establishing delivery."
+    aliases: []
+  - name: rejectsChange
+    from: OrderChangeRejection
+    to: OrderChange
+    meaning: "The seller's rejection responds to the particular change it did not accept, without establishing delivery."
+    aliases: []
+  - name: confirmsCancellation
+    from: OrderCancellationConfirmation
+    to: OrderCancellation
+    meaning: "The seller's confirmation answers the particular cancellation by acknowledging it."
+    aliases: []
+  - name: rejectsCancellation
+    from: OrderCancellationRejection
+    to: OrderCancellation
+    meaning: "The seller's rejection answers the particular cancellation by stating it was not accepted."
+    aliases: []
+  - name: carriesDeliveryInformation
+    from: Order
+    to: DeliveryInformation
+    meaning: The order specifies its delivery information.
+    aliases: []
+  - name: identifiesConsignee
+    from: DeliveryInformation
+    to: Consignee
+    meaning: The delivery information concerns the consignee who receives and takes possession of the delivery.
+    aliases: []
+  - name: carriesOriginatorInformation
+    from: Order
+    to: OriginatorInformation
+    meaning: The order carries information about whose need prompted the purchase.
+    aliases: []
+  - name: concernsOriginator
+    from: OriginatorInformation
+    to: Originator
+    meaning: The information identifies the person or unit whose need prompted the purchase.
+    aliases: []
+  - name: specifiesDeliveryAgreement
+    from: DeliveryInformation
+    to: DeliveryAgreement
+    meaning: The delivery information specifies the applicable delivery agreement.
+    aliases: []
+  - name: hasTaxInformation
+    from: AllowanceAndChargeInformation
+    to: TaxInformation
+    meaning: "The allowance and charge information includes its associated tax information, without establishing a link to a particular order."
+    aliases: []
+  - name: carriesResponseInformation
+    from: OrderResponse
+    to: OrderResponseInformation
+    meaning: "The order response specifies its order response information, which can be specific to a response line."
+    aliases: []
+  - name: concernsResponseLine
+    from: OrderResponseInformation
+    to: OrderResponseLine
+    meaning: The order response information can be specific to a particular order response line.
+    aliases: []
+  - name: namesInvoicee
+    from: Order
+    to: Invoicee
+    meaning: The order identifies who receives and processes its invoice.
+    aliases: []
+  - name: specifiesAllowanceInformation
+    from: Order
+    to: AllowanceInformation
+    meaning: The order specifies its recorded allowance information for discounts.
+    aliases: []
+  - name: appliesToOrderLine
+    from: AllowanceInformation
+    to: OrderLine
+    meaning: An allowance specified on the order can be particular to one or more order lines.
+    aliases: []
+  - name: hasPriceDiscountInformation
+    from: OrderLine
+    to: AllowanceInformation
+    meaning: "An order line's price has associated discount details in allowance information."
+    aliases: []
+rules:
+  intendedOrderForDocument:
+    conditions:
+      - "The intended order has been selected; if it cannot be identified, stop and ask which order is intended."
+      - "The order response, order change or order cancellation being recorded refers to that selected order; if it refers to another order, stop rather than guessing from the seller's order reference."
+  intendedOrderChangeForReply:
+    conditions:
+      - "The intended order change has been selected; if it cannot be identified, stop and ask which change is intended."
+      - "The confirmation or rejection answers that selected change, not a different change."
+      - The selected change refers to an order; otherwise stop and ask for the intended document.
+  intendedOrderCancellationForReply:
+    conditions:
+      - "The intended order cancellation has been selected; if it cannot be identified, stop and ask which cancellation is intended."
+      - "The confirmation or rejection answers that selected cancellation, not a different cancellation."
+      - The selected cancellation refers to an order; otherwise stop and ask for the intended document.
+  orderSellerCheck:
+    conditions:
+      - "An order needs a seller; if none is identified, do not represent the order as ready."
+  orderLineQuantityCheck:
+    conditions:
+      - "An order line needs a recorded quantity; if missing, report that its quantity cannot be given."
+  responseLineMatchCheck:
+    conditions:
+      - "Each order response line must refer to the particular order line it answers; if this link is missing, do not claim a line-level match."
+  deliveryConsigneeExpectation:
+    conditions:
+      - "Delivery information should identify the consignee; if it does not, report that the recipient cannot be identified from it rather than assuming one."
+actions:
+  recordOrderResponse:
+    input: OrderResponse
+    preconditions:
+      - intendedOrderForDocument
+    effect: "Record the seller's existing order response as submitted for the selected order; do not create or send the reply."
+    verification: Retrieve the recorded order response and confirm that its order link points to the intended order.
+  sendOrderChange:
+    input: OrderChange
+    preconditions:
+      - intendedOrderForDocument
+    effect: Record the order change as submitted for the selected order; actual transmission to the seller remains unestablished and must not be claimed.
+    verification: Confirm the recorded order change links to the intended order; this is not evidence of transmission or receipt.
+  sendOrderCancellation:
+    input: OrderCancellation
+    preconditions:
+      - intendedOrderForDocument
+    effect: Record the order cancellation as submitted for the selected order; actual transmission to the seller remains unestablished and must not be claimed.
+    verification: Confirm the recorded order cancellation links to the intended order; this is not evidence of transmission or receipt.
+  recordOrderChangeConfirmation:
+    input: OrderChangeConfirmation
+    preconditions:
+      - intendedOrderChangeForReply
+    effect: "Record the seller's existing confirmation as answering the selected order change; do not create or send the reply or infer delivery."
+    verification: Retrieve the recorded confirmation and confirm that it points to the intended order change.
+  recordOrderChangeRejection:
+    input: OrderChangeRejection
+    preconditions:
+      - intendedOrderChangeForReply
+    effect: "Record the seller's existing rejection as answering the selected order change; do not create or send the reply or infer delivery."
+    verification: Retrieve the recorded rejection and confirm that it points to the intended order change.
+  recordOrderCancellationConfirmation:
+    input: OrderCancellationConfirmation
+    preconditions:
+      - intendedOrderCancellationForReply
+    effect: "Record the seller's existing confirmation as answering the selected order cancellation; do not create or send the reply or infer delivery."
+    verification: Retrieve the recorded confirmation and confirm that it points to the intended order cancellation.
+  recordOrderCancellationRejection:
+    input: OrderCancellationRejection
+    preconditions:
+      - intendedOrderCancellationForReply
+    effect: "Record the seller's existing rejection as answering the selected order cancellation; do not create or send the reply or infer delivery."
+    verification: Retrieve the recorded rejection and confirm that it points to the intended order cancellation.

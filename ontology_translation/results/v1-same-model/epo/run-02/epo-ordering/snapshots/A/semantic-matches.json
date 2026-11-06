@@ -1,0 +1,53 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_18",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "rel_19",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "rel_20",
+        "recoveredId": "e11"
+      },
+      {
+        "goldId": "rel_21",
+        "recoveredId": "e12"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "AllowanceChargeInformation.allowanceChargeReasonDescription",
+        "matchedPropertyName": "reason"
+      }
+    ],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_18",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "rel_19",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "rel_20",
+        "recoveredId": "e11"
+      },
+      {
+        "goldId": "rel_21",
+        "recoveredId": "e12"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  }
+}
