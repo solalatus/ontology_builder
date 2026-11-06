@@ -24,6 +24,7 @@ import { snapshotRow } from "./analyze-paired-stages.mjs";
 import { interviewerFirstCount, goldSize } from "./analyze-final-scores.mjs";
 import { stratifiedWelch, welch, threeOutcome, mean } from "./lib/welch.mjs";
 import { ARM_STOPS } from "./run-paired-stages.mjs";
+import { rescoreRun } from "./rescore-saved-run.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RESULTS = path.resolve(__dirname, "..", "..", "ontology_translation", "results");
@@ -108,6 +109,25 @@ export function runAll() {
     out.reading.keySecondary = threeOutcome(out.keySecondary);
   }
   if (ready(["itops"])) out.descriptive.itops = Object.fromEntries(METRICS.map((m) => [m, welch(out.arms.final.itops.map((x) => x.row[m]), out.arms.v1.itops.map((x) => x.row[m]))]));
+  // E1 on the held-out domain (EPO-DESIGN.md): the v1 arm against the committed
+  // interactive ePO runs, both rescored like every ePO cell (heuristic, full domain).
+  const epoRuns = ["run-01", "run-02", "run-03"];
+  const epoV1 = epoRuns.map((r) => ({ r, dir: path.join(OUT_DIR, "epo", r, "epo-ordering") }))
+    .map(({ r, dir }) => ({ r, dir, prov: readJson(path.join(dir, "provenance.json")) }))
+    .filter((x) => x.prov && x.prov.status === "complete" && ARM_STOPS.includes(x.prov.stoppedReason));
+  if (epoV1.length === epoRuns.length) {
+    const pick = (m) => ({ composite: m.recoveryEffectiveness, classF1: m.classes.f1, relF1: m.relationships.f1, propF1: m.properties.f1 });
+    const v1 = epoV1.map((x) => ({ runId: x.r, stoppedReason: x.prov.stoppedReason, turns: x.prov.turnsUsed, costUsd: x.prov.totalCostUsd,
+      relayAudit: x.prov.v1Interviewer && x.prov.v1Interviewer.relayAudit, row: pick(rescoreRun(x.dir, "epo-ordering").heuristic.full) }));
+    const inter = ri.cells["epo-interactive"]["epo-ordering"];
+    out.epo = { v1, cells: { "v1-same-model": { n: v1.length }, final: { n: inter.n } }, differences: {} };
+    for (const m of METRICS) {
+      out.epo.cells["v1-same-model"][m] = cellOf(v1.map((x) => x.row[m]));
+      out.epo.cells.final[m] = cellOf(inter[m].values);
+    }
+    for (const m of ["composite", "relF1"]) out.epo.differences[m] = welch(inter[m].values, v1.map((x) => x.row[m]));
+    out.reading.epo = threeOutcome(out.epo.differences.composite);
+  }
   out.macro = {};
   for (const [cn, doms] of Object.entries(out.cells)) if (DEV.every((d) => doms[d])) out.macro[cn] = Object.fromEntries(METRICS.map((m) => [m, mean(DEV.map((d) => doms[d][m].mean))]));
   return out;
@@ -144,6 +164,17 @@ export function renderReport(res) {
     for (const d of DEV) L.push(`- ${d}: composite ${iv(res.descriptive[d].composite)}, relationship F1 ${iv(res.descriptive[d].relF1)} (plain Welch).`);
   }
   if (res.descriptive.itops) L.push(`- itops (3 against 3, plain Welch): composite ${iv(res.descriptive.itops.composite)}, relationship F1 ${iv(res.descriptive.itops.relF1)}, class F1 ${iv(res.descriptive.itops.classF1)}, property F1 ${iv(res.descriptive.itops.propF1)}.`);
+  if (res.epo) {
+    const e = res.epo, o = res.reading.epo;
+    const EPOW = { a: (x) => `on the held-out domain too, the second-generation interviewer scores ${p1(x.estimate)} points higher [${sg(x.lo)}, ${sg(x.hi)}]`,
+      b: (x) => `${p1(x.estimate)} points higher on the held-out domain; with 3 runs per arm the difference is within run-to-run spread [${sg(x.lo)}, ${sg(x.hi)}]`,
+      c: (x) => `no gain on the held-out domain [${sg(x.lo)}, ${sg(x.hi)}], where the final interviewer is near the ceiling` };
+    L.push("", "## Held-out domain (EPO-DESIGN.md)", "", "| Arm | n | Composite | Class F1 | Rel F1 | Prop F1 |", "|---|---|---|---|---|---|");
+    for (const [k, c] of Object.entries(e.cells)) L.push(`| ${k === "final" ? "final (committed interactive ePO runs)" : "v1 same-model"} | ${c.n} | ${cell(c.composite)} | ${cell(c.classF1)} | ${cell(c.relF1)} | ${cell(c.propF1)} |`);
+    L.push("", `- **Composite, final − v1 (plain Welch, 3 vs 3):** ${iv(e.differences.composite)}, df ${e.differences.composite.df.toFixed(1)}. Outcome (${o}): "${EPOW[o](e.differences.composite)}".`,
+      `- Relationship F1, final − v1 (descriptive): ${iv(e.differences.relF1)}.`,
+      `- v1 runs: ${e.v1.map((x) => `${x.runId} ${x.stoppedReason}, ${x.turns} turns, ${x.costUsd.toFixed(2)} USD, composite ${p1(x.row.composite)}, relay ${x.relayAudit ? `${x.relayAudit.toolRequests}/${x.relayAudit.violations.length}` : "?"}`).join("; ")}.`);
+  }
   L.push("", "## Per run", "", "| Arm | Domain | Run | Stop | Scored on | Turns | Cost USD | Composite | Rel F1 | Interviewer-first / 100 gold | v1 relay audit (tool requests / violations / skip notes) |", "|---|---|---|---|---|---|---|---|---|---|---|");
   for (const arm of ["v1", "final"]) for (const d of ALL) for (const x of res.arms[arm][d]) {
     const a = x.relayAudit ? `${x.relayAudit.toolRequests} / ${x.relayAudit.violations.length} / ${x.relayAudit.skipNotesRewritten}` : "";

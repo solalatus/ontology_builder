@@ -45,6 +45,10 @@ export function loadCells() {
       for (const [d, c] of Object.entries(v1.cells[arm])) { cells[key][d] = { n: c.n }; for (const m of METRICS) if (c[m]) cells[key][d][m] = cellOf(c[m].values); }
     }
   }
+  if (v1 && v1.epo) {
+    cells["epo-v1-same-model"] = { "epo-ordering": { n: v1.epo.cells["v1-same-model"].n } };
+    for (const m of METRICS) cells["epo-v1-same-model"]["epo-ordering"][m] = cellOf(v1.epo.cells["v1-same-model"][m].values);
+  }
   return cells;
 }
 
@@ -86,6 +90,7 @@ export function runAll() {
   for (const m of ["composite", "relF1"]) {
     add(`epo ${m}: interactive - B3`, "epo-interactive", "epo-b3", m, ["epo-ordering"]);
     add(`epo ${m}: interactive - weak expert`, "epo-interactive", "epo-weak-expert", m, ["epo-ordering"]);
+    add(`epo ${m}: final - v1 same-model`, "epo-interactive", "epo-v1-same-model", m, ["epo-ordering"]);
     if (cells["epo-weak-expert"]) {
       const iv = welchDiffOfDiffs(vals("epo-interactive", "epo-ordering", m), vals("epo-weak-expert", "epo-ordering", m), vals("final", "itops", m), vals("persona-ablation", "itops", m));
       out.differences[`${m}: ePO drop - itops drop`] = { kind: "Welch, difference of differences", metric: m, ...iv, clearOfZero: iv.lo > 0 || iv.hi < 0 };
