@@ -21,6 +21,7 @@ Final arm run-01..03 reproduce the committed `run-intervals/results.json` values
 ## Descriptive
 
 - Macro class F1: +2.0 [-2.6, +6.6]; macro property F1: +6.5 [-1.4, +14.4].
+- Semantic matching policy (sensitivity): macro composite +3.9 [-0.5, +8.3], relationship F1 +10.5 [+4.0, +16.9], class F1 +1.3 [-3.2, +5.8].
 - Primary, clean runs only: all runs clean: identical to the primary.
 - brick-hvac: composite +16.0 [+1.3, +30.8], relationship F1 +19.6 [-12.3, +51.6] (plain Welch).
 - iof-maintenance: composite +10.1 [-0.5, +20.8], relationship F1 +14.3 [-11.0, +39.7] (plain Welch).

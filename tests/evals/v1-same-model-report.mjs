@@ -102,6 +102,9 @@ export function runAll() {
     out.keySecondary = { metric: "relF1", ...strat("relF1") };
     out.descriptive.classF1 = strat("classF1");
     out.descriptive.propF1 = strat("propF1");
+    // Sensitivity (second co-author review, B4): the LLM-judged semantic matching policy.
+    out.descriptive.semantic = { composite: strat("semanticComposite"), relF1: strat("semRelF1"), classF1: strat("semClassF1"),
+      macro: Object.fromEntries(["v1", "final"].map((a) => [a, { composite: mean(DEV.map((d) => mean(out.arms[a][d].map((x) => x.row.semanticComposite)))), relF1: mean(DEV.map((d) => mean(out.arms[a][d].map((x) => x.row.semRelF1)))) }])) };
     const anyUnclean = DEV.some((d) => [...out.arms.final[d], ...out.arms.v1[d]].some((x) => !x.clean));
     out.descriptive.primaryCleanRunsOnly = anyUnclean ? (() => { try { return strat("composite", (x) => x.clean); } catch { return null; } })() : "all runs clean: identical to the primary";
     for (const d of DEV) out.descriptive[d] = Object.fromEntries(["composite", "relF1"].map((m) => [m, welch(out.arms.final[d].map((x) => x.row[m]), out.arms.v1[d].map((x) => x.row[m]))]));
@@ -160,6 +163,7 @@ export function renderReport(res) {
       `- **Key secondary (macro relationship F1, final − v1):** ${iv(res.keySecondary)}, df ${res.keySecondary.df.toFixed(1)}. Outcome (${res.reading.keySecondary}): "${WORDING[res.reading.keySecondary](res.keySecondary)}".`,
       "", "## Descriptive", "",
       `- Macro class F1: ${iv(res.descriptive.classF1)}; macro property F1: ${iv(res.descriptive.propF1)}.`,
+      `- Semantic matching policy (sensitivity): macro composite ${iv(res.descriptive.semantic.composite)}, relationship F1 ${iv(res.descriptive.semantic.relF1)}, class F1 ${iv(res.descriptive.semantic.classF1)}.`,
       `- Primary, clean runs only: ${typeof res.descriptive.primaryCleanRunsOnly === "string" ? res.descriptive.primaryCleanRunsOnly : res.descriptive.primaryCleanRunsOnly ? iv(res.descriptive.primaryCleanRunsOnly) : "n/a (a stratum has fewer than 2 clean runs)"}.`);
     for (const d of DEV) L.push(`- ${d}: composite ${iv(res.descriptive[d].composite)}, relationship F1 ${iv(res.descriptive[d].relF1)} (plain Welch).`);
   }
