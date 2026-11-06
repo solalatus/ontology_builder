@@ -75,3 +75,5 @@ The outcome decides wording only. It never removes a result from the article.
 ## Follow-up block (separate design note)
 
 The v1 arm on the held-out ePO domain has its own design note, committed before its runs: [`EPO-DESIGN.md`](EPO-DESIGN.md). Nothing above changes.
+
+The interviewer × simulated-expert cell on itops (v1 arm with the gpt-4o-mini persona) has its own design note, committed before its runs: [`WEAK-EXPERT-ITOPS-DESIGN.md`](WEAK-EXPERT-ITOPS-DESIGN.md).

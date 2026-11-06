@@ -123,6 +123,15 @@ BLOCKS["v1-same-model-epo"] = {
   runs: ["run-01", "run-02", "run-03"].map((r) => `epo-ordering:${r}`),
   acceptStops: ARM_STOPS,
 };
+// B1 of the second co-author review (results/v1-same-model/WEAK-EXPERT-ITOPS-DESIGN.md):
+// the v1 arm with the gpt-4o-mini persona on itops, the missing cell of the
+// interviewer x expert 2x2 at the same interviewer model.
+BLOCKS["v1-4omini-itops"] = {
+  root: path.join(ROOT, "ontology_translation", "results", "v1-same-model"), dir: "weak-expert-itops", effort: null,
+  env: { ...FINAL_ENV, ONTOLOGY_EVAL_INTERVIEWER_GENERATION: "v1", ONTOLOGY_EVAL_PERSONA_MODEL: "gpt-4o-mini" },
+  runs: ["run-01", "run-02", "run-03"].map((r) => `itops:${r}`),
+  acceptStops: ARM_STOPS,
+};
 // E1's top-up of the final arm to 5 runs: `--block=final` unchanged, with
 // `--runs=` naming run-04/05 and `--acceptStops=arm` (the same run-end rule).
 export const FINAL_TOPUP_RUNS = ["run-04", "run-05"].flatMap((r) => DEV_DOMAINS.map((d) => `${d}:${r}`));
