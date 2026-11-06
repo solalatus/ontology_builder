@@ -1,0 +1,23 @@
+2026-11-06T15:57:43.015Z START weak-expert-itops itops/run-01 (spent so far $48.45 of $1000)
+2026-11-06T16:30:39.100Z   appearsFinished: the classifier model rejected temperature; continuing without it (itops/run-01: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-06T16:30:43.610Z itops/run-01: snapshot A at turn 177 ($4.72 so far)
+2026-11-06T16:30:43.617Z itops/run-01: [stages] {"type":"snapshot","label":"A","turn":177}
+2026-11-06T16:32:52.473Z itops/run-01: snapshot A composite(full)=0.290 (scoped)=0.366 semantic=0.345
+2026-11-06T16:32:52.541Z itops/run-01: done. 177 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.290 (scoped)=0.366
+2026-11-06T16:32:52.675Z END itops/run-01: exit=0 status=complete stopped=stages_complete cost=$5.01 turns=177
+2026-11-06T16:32:52.677Z START weak-expert-itops itops/run-02 (spent so far $53.46 of $1000)
+2026-11-06T17:07:39.346Z   appearsFinished: the classifier model rejected temperature; continuing without it (itops/run-02: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-06T17:07:39.544Z   itops/run-02: rate limited (429), waiting 32s before attempt 2/6
+2026-11-06T17:08:18.430Z itops/run-02: snapshot A at turn 163 ($4.98 so far)
+2026-11-06T17:08:18.436Z itops/run-02: [stages] {"type":"snapshot","label":"A","turn":163}
+2026-11-06T17:10:39.604Z itops/run-02: snapshot A composite(full)=0.232 (scoped)=0.302 semantic=0.285
+2026-11-06T17:10:39.675Z itops/run-02: done. 163 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.232 (scoped)=0.302
+2026-11-06T17:10:39.808Z END itops/run-02: exit=0 status=complete stopped=stages_complete cost=$5.27 turns=163
+2026-11-06T17:10:39.811Z START weak-expert-itops itops/run-03 (spent so far $58.73 of $1000)
+2026-11-06T17:16:18.335Z   appearsFinished: the classifier model rejected temperature; continuing without it (itops/run-03: chat call failed: HTTP 400 Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.)
+2026-11-06T17:21:51.305Z itops/run-03: snapshot A at turn 80 ($1.14 so far)
+2026-11-06T17:21:51.307Z itops/run-03: [stages] {"type":"snapshot","label":"A","turn":80}
+2026-11-06T17:22:55.407Z itops/run-03: snapshot A composite(full)=0.173 (scoped)=0.213 semantic=0.228
+2026-11-06T17:22:55.452Z itops/run-03: done. 80 turns, stopped=stages_complete, recoveryEffectiveness(full)=0.173 (scoped)=0.213
+2026-11-06T17:22:55.593Z END itops/run-03: exit=0 status=complete stopped=stages_complete cost=$1.25 turns=80
+2026-11-06T17:22:55.597Z BLOCK DONE weak-expert-itops: $59.97 spent under ontology_translation/results/v1-same-model/

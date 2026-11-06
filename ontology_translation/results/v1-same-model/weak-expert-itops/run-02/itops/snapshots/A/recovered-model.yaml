@@ -1,0 +1,669 @@
+competency_questions: []
+classes:
+  Incident:
+    meaning: A disruption or potential disruption being managed through the incident response process.
+    aliases: []
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - New
+          - Acknowledged
+          - Investigation
+          - Contained
+          - Recovering
+          - Monitoring
+          - Resolved
+          - Closed
+          - Cancelled
+      severityLevel:
+        type: text
+        allowed:
+          - Sev1 - Critical
+          - Sev2 - High
+          - Sev3 - Medium
+          - Sev4 - Low
+      majorIncidentDeclared:
+        type: boolean
+      expectedResolutionTime:
+        type: date
+      statusChangedAt:
+        type: date
+      closedAt:
+        type: date
+  ITService:
+    meaning: A managed technology capability that supports one or more business services and whose operation or recovery may be affected by an incident.
+    aliases:
+      - Service
+    properties:
+      currentHealth:
+        type: text
+        allowed:
+          - Healthy
+          - Degraded
+          - Partially Unavailable
+          - Unavailable
+          - Recovering
+          - Unknown
+  ResolverGroup:
+    meaning: A team responsible for diagnosing and resolving incidents that affect the IT services it supports.
+    aliases:
+      - Support Team
+    properties: {}
+  Stakeholder:
+    meaning: "A person, group, or organization that may be affected by or responsible for an operational outcome and may receive incident updates."
+    aliases: []
+    properties:
+      audienceType:
+        type: text
+        allowed:
+          - Technical
+          - Management
+          - Business
+          - Customer
+          - Vendor
+          - Regulator
+          - All Staff
+      emailAddress:
+        type: text
+  OnCallEngineer:
+    meaning: A technical engineer available through a resolver group for immediate response to incidents as they occur.
+    aliases:
+      - On-Call Technician
+    properties:
+      currentAvailability:
+        type: text
+        allowed:
+          - Available
+          - Unavailable
+  ServiceOwner:
+    meaning: "The person accountable for the overall management, performance, and delivery of an IT service affected by an incident."
+    aliases: []
+    properties:
+      emailAddress:
+        type: text
+  BusinessOwner:
+    meaning: The person responsible for overseeing business outcomes associated with processes supported by an IT service.
+    aliases: []
+    properties:
+      emailAddress:
+        type: text
+  IncidentResponseTeam:
+    meaning: The cross-functional team engaged to coordinate the response and management of a major incident.
+    aliases: []
+    properties: {}
+  SeniorManagement:
+    meaning: Leaders involved in major-incident decision-making and updates to ensure alignment with organizational priorities.
+    aliases: []
+    properties: {}
+  Alert:
+    meaning: An actionable signal from monitoring that indicates a potential issue with an IT service or its components.
+    aliases: []
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - New
+          - Acknowledged
+          - Suppressed
+          - Escalated
+          - Closed
+      acknowledgedAt:
+        type: date
+  Event:
+    meaning: A time-stamped observation of a noteworthy occurrence that may or may not produce an alert and reflects a significant change in system state.
+    aliases: []
+    properties:
+      currentlyActive:
+        type: boolean
+  ConfigurationItem:
+    meaning: A managed component that supports one or more IT services and is maintained to support their operation.
+    aliases: []
+    properties:
+      currentHealth:
+        type: text
+        allowed:
+          - Active
+          - Inactive
+          - Under Maintenance
+          - Unhealthy
+  ThirdPartyService:
+    meaning: A service provided by an external organization on which an IT service may rely.
+    aliases: []
+    properties:
+      currentAvailability:
+        type: text
+        allowed:
+          - Available
+          - Unavailable
+          - Degraded
+          - Maintenance Mode
+  Workaround:
+    meaning: A temporary solution to reduce the impact of an issue or incident without resolving the underlying problem.
+    aliases: []
+    properties:
+      currentlyAvailable:
+        type: boolean
+  Runbook:
+    meaning: "Documented operational steps guiding the diagnosis, response, or recovery of an incident."
+    aliases: []
+    properties:
+      procedure:
+        type: text
+  RecoveryPlan:
+    meaning: Documented procedures and actions required to restore an affected IT service to normal operation.
+    aliases: []
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - Draft
+          - Approved
+          - Implemented
+          - Failed
+          - Rolled Back
+      steps:
+        type: text
+  KnownError:
+    meaning: A documented issue with an identified cause that may help understand or resolve related incidents.
+    aliases: []
+    properties:
+      description:
+        type: text
+  CorrectiveAction:
+    meaning: Follow-up work intended to prevent recurrence or address findings from an incident or post-incident review.
+    aliases: []
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - Open
+          - In Progress
+          - Blocked
+          - Implemented
+          - Verified
+          - Closed
+          - Cancelled
+  MaterialityAssessment:
+    meaning: "An evaluation of an incident's significance that informs whether reporting or other actions are required."
+    aliases: []
+    properties:
+      completionStatus:
+        type: text
+        allowed:
+          - Not Started
+          - In Progress
+          - Completed
+      assessmentOutcome:
+        type: text
+  RegulatoryNotification:
+    meaning: A record of incident information prepared or submitted to a regulator for compliance purposes.
+    aliases: []
+    properties:
+      submissionStatus:
+        type: text
+        allowed:
+          - Draft
+          - Pending Approval
+          - Approved
+          - Submitted
+          - Accepted
+          - Rejected
+          - Withdrawn
+      submittedAt:
+        type: date
+  StakeholderCommunication:
+    meaning: A recorded incident update intended for identified recipients to inform them of its status and implications.
+    aliases: []
+    properties:
+      sentStatus:
+        type: text
+        allowed:
+          - Draft
+          - Pending Approval
+          - Approved
+          - Sent
+          - Rejected
+          - Withdrawn
+      sentAt:
+        type: date
+      communicatedIncidentStatus:
+        type: text
+      messageText:
+        type: text
+  Evidence:
+    meaning: "Collected material or a reference to material that supports incident analysis, documentation, or accountability."
+    aliases: []
+    properties:
+      descriptionOrReference:
+        type: text
+  EmergencyChange:
+    meaning: "An urgent change linked to an incident to address immediate operational needs, with implementation and backout plans."
+    aliases: []
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - Draft
+          - Assessed
+          - Approved
+          - Scheduled
+          - Implementing
+          - Implemented
+          - Failed
+          - Rolled Back
+          - Closed
+      implementationPlan:
+        type: text
+      backoutPlan:
+        type: text
+  BackupSet:
+    meaning: A stored recovery point available for restoring an IT service or configuration item to a previous state.
+    aliases: []
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - Scheduled
+          - Running
+          - Successful
+          - Failed
+          - Expired
+          - Corrupted
+          - Verified
+      restorePoint:
+        type: text
+  PostIncidentReview:
+    meaning: "A recorded evaluation of incident response effectiveness, lessons learned, and recommendations for improvement."
+    aliases: []
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - Scheduled
+          - In Progress
+          - Completed
+          - Reviewed
+  ContainmentMeasure:
+    meaning: "An individual action taken to limit an incident's impact on IT services and associated processes."
+    aliases: []
+    properties:
+      executed:
+        type: boolean
+      currentlyInEffect:
+        type: boolean
+      actionTaken:
+        type: text
+  Environment:
+    meaning: "An operating context, such as production, testing, or development, in which an IT service operates or an incident occurs."
+    aliases: []
+    properties: {}
+  IncidentCommander:
+    meaning: The specifically designated person who leads coordination and declaration of a major incident.
+    aliases: []
+    properties: {}
+relationships:
+  - name: impacts
+    from: Incident
+    to: ITService
+    meaning: The incident disrupts or threatens operation of the IT service.
+    aliases: []
+  - name: assignedTo
+    from: Incident
+    to: ResolverGroup
+    meaning: The group recorded as responsible for managing and resolving the incident.
+    aliases: []
+  - name: supportedBy
+    from: ITService
+    to: ResolverGroup
+    meaning: The group supports the service and can be recommended to handle incidents affecting it.
+    aliases: []
+  - name: hasOnCallEngineer
+    from: ResolverGroup
+    to: OnCallEngineer
+    meaning: An engineer available through the group for immediate incident response.
+    aliases: []
+  - name: ownedBy
+    from: ITService
+    to: ServiceOwner
+    meaning: "The person accountable for the service's management, performance, and delivery."
+    aliases: []
+  - name: overseenBy
+    from: ITService
+    to: BusinessOwner
+    meaning: The person responsible for overseeing the business outcomes supported by the service.
+    aliases: []
+  - name: engages
+    from: Incident
+    to: IncidentResponseTeam
+    meaning: The team activated to coordinate response and management of the incident.
+    aliases: []
+  - name: involves
+    from: Incident
+    to: SeniorManagement
+    meaning: Leaders involved in decisions or updates regarding the incident.
+    aliases: []
+  - name: hasCommunication
+    from: Incident
+    to: StakeholderCommunication
+    meaning: An update prepared or sent about the incident to keep stakeholders informed.
+    aliases: []
+  - name: sentTo
+    from: StakeholderCommunication
+    to: Stakeholder
+    meaning: A recipient to whom this incident update was sent.
+    aliases: []
+  - name: affectsStakeholder
+    from: Incident
+    to: Stakeholder
+    meaning: "The incident affects this stakeholder, helping identify who may need an update."
+    aliases: []
+  - name: signals
+    from: Alert
+    to: Incident
+    meaning: The alert indicates a potential issue associated with this incident.
+    aliases: []
+  - name: correlatesWith
+    from: Event
+    to: Incident
+    meaning: The event helps explain the context or causes of the incident.
+    aliases: []
+  - name: associatedWithEvent
+    from: Alert
+    to: Event
+    meaning: This event is an observation associated with the alert and provides context for it.
+    aliases: []
+  - name: dependsOnConfigurationItem
+    from: ITService
+    to: ConfigurationItem
+    meaning: The service relies on this managed component for proper operation.
+    aliases: []
+  - name: dependsOnItservice
+    from: ThirdPartyService
+    to: ITService
+    meaning: null
+    aliases: []
+  - name: dependsOnItservice
+    from: ITService
+    to: ThirdPartyService
+    meaning: null
+    aliases: []
+  - name: reliesOnThirdPartyService
+    from: ITService
+    to: ThirdPartyService
+    meaning: An external service on which this IT service depends for operation.
+    aliases: []
+  - name: hasWorkaround
+    from: Incident
+    to: Workaround
+    meaning: A temporary measure that helps mitigate the impact of the incident.
+    aliases: []
+  - name: followsRunbook
+    from: Incident
+    to: Runbook
+    meaning: The runbook selected to guide response and resolution of the incident.
+    aliases: []
+  - name: hasRecoveryPlan
+    from: Incident
+    to: RecoveryPlan
+    meaning: The plan identified to restore the IT service affected by this incident.
+    aliases: []
+  - name: relatesToKnownError
+    from: Incident
+    to: KnownError
+    meaning: A documented error that may help explain or resolve the incident.
+    aliases: []
+  - name: hasRunbook
+    from: ITService
+    to: Runbook
+    meaning: Guidance designated for responding to incidents affecting this service.
+    aliases: []
+  - name: linkedToPreviousIncident
+    from: Incident
+    to: Incident
+    meaning: A prior incident connected to the current one that may provide relevant context.
+    aliases: []
+  - name: hasCorrectiveAction
+    from: Incident
+    to: CorrectiveAction
+    meaning: Follow-up work associated with this incident to address findings or prevent recurrence.
+    aliases: []
+  - name: hasMaterialityAssessment
+    from: Incident
+    to: MaterialityAssessment
+    meaning: "An evaluation of the incident's significance that informs potential reporting obligations."
+    aliases: []
+  - name: mayLeadToNotification
+    from: MaterialityAssessment
+    to: RegulatoryNotification
+    meaning: A notification that may be required if the assessment and other reporting criteria call for it.
+    aliases: []
+  - name: hasRegulatoryNotification
+    from: Incident
+    to: RegulatoryNotification
+    meaning: A compliance notification prepared or submitted concerning this incident.
+    aliases: []
+  - name: hasEvidence
+    from: Incident
+    to: Evidence
+    meaning: Material collected for this incident to support analysis and accountability.
+    aliases: []
+  - name: hasContainmentMeasure
+    from: Incident
+    to: ContainmentMeasure
+    meaning: "A measure recorded for the incident to limit its impact, with execution tracked on the measure."
+    aliases: []
+  - name: linkedToEmergencyChange
+    from: Incident
+    to: EmergencyChange
+    meaning: An urgent change connected to this incident to address immediate operational needs.
+    aliases: []
+  - name: hasPostIncidentReview
+    from: Incident
+    to: PostIncidentReview
+    meaning: "A review of this incident's response, effectiveness, and lessons learned."
+    aliases: []
+  - name: hasBackupSet
+    from: ConfigurationItem
+    to: BackupSet
+    meaning: A backup set available to restore this component to a previous state.
+    aliases: []
+  - name: hasServiceBackupSet
+    from: ITService
+    to: BackupSet
+    meaning: A backup set available to restore this service to a previous state.
+    aliases: []
+  - name: usedBackupSet
+    from: Incident
+    to: BackupSet
+    meaning: The backup set recorded as used during recovery from this incident.
+    aliases: []
+  - name: runsIn
+    from: ITService
+    to: Environment
+    meaning: "An environment, such as production or testing, in which the service operates."
+    aliases: []
+  - name: occursIn
+    from: Incident
+    to: Environment
+    meaning: The specific environment affected by this incident.
+    aliases: []
+  - name: restoresService
+    from: RecoveryPlan
+    to: ITService
+    meaning: The service that this recovery plan is intended to restore to normal operation.
+    aliases: []
+  - name: affectsService
+    from: EmergencyChange
+    to: ITService
+    meaning: The service altered or potentially affected by this incident-related emergency change.
+    aliases: []
+  - name: producesCorrectiveAction
+    from: PostIncidentReview
+    to: CorrectiveAction
+    meaning: Follow-up work identified by the review to address findings or prevent recurrence.
+    aliases: []
+  - name: hasDocumentedWorkaround
+    from: KnownError
+    to: Workaround
+    meaning: A documented temporary mitigation for this error that can reduce incident impact.
+    aliases: []
+  - name: designatesCommander
+    from: Incident
+    to: IncidentCommander
+    meaning: "The person designated to lead this incident's major-incident response."
+    aliases: []
+  - name: includesCommander
+    from: IncidentResponseTeam
+    to: IncidentCommander
+    meaning: The designated Incident Commander is a member of this Incident Response Team.
+    aliases: []
+  - name: affectsConfigurationItem
+    from: Incident
+    to: ConfigurationItem
+    meaning: A component specifically affected by this incident; this link is not yet populated in current records.
+    aliases: []
+  - name: correspondsToStakeholder
+    from: ServiceOwner
+    to: Stakeholder
+    meaning: The stakeholder record used to address incident communications to this service owner; not populated in current records.
+    aliases: []
+  - name: businessOwnerStakeholder
+    from: BusinessOwner
+    to: Stakeholder
+    meaning: The stakeholder record used to address incident communications to this business owner; not populated in current records.
+    aliases: []
+rules:
+  canAcknowledgeAlert:
+    conditions:
+      - Alert current status is known and is New.
+      - The executing system must confirm operator authorization for the responsible resolver group; alert status alone does not establish authorization.
+  canAssignIncident:
+    conditions:
+      - "Incident current status is known and is New, Acknowledged, Investigation, Contained, Recovering, or Monitoring."
+      - The proposed resolver group supports an IT service impacted by the incident.
+      - "When multiple resolver groups qualify, a person must choose the group; no recorded primary service or lead-group designation currently resolves the choice."
+      - No available on-call engineer does not block group assignment; any staffing warning must be communicated outside the incident record because no field currently records it.
+  canContainIncident:
+    conditions:
+      - Incident current status is known and is Acknowledged or Investigation.
+      - A containment measure is linked to the incident.
+      - Readiness to execute the measure requires an external or manual check; no recorded readiness status exists.
+  canExecuteEmergencyChange:
+    conditions:
+      - Emergency change current status is known and is Approved.
+      - The emergency change has an implementation plan and a backout plan.
+      - The emergency change is linked to the incident.
+  canSendStakeholderCommunication:
+    conditions:
+      - Stakeholder communication sent status is known and is Approved.
+      - "The communication has message text covering the incident's current status and impact."
+      - Intended recipients must be verified externally before sending; communication records currently have no pre-send intended-recipient list.
+      - Current records do not reliably match service owners or business owners to stakeholder recipient records; those recipients must be identified externally until owner-to-stakeholder links are populated.
+      - Senior Management recipient membership must also be verified externally when applicable; Stakeholder audience type Management is too broad.
+  canRestoreBackup:
+    conditions:
+      - Backup set current status is known and is Verified.
+      - "Backup set matches the affected IT service or, for a component-specific restore, a configuration item identified externally as affected by the incident; the current records cannot identify incident-affected configuration items automatically."
+  canConductPostIncidentReview:
+    conditions:
+      - "Incident current status is known and is Monitoring, Resolved, or Closed."
+      - Post-incident review current status is Scheduled.
+  declarationOperationalPrerequisites:
+    conditions:
+      - "Incident current status is known and is New, Acknowledged, or Investigation."
+      - A specific Incident Commander is designated for the incident and belongs to the Incident Response Team selected for engagement; the team need not yet be engaged.
+      - These conditions alone do not establish that the incident qualifies as major.
+  notificationSubmissionPrerequisites:
+    conditions:
+      - "The incident's materiality assessment is Completed."
+      - The regulatory notification submission status is Approved.
+      - These conditions alone do not establish that regulatory notification is required.
+  incidentClosurePrerequisites:
+    conditions:
+      - Incident current status is known and is Resolved or Monitoring.
+      - "Required incident evidence and stakeholder communications must be complete, but there is no approved recorded way to identify all required items yet."
+  isActiveCorrelatedAlert:
+    conditions:
+      - "Alert current status is known and is New, Acknowledged, Suppressed, or Escalated; Closed is not active."
+      - The alert signals the incident in question.
+  isOutstandingCorrectiveAction:
+    conditions:
+      - "Corrective action current status is known and is Open, In Progress, or Blocked."
+      - The corrective action belongs to a previous incident linked to the current incident.
+  impactedServicesFullyHealthy:
+    conditions:
+      - Every IT service impacted by the incident has current health Healthy.
+      - "Every incident-affected configuration item relevant to those services has current health Active; current records do not identify which configuration items are incident-affected, so this check requires external identification and cannot yet pass automatically."
+      - Every third-party service on which an impacted IT service relies has current availability Available.
+  recoveryPlanInPlace:
+    conditions:
+      - The incident has a linked recovery plan whose current status is Approved or Implemented.
+  currentIncidentStatusCommunicated:
+    conditions:
+      - A communication linked to the incident has sent status Sent.
+      - "Its communicated incident status matches the incident's current status."
+      - "Its sentAt time is known and is no earlier than the incident's known statusChangedAt time."
+      - The communication has at least one sentTo link to a stakeholder to whom it was dispatched.
+      - Confirmed dispatch suffices for this question; actual delivery and coverage of every required recipient are not established.
+actions:
+  acknowledgeAlert:
+    input: Alert
+    preconditions:
+      - canAcknowledgeAlert
+    effect: "After the executing system confirms operator authorization, set alert current status to Acknowledged and record the acknowledgment time."
+    verification: Read back the alert and confirm current status is Acknowledged and acknowledgment time is recorded.
+  assignIncident:
+    input: Incident
+    preconditions:
+      - canAssignIncident
+    effect: "After a person resolves any multiple-group choice, link the incident to the selected resolver group without changing incident status or storing an engineer on the incident; communicate lack of available on-call coverage externally where applicable."
+    verification: "Read back the incident's assigned resolver group and confirm it is the selected group and status is unchanged; check on-call availability and flag any lack of coverage outside the incident record."
+  containIncident:
+    input: Incident
+    preconditions:
+      - canContainIncident
+    effect: "After the manual measure-readiness check, execute the linked measure, mark it executed, set incident currentStatus to Contained and update statusChangedAt."
+    verification: "Read back the incident and measure; confirm status is Contained, statusChangedAt reflects the change and the measure is executed."
+  executeEmergencyChange:
+    input: EmergencyChange
+    preconditions:
+      - canExecuteEmergencyChange
+    effect: Implement the linked emergency change according to its implementation plan and set its current status to Implemented upon success.
+    verification: Read back the emergency change and confirm current status is Implemented; check implementation evidence where required.
+  sendStakeholderCommunication:
+    input: StakeholderCommunication
+    preconditions:
+      - canSendStakeholderCommunication
+    effect: "Only after external confirmation of intended recipients, send the approved incident update, set sent status to Sent, record sent time and sent-to recipient links."
+    verification: "Read back communication status, sent time and sent-to recipients; compare the actual recipients with the externally confirmed intended recipients, including any required Senior Management recipients."
+  restoreBackup:
+    input: BackupSet
+    preconditions:
+      - canRestoreBackup
+    effect: Restore the matching service or component from the verified backup set and record the incident-to-backup-set used link; do not automatically change service or component health.
+    verification: Confirm the restore operation succeeded and read independently assessed health of the affected IT service or configuration item and availability of relevant third-party dependencies; do not infer recovery merely from restore completion.
+  conductPostIncidentReview:
+    input: PostIncidentReview
+    preconditions:
+      - canConductPostIncidentReview
+    effect: Start the incident-linked post-incident review by changing its current status from Scheduled to In Progress.
+    verification: Read back the review; confirm status is In Progress and it is linked to the intended incident.
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - declarationOperationalPrerequisites
+    effect: "After external confirmation that the incident qualifies as major, set majorIncidentDeclared to true and engage the Incident Response Team, without changing incident currentStatus."
+    verification: "Read back the incident; confirm majorIncidentDeclared is true, currentStatus is unchanged, the Incident Response Team is engaged, and the designated Incident Commander belongs to that team."
+  submitRegulatoryNotification:
+    input: RegulatoryNotification
+    preconditions:
+      - notificationSubmissionPrerequisites
+    effect: "Only after external confirmation that notification is required, submit the approved notification, set submissionStatus to Submitted and record submission time."
+    verification: Read back the notification and confirm status is Submitted and submission time is recorded.
+  closeIncident:
+    input: Incident
+    preconditions:
+      - incidentClosurePrerequisites
+    effect: "Only after external confirmation that required evidence and communications are complete, set incident currentStatus to Closed, update statusChangedAt and record closedAt."
+    verification: "Read back the incident and confirm status is Closed, statusChangedAt and closedAt record closure time; review linked records against externally confirmed requirements."

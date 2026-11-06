@@ -1,0 +1,148 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "ItService",
+        "recoveredId": "n2"
+      },
+      {
+        "goldId": "Communication",
+        "recoveredId": "n21"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_10",
+        "recoveredId": "e4"
+      },
+      {
+        "goldId": "rel_11",
+        "recoveredId": "e43"
+      },
+      {
+        "goldId": "rel_44",
+        "recoveredId": "e33"
+      },
+      {
+        "goldId": "rel_72",
+        "recoveredId": "e13"
+      },
+      {
+        "goldId": "rel_79",
+        "recoveredId": "e20"
+      },
+      {
+        "goldId": "rel_80",
+        "recoveredId": "e29"
+      },
+      {
+        "goldId": "rel_87",
+        "recoveredId": "e26"
+      },
+      {
+        "goldId": "rel_88",
+        "recoveredId": "e32"
+      },
+      {
+        "goldId": "rel_116",
+        "recoveredId": "e27"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "Stakeholder.audienceType",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 0.99
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "CorrectiveAction.status",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "ItService",
+        "recoveredId": "n2"
+      },
+      {
+        "goldId": "Communication",
+        "recoveredId": "n21"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_10",
+        "recoveredId": "e4"
+      },
+      {
+        "goldId": "rel_44",
+        "recoveredId": "e33"
+      },
+      {
+        "goldId": "rel_79",
+        "recoveredId": "e20"
+      },
+      {
+        "goldId": "rel_80",
+        "recoveredId": "e29"
+      },
+      {
+        "goldId": "rel_87",
+        "recoveredId": "e26"
+      },
+      {
+        "goldId": "rel_88",
+        "recoveredId": "e32"
+      },
+      {
+        "goldId": "rel_116",
+        "recoveredId": "e27"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

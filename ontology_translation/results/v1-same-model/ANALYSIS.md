@@ -38,3 +38,21 @@ Three v1 interviews on epo-ordering (2026-11-06, 10:16–10:58 Berlin time, all 
 - **Reading fixed in EPO-DESIGN.md:** composite, final − v1: **+7.4 [−2.4, +17.2]** (plain Welch, df 3.5) → outcome **(b)**: "7.4 points higher on the held-out domain; with 3 runs per arm the difference is within run-to-run spread".
 - Relationship F1 (descriptive): +19.8 [−1.0, +40.7]; class F1 is level. The same pattern as on the development domains: the generations differ in structure, not in concepts.
 - The final interviewer is at 96.8 %, near the ceiling, as stated in advance.
+
+## Interviewer × simulated expert on itops (`WEAK-EXPERT-ITOPS-DESIGN.md`)
+
+Cell D (v1 interviewer, gpt-4o-mini persona, gpt-6-sol elsewhere): 3 interviews, 2026-11-06 16:57–18:23 Berlin time, all `stages_complete`, relay audit 0 violations, 11.53 USD (harness figure, upper bound for the persona calls). Composite 23.2 [17.3–29.0], relationship F1 6.8 [4.6–10.5].
+
+| | gpt-6-sol expert | gpt-4o-mini expert |
+|---|---|---|
+| v2 interviewer | A 57.7 | B 29.4 |
+| v1 interviewer | C 60.6 | D 23.2 |
+
+Readings fixed in the design note (composite; Welch, linear combinations of the four cell means):
+- **Expert main effect** +32.8 [+22.6, +43.0] → (a): with the stronger expert the result is higher.
+- **Interviewer main effect** +1.7 [−8.5, +11.9] → (b): higher on average, within run-to-run spread.
+- **Interaction** −9.2 [−29.6, +11.3] → no interaction is shown.
+- Simple effects: interviewer with the strong expert −2.9 [−23.5, +17.7], with the weak expert +6.3 [−5.8, +18.3]; expert with v2 +28.2 [+7.4, +49.1], with v1 +37.4 [+21.5, +53.3].
+- Relationship F1 (descriptive): expert main effect +46.8 [+36.4, +57.1]; interviewer main effect +5.5 [−4.9, +15.8]; interviewer with the weak expert +12.3 [+3.6, +21.0].
+
+These effects replace the 87.5 % / 12.5 % split of the persona ablation in the article.

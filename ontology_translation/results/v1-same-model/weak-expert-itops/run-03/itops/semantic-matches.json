@@ -1,0 +1,82 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "ItOperationsTeam",
+        "recoveredId": "n8"
+      },
+      {
+        "goldId": "Regulator",
+        "recoveredId": "n29"
+      },
+      {
+        "goldId": "ItService",
+        "recoveredId": "n2"
+      },
+      {
+        "goldId": "KnownError",
+        "recoveredId": "n20"
+      },
+      {
+        "goldId": "Communication",
+        "recoveredId": "n24"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_10",
+        "recoveredId": "e11"
+      },
+      {
+        "goldId": "rel_72",
+        "recoveredId": "e18"
+      },
+      {
+        "goldId": "rel_75",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_80",
+        "recoveredId": "e22"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "Regulator",
+        "recoveredId": "n29"
+      },
+      {
+        "goldId": "ItService",
+        "recoveredId": "n2"
+      },
+      {
+        "goldId": "Communication",
+        "recoveredId": "n24"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_10",
+        "recoveredId": "e11"
+      },
+      {
+        "goldId": "rel_75",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_77",
+        "recoveredId": "e12"
+      },
+      {
+        "goldId": "rel_80",
+        "recoveredId": "e22"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

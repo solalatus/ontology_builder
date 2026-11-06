@@ -40,6 +40,29 @@ Final arm run-01..03 reproduce the committed `run-intervals/results.json` values
 - Relationship F1, final − v1 (descriptive): +19.8 [-1.0, +40.7].
 - v1 runs: run-01 stages_complete, 75 turns, 1.36 USD, composite 92.2, relay 122/0; run-02 stages_complete, 70 turns, 2.24 USD, composite 83.9, relay 157/0; run-03 stages_complete, 73 turns, 1.26 USD, composite 92.1, relay 129/0.
 
+## Interviewer x simulated expert on itops (WEAK-EXPERT-ITOPS-DESIGN.md)
+
+Cells (gpt-6-sol interviewer model; 3 runs each): A v2 + gpt-6-sol expert (final), B v2 + gpt-4o-mini (persona ablation), C v1 + gpt-6-sol (E1), D v1 + gpt-4o-mini (this block).
+
+| Cell | Composite | Rel F1 | Class F1 |
+|---|---|---|---|
+| A | 57.7 [46.6–65.7] | 59.0 [47.6–67.5] | 64.9 [55.3–74.1] |
+| B | 29.4 [26.7–34.6] | 19.1 [15.4–23.6] | 47.0 [40.0–54.5] |
+| C | 60.6 [54.4–69.1] | 60.4 [53.6–68.6] | 69.7 [65.3–74.5] |
+| D | 23.2 [17.3–29.0] | 6.8 [4.6–10.5] | 50.7 [47.4–54.7] |
+
+| Effect | Composite | Rel F1 |
+|---|---|---|
+| interviewer, strong expert (A − C) | -2.9 [-23.5, +17.7] | -1.4 [-22.6, +19.9] |
+| interviewer, weak expert (B − D) | +6.3 [-5.8, +18.3] | +12.3 [+3.6, +21.0] |
+| expert, v2 interviewer (A − B) | +28.2 [+7.4, +49.1] | +39.9 [+17.8, +62.0] |
+| expert, v1 interviewer (C − D) | +37.4 [+21.5, +53.3] | +53.6 [+37.4, +69.8] |
+| interviewer main effect | +1.7 [-8.5, +11.9] | +5.5 [-4.9, +15.8] |
+| expert main effect | +32.8 [+22.6, +43.0] | +46.8 [+36.4, +57.1] |
+| interaction (A − B) − (C − D) | -9.2 [-29.6, +11.3] | -13.7 [-34.4, +7.0] |
+
+Cell D runs: run-01 stages_complete, 177 turns, 5.01 USD, composite 29.0; run-02 stages_complete, 163 turns, 5.27 USD, composite 23.2; run-03 stages_complete, 80 turns, 1.25 USD, composite 17.3.
+
 ## Per run
 
 | Arm | Domain | Run | Stop | Scored on | Turns | Cost USD | Composite | Rel F1 | Interviewer-first / 100 gold | v1 relay audit (tool requests / violations / skip notes) |

@@ -1,0 +1,137 @@
+{
+  "classes": [
+    {
+      "goldId": "ResolverGroup",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "OnCallEngineer",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "ServiceOwner",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "Stakeholder",
+      "recoveredId": "n28",
+      "weight": 1
+    },
+    {
+      "goldId": "BusinessService",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "CustomerChannel",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "ConfigurationItem",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "BackupSet",
+      "recoveredId": "n15",
+      "weight": 1
+    },
+    {
+      "goldId": "ThirdPartyService",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "Event",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "Alert",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "Incident",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "Problem",
+      "recoveredId": "n19",
+      "weight": 1
+    },
+    {
+      "goldId": "Change",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "Deployment",
+      "recoveredId": "n18",
+      "weight": 1
+    },
+    {
+      "goldId": "Workaround",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "Runbook",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "RecoveryPlan",
+      "recoveredId": "n16",
+      "weight": 1
+    },
+    {
+      "goldId": "EvidenceItem",
+      "recoveredId": "n23",
+      "weight": 1
+    },
+    {
+      "goldId": "MaterialityAssessment",
+      "recoveredId": "n21",
+      "weight": 1
+    },
+    {
+      "goldId": "RegulatoryNotification",
+      "recoveredId": "n22",
+      "weight": 1
+    },
+    {
+      "goldId": "PostIncidentReview",
+      "recoveredId": "n25",
+      "weight": 1
+    },
+    {
+      "goldId": "CorrectiveAction",
+      "recoveredId": "n26",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_9",
+      "edgeId": "e10",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "rel_74",
+      "edgeId": "e2",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_84",
+      "edgeId": "e20",
+      "direction": "forward"
+    }
+  ],
+  "properties": []
+}

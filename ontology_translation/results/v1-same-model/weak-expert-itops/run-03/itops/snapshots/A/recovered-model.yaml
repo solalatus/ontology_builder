@@ -1,0 +1,231 @@
+competency_questions: []
+classes:
+  Incident:
+    meaning: A specific unplanned interruption or degradation that requires a managed response.
+    aliases: []
+    properties: {}
+  ITService:
+    meaning: A managed technology capability that supports business services and may be affected by incidents.
+    aliases: []
+    properties: {}
+  BusinessService:
+    meaning: A customer- or business-facing capability provided by the bank.
+    aliases: []
+    properties: {}
+  CustomerChannel:
+    meaning: A way customers access banking services that may be impacted by an incident.
+    aliases: []
+    properties: {}
+  ServiceOwner:
+    meaning: An identifiable individual or role accountable for an IT service throughout its lifecycle.
+    aliases: []
+    properties: {}
+  ResolverGroup:
+    meaning: A specialized group responsible for diagnosing and resolving incidents in a technology area.
+    aliases: []
+    properties: {}
+  OnCallEngineer:
+    meaning: "A technical specialist available for urgent operational responses, including off-hours incidents."
+    aliases: []
+    properties: {}
+  ITOperationsTeam:
+    meaning: A team responsible for reliable day-to-day operation of IT services and involved in incident acknowledgment and service management.
+    aliases: []
+    properties: {}
+  ConfigurationItem:
+    meaning: A managed component that may affect services and may be isolated during an incident.
+    aliases: []
+    properties: {}
+  ThirdPartyService:
+    meaning: An external service on which the bank may rely.
+    aliases: []
+    properties: {}
+  Alert:
+    meaning: A monitoring signal that requires acknowledgment and action.
+    aliases: []
+    properties: {}
+  Event:
+    meaning: A notable occurrence or state change that may be correlated with an incident or alert.
+    aliases: []
+    properties: {}
+  Runbook:
+    meaning: "A maintained, scenario-specific operational procedure for diagnosis, response, recovery, or verification during an incident."
+    aliases: []
+    properties: {}
+  Workaround:
+    meaning: A temporary method for reducing or bypassing the impact of an incident or problem.
+    aliases: []
+    properties: {}
+  BackupSet:
+    meaning: A defined collection of recoverable backup data for protected components.
+    aliases: []
+    properties: {}
+  RecoveryPlan:
+    meaning: "A documented plan for restoring an IT service and its dependencies after an incident, including recovery objectives and procedures."
+    aliases: []
+    properties: {}
+  Change:
+    meaning: "A controlled addition, modification, or removal that may affect an IT service."
+    aliases: []
+    properties: {}
+  Deployment:
+    meaning: The technical execution that installs or activates a change or release in the operational environment.
+    aliases: []
+    properties: {}
+  Problem:
+    meaning: An underlying or potential cause of one or more incidents identified for investigation and remedial action.
+    aliases: []
+    properties: {}
+  KnownIssue:
+    meaning: A record of a diagnosed problem with an established cause or workaround.
+    aliases: []
+    properties: {}
+  MaterialityAssessment:
+    meaning: "A documented determination of an incident's significance and reportability, with the rationale for the decision."
+    aliases: []
+    properties: {}
+  RegulatoryNotification:
+    meaning: A formal incident-related submission to a competent authority.
+    aliases: []
+    properties: {}
+  Evidence:
+    meaning: "A preserved record, artifact, or observation supporting incident analysis and accountability."
+    aliases: []
+    properties: {}
+  StakeholderCommunication:
+    meaning: A documented communication to an incident-relevant audience about status or progress.
+    aliases: []
+    properties: {}
+  PostIncidentReview:
+    meaning: "A structured review after an incident to analyze causes, assess response effectiveness, and identify lessons learned."
+    aliases: []
+    properties: {}
+  CorrectiveAction:
+    meaning: "A tracked action to address an identified issue, remove its cause, or improve future responses."
+    aliases: []
+    properties: {}
+  ContainmentMeasure:
+    meaning: "A recorded action taken to limit an incident's impact or prevent further escalation, including assessment of side effects."
+    aliases: []
+    properties: {}
+  Stakeholder:
+    meaning: "A person, group, or organization affected by or responsible for an operational outcome and addressed in incident communications."
+    aliases: []
+    properties: {}
+  RegulatoryAuthority:
+    meaning: A competent authority that may require notification about an incident.
+    aliases: []
+    properties: {}
+relationships:
+  - name: affects
+    from: Incident
+    to: ITService
+    meaning: The IT service affected by the incident.
+    aliases: []
+  - name: impactsBusinessService
+    from: Incident
+    to: BusinessService
+    meaning: The business service impacted by the incident.
+    aliases: []
+  - name: impactsCustomerChannel
+    from: Incident
+    to: CustomerChannel
+    meaning: The customer channel impacted by the incident.
+    aliases: []
+  - name: supports
+    from: ITService
+    to: BusinessService
+    meaning: The business service supported by the IT service.
+    aliases: []
+  - name: dependsOnConfigurationItem
+    from: ITService
+    to: ConfigurationItem
+    meaning: The configuration item on which the IT service depends.
+    aliases: []
+  - name: dependsOnThirdPartyService
+    from: ITService
+    to: ThirdPartyService
+    meaning: The external service on which the IT service relies.
+    aliases: []
+  - name: impactsConfigurationItem
+    from: Incident
+    to: ConfigurationItem
+    meaning: "A configuration item affected by the incident, when applicable."
+    aliases: []
+  - name: ownedBy
+    from: ITService
+    to: ServiceOwner
+    meaning: The accountable owner of the IT service.
+    aliases: []
+  - name: supportedBy
+    from: ITService
+    to: ResolverGroup
+    meaning: A resolver group that supports the IT service and may be selected for incident assignment.
+    aliases: []
+  - name: assignedToResolverGroup
+    from: Incident
+    to: ResolverGroup
+    meaning: The resolver group assigned to manage the incident.
+    aliases: []
+  - name: hasOnCallEngineer
+    from: ResolverGroup
+    to: OnCallEngineer
+    meaning: The on-call engineer designated for the resolver group.
+    aliases: []
+  - name: assignedToOnCallEngineer
+    from: Incident
+    to: OnCallEngineer
+    meaning: "The on-call engineer explicitly assigned to handle the incident, when applicable."
+    aliases: []
+  - name: accountableServiceOwner
+    from: Incident
+    to: ServiceOwner
+    meaning: The service owner accountable in the context of the incident.
+    aliases: []
+  - name: operatedBy
+    from: ITService
+    to: ITOperationsTeam
+    meaning: "The IT operations team responsible for the service's day-to-day operation."
+    aliases: []
+  - name: coordinatedBy
+    from: Incident
+    to: ITOperationsTeam
+    meaning: The IT operations team coordinating the incident response.
+    aliases: []
+  - name: acknowledgedBy
+    from: Alert
+    to: ITOperationsTeam
+    meaning: "The IT operations team that acknowledges the alert, when applicable."
+    aliases: []
+  - name: correlatedWithAlert
+    from: Incident
+    to: Alert
+    meaning: An alert correlated with the incident.
+    aliases: []
+  - name: correlatedWithEvent
+    from: Incident
+    to: Event
+    meaning: An event correlated with the incident.
+    aliases: []
+  - name: implementedByDeployment
+    from: Change
+    to: Deployment
+    meaning: A deployment that technically implements or activates the change.
+    aliases: []
+  - name: linkedToProblem
+    from: Incident
+    to: Problem
+    meaning: The problem investigated as an underlying or potential cause of the incident.
+    aliases: []
+  - name: documentedByKnownIssue
+    from: Problem
+    to: KnownIssue
+    meaning: A known-issue record documenting the diagnosed problem.
+    aliases: []
+  - name: hasEvidence
+    from: Incident
+    to: Evidence
+    meaning: Evidence collected or preserved in connection with the incident.
+    aliases: []
+rules: {}
+actions: {}
